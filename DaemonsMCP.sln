@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36221.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP", "DaemonsMCP\DaemonsMCP.csproj", "{D745B223-AD4F-4E4B-8677-8D59A8795A74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCPTester", "DaemonsTester\DaemonsMCPTester.csproj", "{F2DB7590-0495-A5C6-69F5-B13C5802BA1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2DB7590-0495-A5C6-69F5-B13C5802BA1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2DB7590-0495-A5C6-69F5-B13C5802BA1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2DB7590-0495-A5C6-69F5-B13C5802BA1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2DB7590-0495-A5C6-69F5-B13C5802BA1D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {078625E8-0A2F-4DD2-A41C-AB25F6160A9B}
+	EndGlobalSection
+EndGlobal
