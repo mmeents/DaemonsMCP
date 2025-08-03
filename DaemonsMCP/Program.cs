@@ -70,7 +70,7 @@ namespace DaemonsMCP
                 {                    
                     await Console.Error.WriteLineAsync($"[DaemonsMCP][Error1]: {je.Message}").ConfigureAwait(false);
                 }
-                 catch (Exception ex)
+                catch (Exception ex)
                 {
                     await Console.Error.WriteLineAsync($"[DaemonsMCP][Error2]: {ex.Message}").ConfigureAwait(false);
                 }
@@ -79,8 +79,8 @@ namespace DaemonsMCP
             }
         }
 
-         private static JsonRpcInitResponse HandleInitialize(JsonRpcRequest request)
-         {
+        private static JsonRpcInitResponse HandleInitialize(JsonRpcRequest request)
+        {
             return new JsonRpcInitResponse
             {
                 JsonRpc = "2.0",
@@ -99,22 +99,21 @@ namespace DaemonsMCP
                 },
                 Id = request.Id
             };
-         }
+        }
 
-    // Add this method
         private static JsonRpcResponse HandleResourcesList(JsonRpcRequest request) {
-          return new JsonRpcResponse {
-            JsonRpc = "2.0",
-            Result = new { resources = new object[] { } },  // Empty array, not null!
-            Id = request.Id
-          };
+            return new JsonRpcResponse {
+                JsonRpc = "2.0",
+                Result = new { resources = new object[] { } }, 
+                Id = request.Id
+            };
         }
         private static JsonRpcResponse HandlePromptsList(JsonRpcRequest request) {
-          return new JsonRpcResponse {
-            JsonRpc = "2.0",
-            Result = new { prompts = Array.Empty<object>() },
-            Id = request.Id
-          };
+            return new JsonRpcResponse {
+                JsonRpc = "2.0",
+                Result = new { prompts = Array.Empty<object>() },
+                Id = request.Id
+            };
         }
 
     }
