@@ -50,7 +50,7 @@ namespace DaemonsMCP
                         Tx.PromptsList => HandlePromptsList(request),
                       _ => new JsonRpcResponse
                         {                           
-                           Error = new { code = -32601, message = "[DaemonsMCP] Method not found" },
+                           Error = new { JsonRpc = "2.0", code = -32601, message = "[DaemonsMCP] Method not found" },
                            Id = request.Id
                         }
                     };

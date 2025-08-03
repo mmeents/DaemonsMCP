@@ -27,7 +27,8 @@ namespace DaemonsMCP
                Tx.CallMethod => await HandleToolsCall(request).ConfigureAwait(false),
                _ => new JsonRpcResponse
                {
-                   Error = new { code = -32601, message = "Method not found" },
+                   JsonRpc = "2.0",
+                   Error = new {  code = -32601, message = "Method not found" },
                    Id = request.Id
                }
            };
@@ -96,8 +97,8 @@ namespace DaemonsMCP
                    !request.Params.Value.TryGetProperty("arguments", out var arguments))
                {
                    return new JsonRpcResponse
-                   {                       
-                       Error = new { code = -32602, message = "[DaemonsMCP][Tools] Invalid params: name and arguments required" },
+                   {   JsonRpc = "2.0",                    
+                       Error = new {  code = -32602, message = "[DaemonsMCP][Tools] Invalid params: name and arguments required" },
                        Id = request.Id
                    };
                }
@@ -121,8 +122,8 @@ namespace DaemonsMCP
            catch (Exception ex)
            {
                return new JsonRpcResponse
-               {
-                   Error = new { code = -32603, message = $"[DaemonsMCP][Tools] Internal error: {ex.Message}" },
+               {   JsonRpc = "2.0",
+                   Error = new {  code = -32603, message = $"[DaemonsMCP][Tools] Internal error: {ex.Message}" },
                    Id = request.Id
                };
            }
@@ -142,7 +143,7 @@ namespace DaemonsMCP
            if (!arguments.TryGetProperty(Px.projectNameParam, out var projectNameElement))
            {
                return new JsonRpcResponse
-               {                   
+               {   JsonRpc = "2.0",                
                    Error = new { code = -32602, message = "[DaemonsMCP][Tools] projectName is required" },
                    Id = request.Id
                };
@@ -153,6 +154,7 @@ namespace DaemonsMCP
            {
                return new JsonRpcResponse
                {
+                   JsonRpc = "2.0",
                    Error = new { code = -32602, message = $"[DaemonsMCP][Tools] Invalid {Px.projectNameParam}" },
                    Id = request.Id
                };
@@ -175,7 +177,7 @@ namespace DaemonsMCP
            if (!arguments.TryGetProperty(Px.projectNameParam, out var projectNameElement))
            {
                return new JsonRpcResponse
-               {                   
+               {   JsonRpc = "2.0",                
                    Error = new { code = -32602, message = $"[DaemonsMCP][Tools] {Px.projectNameParam} is required" },
                    Id = request.Id
                };
@@ -185,7 +187,7 @@ namespace DaemonsMCP
            if (string.IsNullOrEmpty(projectName) || !GlobalConfig.Projects.ContainsKey(projectName))
            {
                return new JsonRpcResponse
-               {                   
+               {    JsonRpc = "2.0",                
                    Error = new { code = -32602, message = $"[DaemonsMCP][Tools] Invalid {Px.projectNameParam} : {projectName}" },
                    Id = request.Id
                };
@@ -208,8 +210,8 @@ namespace DaemonsMCP
             if (!arguments.TryGetProperty(Px.projectNameParam, out var projectNameElement))
             {
                 return new JsonRpcResponse
-                {                 
-                    Error = new { code = -32602, message = $"{Px.projectNameParam} is required" },
+                {   JsonRpc = "2.0",              
+                    Error = new {  code = -32602, message = $"{Px.projectNameParam} is required" },
                     Id = request.Id
                 };
             }
@@ -219,8 +221,8 @@ namespace DaemonsMCP
             if (string.IsNullOrEmpty(projectName) || !GlobalConfig.Projects.ContainsKey(projectName))
             {
                 return new JsonRpcResponse
-                {                
-                    Error = new { code = -32602, message = $"[DaemonsMCP][Tools] Invalid projectName {projectName}" },
+                {   JsonRpc = "2.0",             
+                    Error = new {  code = -32602, message = $"[DaemonsMCP][Tools] Invalid projectName {projectName}" },
                     Id = request.Id
                 };
             }
