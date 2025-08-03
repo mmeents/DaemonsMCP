@@ -204,7 +204,7 @@ Contributions are welcome! Areas where help is especially appreciated:
 - Verify path separators match your operating system
 
 **Build issues:**
-- Ensure .NET 8.0 is installed
+- Ensure .NET 9.0 is installed
 - Run `dotnet restore` to install dependencies including MCPSharp
 - Check that all project references are resolved
 
