@@ -65,7 +65,7 @@ namespace DaemonsMCP
                     if (request.Params == null || !request.Params.Value.TryGetProperty(Px.projectNameParam, out var projectName) || projectName.GetString() != ProjectName)
                     {
                         response.Error = new { code = -32602,
-                          JsonRpc = "2.0", message = $"[DaemonsMCP][Project] Invalid params:  {Px.projectNameParam}  is required and must match a project.." };
+                          message = $"[DaemonsMCP][Project] Invalid params:  {Px.projectNameParam}  is required and must match a project.." };
                         break;                    
                     }
                     var path = request.Params.Value.TryGetProperty(Px.pathParam, out var p) ? p.GetString() : string.Empty;
@@ -90,7 +90,7 @@ namespace DaemonsMCP
                     if (request.Params == null || !request.Params.Value.TryGetProperty(Px.projectNameParam, out var projectName2) || projectName2.GetString() != ProjectName)
                     {
                         response.Error = new { code = -32602,
-                          JsonRpc = "2.0", message = $"[DaemonsMCP][Project] Invalid params:  {Px.projectNameParam}  is required and must match the current project.." };
+                          message = $"[DaemonsMCP][Project] Invalid params:  {Px.projectNameParam}  is required and must match the current project.." };
                         break;                    
                     }
                     var path2 = request.Params.Value.TryGetProperty(Px.pathParam, out var p2) ? p2.GetString() : string.Empty;
@@ -117,7 +117,7 @@ namespace DaemonsMCP
                     if (request.Params == null || !request.Params.Value.TryGetProperty(Px.projectNameParam, out var projectName3) || projectName3.GetString() != ProjectName)
                     {
                         response.Error = new { code = -32602,
-                          JsonRpc = "2.0", message = $"[DaemonsMCP][Project] Invalid params: {Px.projectNameParam} is required and must match the current project." };
+                          message = $"[DaemonsMCP][Project] Invalid params: {Px.projectNameParam} is required and must match the current project." };
                         break;                    
                     }
                     var filePath = request.Params.Value.TryGetProperty("path", out var fPath) ? fPath.GetString() : string.Empty;
@@ -132,7 +132,7 @@ namespace DaemonsMCP
                     }
                     if (!SecurityFilters.IsFileAllowed(fullFilePath)) {
                         response.Error = new {
-                          JsonRpc = "2.0", code = -32602, 
+                           code = -32602, 
                             message = "[DaemonsMCP][Project] Access to this file type is not allowed for security reasons."
                         };
                         break;
@@ -152,7 +152,7 @@ namespace DaemonsMCP
                         }
                         catch (Exception ex)
                         {
-                            response.Error = new { JsonRpc = "2.0", code = -32603, message = $"[DaemonsMCP][Project] Error reading file content: {ex.Message}" };
+                            response.Error = new {  code = -32603, message = $"[DaemonsMCP][Project] Error reading file content: {ex.Message}" };
                             return response;
                         }
                     }
