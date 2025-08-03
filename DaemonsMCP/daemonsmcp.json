@@ -1,0 +1,27 @@
+﻿{
+    "version": "1.0",
+    "daemon": {
+        "name": "DaemonMCP",
+        "version": "1.0.0"
+    },
+    "projects": [
+ //       {
+ //           "name": "MyProject",
+ //           "description": "Project description",
+ //           "path": "relative/or/absolute/path",
+ //           "enabled": true
+ //      },
+        {
+            "name": "DaemonsMCP",
+            "description": "This Project DaemonsMCP",
+            "path": "C:\\GithubMM\\DaemonsMCP",    // Relative or absolute path to the project directory
+            "enabled": true
+        }
+
+    ],
+    "security": {
+        "blockedExtensions": [ ".exe", ".dll", ".bat", ".cmd", ".sh" ],        
+        "allowedExtensions": [ ".sln", ".csproj", ".cs", ".sql", ".html", ".htm", ".js", ".py", ".md", ".json", ".resx" ],
+        "maxFileSize": "10MB"
+    }
+}

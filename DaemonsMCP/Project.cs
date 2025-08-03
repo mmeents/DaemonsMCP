@@ -7,41 +7,7 @@ using System.Threading.Tasks;
 namespace DaemonsMCP
 {
 
-    // This class represents a collection of projects and their details.
-    // it will need to be updated by the user to match their local environment.
-    // Add by hand, Create a new project and add it to the Projects dictionary.
-    public static class Nx
-    {
-        public static readonly string BasePath = "C:\\";        
-
-        public static readonly string Project1Path = Path.Combine(BasePath, "GithubMM\\DaemonsMCP");
-        public static readonly string Project2Path = Path.Combine(BasePath, "GithubMM\\PackedTables.NET");
-        public static readonly string Project3Path = Path.Combine(BasePath, "GithubMM\\PackedTables.Tabs");
-
-        public static readonly Project project1 = new Project(
-            "DaemonsMCP", 
-            "This MCP Service Project.", 
-            Project1Path);
-
-        public static readonly Project project2 = new Project(
-            "PackedTables.NET", 
-            "This is project that saves table as a string", 
-            Project2Path);
-
-        public static readonly Project project3 = new Project(
-            "PackedTables.Tabs",
-            "This Windows Forms UI Class Library",
-            Project1Path);
-
-    public static IReadOnlyDictionary<string, Project> Projects { get; } = new Dictionary<string, Project>
-        {
-            { project1.Name, project1 },
-            { project2.Name, project2 },
-            { project3.Name, project3 }
-        };
-
-    }
-
+   
     public class Project
     {
         public Project() { }
@@ -55,8 +21,14 @@ namespace DaemonsMCP
         public string Path { get; set; } = "";
     }
 
-
-
-
+ // This class represents a collection of projects and their details.
+    // its out of date.  you should use the DaemonsMcpConfiguration class to load projects from the configuration file.
+    public static class Nx
+    {       
+          // this was a hardcoded list of projects.  This was moved to the deamonsmcp.json configuration file.  
+          public static IReadOnlyDictionary<string, Project> Projects { get; } = new Dictionary<string, Project>
+          {           
+          };
+    }
 
 }

@@ -19,11 +19,11 @@ namespace DaemonsMCPTester
             try
             {
                 _initButton.Enabled = false;
-                AppendOutput("[Form] Initializing MCP Client...");
+                AppendOutput("[Form1] Initializing MCP Client...");
                 
                 await _mcpClient.InitializeAsync().ConfigureAwait(false);
                 
-                AppendOutput("[Form] MCP Client initialized successfully!");
+                AppendOutput("[Form1] MCP Client initialized successfully!");
                 
                 _listProjectsButton.Enabled = true;
                 _listDirsButton.Enabled = true;
@@ -32,7 +32,7 @@ namespace DaemonsMCPTester
             }
             catch (Exception ex)
             {
-                AppendOutput($"[Form] Error initializing: {ex.Message}");                
+                AppendOutput($"[Form1] Error initializing: {ex.Message}");                
             }
         }
 
@@ -40,7 +40,7 @@ namespace DaemonsMCPTester
         {
             try
             {
-                AppendOutput("[Form] Requesting project list...");
+                AppendOutput("[Form1] Requesting project list...");
                 
                 var request = new JsonRpcRequest
                 {
@@ -54,11 +54,11 @@ namespace DaemonsMCPTester
                 };
 
                 var response = await _mcpClient.SendRequestAsync(request).ConfigureAwait(false);
-                AppendOutput($"[Form] Projects Response: {response}");
+                AppendOutput($"[Form1] Projects Response: {response}");
             }
             catch (Exception ex)
             {
-                AppendOutput($"[Form] Error listing projects: {ex.Message}");
+                AppendOutput($"[Form1] Error listing projects: {ex.Message}");
             }
         }
 
@@ -68,11 +68,11 @@ namespace DaemonsMCPTester
             {
                 if (string.IsNullOrEmpty(_projectNameTextBox.Text))
                 {
-                    AppendOutput("[Form] Please enter a project name first");
+                    AppendOutput("[Form1] Please enter a project name first");
                     return;
                 }
 
-                AppendOutput($"[Form] Requesting directories for project: {_projectNameTextBox.Text}");
+                AppendOutput($"[Form1] Requesting directories for project: {_projectNameTextBox.Text}");
                 
                 var request = new JsonRpcRequest
                 {
@@ -91,11 +91,11 @@ namespace DaemonsMCPTester
                 };
 
                 var response = await _mcpClient.SendRequestAsync(request).ConfigureAwait(false);
-                AppendOutput($"[Form] Directories Response: {response}");
+                AppendOutput($"[Form1] Directories Response: {response}");
             }
             catch (Exception ex)
             {
-                AppendOutput($"[Form] Error listing directories: {ex.Message}");
+                AppendOutput($"[Form1] Error listing directories: {ex.Message}");
             }
         }
 
@@ -105,11 +105,11 @@ namespace DaemonsMCPTester
             {
                 if (string.IsNullOrEmpty(_projectNameTextBox.Text))
                 {
-                    AppendOutput("[Form] Please enter a project name first");
+                    AppendOutput("[Form1] Please enter a project name first");
                     return;
                 }
 
-                AppendOutput($"[Form] Requesting files for project: {_projectNameTextBox.Text}");
+                AppendOutput($"[Form1] Requesting files for project: {_projectNameTextBox.Text}");
                 
                 var request = new JsonRpcRequest
                 {
@@ -128,11 +128,11 @@ namespace DaemonsMCPTester
                 };
 
                 var response = await _mcpClient.SendRequestAsync(request).ConfigureAwait(false);
-                AppendOutput($"[Form] Files Response: {response}");
+                AppendOutput($"[Form1] Files Response: {response}");
             }
             catch (Exception ex)
             {
-                AppendOutput($"[Form] Error listing files: {ex.Message}");
+                AppendOutput($"[Form1] Error listing files: {ex.Message}");
             }
         }
 

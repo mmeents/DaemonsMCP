@@ -15,8 +15,8 @@ namespace DaemonsMCP
         public const string InitializedNotification = "notifications/initialized";                                                      
     }
 
-   public static class ToolsHandler
-   {    
+   static class ToolsHandler
+   {  
        public static async Task<JsonRpcResponse> HandleRequest(JsonRpcRequest request)
        {
            return request.Method switch
@@ -127,10 +127,10 @@ namespace DaemonsMCP
        }
 
        private static JsonRpcResponse HandleListProjects(JsonRpcRequest request)
-       {
+       {           
            return new JsonRpcResponse
            {
-               Result = new { projects = Nx.Projects.Select(p => new { p.Value.Name, p.Value.Description }) },
+               Result = new { projects = GlobalConfig.Projects.Select(p => new { p.Value.Name, p.Value.Description }) },
                Id = request.Id
            };
        }
@@ -146,8 +146,8 @@ namespace DaemonsMCP
                };
            }
            var projectName = projectNameElement.GetString();
-
-           if (string.IsNullOrEmpty(projectName) || !Nx.Projects.TryGetValue(projectName, out Project? project))
+           
+           if (string.IsNullOrEmpty(projectName) || !GlobalConfig.Projects.TryGetValue(projectName, out Project? project))
            {
                return new JsonRpcResponse
                {
@@ -179,8 +179,8 @@ namespace DaemonsMCP
                };
            }
 
-           var projectName = projectNameElement.GetString();
-           if (string.IsNullOrEmpty(projectName) || !Nx.Projects.ContainsKey(projectName))
+           var projectName = projectNameElement.GetString();           
+           if (string.IsNullOrEmpty(projectName) || !GlobalConfig.Projects.ContainsKey(projectName))
            {
                return new JsonRpcResponse
                {                   
@@ -189,7 +189,7 @@ namespace DaemonsMCP
                };
            }
 
-           var project = Nx.Projects[projectName];
+           var project = GlobalConfig.Projects[projectName];
            var projectHandler = new ProjectHandler(project);
        
            var projectRequest = new JsonRpcRequest
@@ -213,7 +213,8 @@ namespace DaemonsMCP
             }
 
             var projectName = projectNameElement.GetString();
-            if (string.IsNullOrEmpty(projectName) || !Nx.Projects.ContainsKey(projectName))
+
+            if (string.IsNullOrEmpty(projectName) || !GlobalConfig.Projects.ContainsKey(projectName))
             {
                 return new JsonRpcResponse
                 {                
@@ -222,7 +223,7 @@ namespace DaemonsMCP
                 };
             }
 
-            var project = Nx.Projects[projectName];
+            var project = GlobalConfig.Projects[projectName];
             var projectHandler = new ProjectHandler(project);
         
             var projectRequest = new JsonRpcRequest

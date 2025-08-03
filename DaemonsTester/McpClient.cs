@@ -165,7 +165,7 @@ namespace DaemonsMCPTester
                 do
                 {
                     var responseTask = _stdout.ReadLineAsync();
-                    var timeoutTask = Task.Delay(5000); // 5 second timeout
+                    var timeoutTask = Task.Delay(30000); // 30 second timeout
                     
                     var completedTask = await Task.WhenAny(responseTask, timeoutTask).ConfigureAwait(false);
                     

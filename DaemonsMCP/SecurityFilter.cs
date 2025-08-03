@@ -37,6 +37,27 @@ namespace DaemonsMCP
             var fileName = Path.GetFileName(filePath);
             var extension = Path.GetExtension(filePath);
             var directory = Path.GetDirectoryName(filePath);
+            if (!IsFileSizeAllowed(filePath)) {            
+                return false;
+            }
+
+
+            if (GlobalConfig.IsConfigured) {
+              var security = GlobalConfig.Security;
+
+              // Check blocked extensions first (takes precedence)
+              if (security.BlockedExtensions.Any() && security.BlockedExtensions.Contains(extension)) {
+                return false;
+              }
+
+              // If no allowed list specified, allow anything not blocked
+              if (!security.AllowedExtensions.Any()) {
+                return true;
+              }
+
+              // Check allowed list
+              return security.AllowedExtensions.Contains(extension);
+            }
 
             // Check blocked files
             if (BlockedFiles.Contains(fileName)) return false;
@@ -48,7 +69,47 @@ namespace DaemonsMCP
             if (directory != null && BlockedDirectories.Any(blocked => 
                 directory.Contains(blocked, StringComparison.OrdinalIgnoreCase))) return false;
 
-            return true;
+            return true;            
+
+            
         }
-    }
+
+        private static long? _maxFileSizeBytes;
+
+        public static bool IsFileSizeAllowed(string filePath) {
+          try {
+            var fileInfo = new FileInfo(filePath);
+            return IsFileSizeAllowed(fileInfo.Length);
+          } catch {
+            // If we can't get file size, assume it's too large
+            return false;
+          }
+        }
+
+        public static bool IsFileSizeAllowed(long fileSizeBytes) {
+          var maxSizeBytes = GetMaxFileSizeBytes();
+          return fileSizeBytes <= maxSizeBytes;
+        }
+
+        private static long GetMaxFileSizeBytes() {
+          if (_maxFileSizeBytes.HasValue)
+            return _maxFileSizeBytes.Value;
+
+          try {
+            _maxFileSizeBytes = FileSizeHelper.ParseFileSize(GlobalConfig.Security.MaxFileSize);
+          } catch (Exception ex) {
+            Console.Error.WriteLine($"[DaemonsMCP][Security] Invalid MaxFileSize format '{GlobalConfig.Security.MaxFileSize}': {ex.Message}. Using default 10MB.");
+            _maxFileSizeBytes = 10 * 1024 * 1024; // 10MB default
+          }
+
+          return _maxFileSizeBytes.Value;
+        }
+
+        /// <summary>
+        /// Reset cached values (useful for testing or config reloading)
+        /// </summary>
+        public static void ResetCache() {
+          _maxFileSizeBytes = null;
+        }
+      }
 }

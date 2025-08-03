@@ -4,13 +4,26 @@ using System.Text.Json.Serialization;
 namespace DaemonsMCP
 {
     
-    static class Program
+    static public class Program
     {
+        private static IReadOnlyDictionary<string, Project> _projects = null!;
+
+        // Add property to access projects from other classes
+        public static IReadOnlyDictionary<string, Project> Projects => _projects;
+
         static async Task Main()    
         {
-            //string testInput = @"{""jsonrpc"":""2.0"",""method"":""tools/call"",""params"":{""name"":""local/list-projects"",""arguments"":{}},""id"":2}";
-           // string TestListProjects = @"{""jsonrpc"":""2.0"",""method"":""tools/call"",""params"":{""name"":""local/list-projects"",""arguments"":{}},""id"":2}";
-           // Console.SetIn(new StringReader(testInput));
+            // One-time initialization
+            GlobalConfig.Initialize();
+
+            if (!GlobalConfig.Projects.Any()) {
+              await Console.Error.WriteLineAsync("[DaemonsMCP] No projects configured.");
+              return;
+            }
+
+            await Console.Error.WriteLineAsync($"[DaemonsMCP] Starting with {GlobalConfig.Projects.Count} projects");
+
+
             while (true)
             {
                 string? input = await Console.In.ReadLineAsync().ConfigureAwait(false);
@@ -72,7 +85,7 @@ namespace DaemonsMCP
                     },
                     serverInfo = new
                     {
-                        name = "DaemonMCP",
+                        name = "DaemonsMCP",
                         version = "1.0.0"
                     }
                 },

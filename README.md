@@ -4,6 +4,8 @@
 
 DaemonsMCP is a compiled C# MCP (Model Context Protocol) service that provides LLMs with comprehensive access to explore and analyze local codebases. Think of it as giving your AI assistant the ability to see, navigate, and understand your project files just like a developer would.
 
+Please note: this is under construction and is changing.  Connecting via Claude isn't working. run ok when the tester runs it.  Checking it in to let Claude see it in it's current state.
+
 ## 🚀 Features
 
 - **🔍 Codebase Exploration**: Browse projects, directories, and files with intuitive tools

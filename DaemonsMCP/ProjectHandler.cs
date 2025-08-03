@@ -58,7 +58,7 @@ namespace DaemonsMCP
             };
             switch (request.Method) { 
                 case Px.listProjects:
-                    response.Result = new { projects = Nx.Projects.Select(p => new { p.Value.Name, p.Value.Description }) };
+                    response.Result = new { projects = GlobalConfig.Projects.Select(p => new { p.Value.Name, p.Value.Description }) };
                     break;
                 case Px.listProjectDirectory :
                     if (request.Params == null || !request.Params.Value.TryGetProperty(Px.projectNameParam, out var projectName) || projectName.GetString() != ProjectName)
@@ -104,8 +104,11 @@ namespace DaemonsMCP
                     List<string> fileList = new List<string>();
                     foreach (var file in files)
                     {
-                        string relativePath = file.Substring(ProjectPath.Length).TrimStart(System.IO.Path.DirectorySeparatorChar);
-                        fileList.Add(relativePath);
+                        if (SecurityFilters.IsFileAllowed(file))
+                        {
+                            string relativePath = file.Substring(ProjectPath.Length).TrimStart(System.IO.Path.DirectorySeparatorChar);
+                            fileList.Add(relativePath);
+                        }                        
                     }
                     response.Result = new { files = fileList };
                     break;              
