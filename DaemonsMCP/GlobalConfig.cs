@@ -10,6 +10,11 @@ namespace DaemonsMCP {
     private static IReadOnlyDictionary<string, Project>? _projects;
 
     public static void Initialize() {
+
+      Console.Error.WriteLine($"[DaemonsMCP][Debug] Current Directory: {Directory.GetCurrentDirectory()}");
+      Console.Error.WriteLine($"[DaemonsMCP][Debug] Executable Directory: {AppContext.BaseDirectory}");
+      Console.Error.WriteLine($"[DaemonsMCP][Debug] Process Name: {System.Diagnostics.Process.GetCurrentProcess().ProcessName}");
+
       // Load configuration
       _config = ConfigurationLoader.LoadConfiguration();
 

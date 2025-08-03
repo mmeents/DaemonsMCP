@@ -81,25 +81,28 @@ namespace DaemonsMCP {
     private static string[] GetConfigurationPaths() {
       return new[]
       {
-                // 1. Current directory (highest priority)
-          Path.Combine(Directory.GetCurrentDirectory(), CONFIG_FILE_NAME),
+        // 1. Executable directory (HIGHEST priority - where the built exe and config are)
+        Path.Combine(AppContext.BaseDirectory, CONFIG_FILE_NAME),
+        
+        // 2. Current directory (for dotnet run scenarios)
+        Path.Combine(Directory.GetCurrentDirectory(), CONFIG_FILE_NAME),
                 
-          // 2. Executable directory
-          Path.Combine(AppContext.BaseDirectory, CONFIG_FILE_NAME),
+        // 3. User config directory (cross-platform)
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "DaemonsMCP",
+            CONFIG_FILE_NAME
+        ),
                 
-          // 3. User config directory (cross-platform)
-          Path.Combine(
-              Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-              "DaemonsMCP",
-              CONFIG_FILE_NAME
-          ),
-                
-          // 4. System config directory (cross-platform)
-          Path.Combine(
-              Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-              "DaemonsMCP",
-              CONFIG_FILE_NAME
-          )
+        // 4. System config directory (cross-platform)
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            "DaemonsMCP",
+            CONFIG_FILE_NAME
+        )
+
+
+
       };
     }
 

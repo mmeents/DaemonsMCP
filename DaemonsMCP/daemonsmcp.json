@@ -14,7 +14,13 @@
         {
             "name": "DaemonsMCP",
             "description": "This Project DaemonsMCP",
-            "path": "C:\\GithubMM\\DaemonsMCP",    // Relative or absolute path to the project directory
+            "path": "C:\\GithubMM\\DaemonsMCP",
+            "enabled": true
+        },
+        {
+            "name": "PackedTables.NET",
+            "description": "This Project PackedTables.NET",
+            "path": "C:\\GithubMM\\PackedTables.NET",
             "enabled": true
         }
 

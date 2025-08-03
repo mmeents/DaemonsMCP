@@ -9,16 +9,16 @@ using System.Web;
 namespace DaemonsMCP
 {
     public static class Px { 
-        public const string listProjects = "local_list_projects";
+        public const string listProjects = "local-list-projects";
         public const string ProjectDescription  = "Gets list of available projects. A project is the name of the root folder.";
 
-        public const string listProjectDirectory = "local_list_project_directories";
+        public const string listProjectDirectory = "local-list-project-directories";
         public const string ProjectDirectoryDescription = "Gets list of directories in the project. The project name is required and must match the current project.";
 
-        public const string listProjectFiles = "local_list_project_files";
+        public const string listProjectFiles = "local-list-project-files";
         public const string ProjectFilesDescription = "Gets list of files in the project. The project name is required and must match the current project.";
 
-        public const string getProjectFile = "local_get_project_file";
+        public const string getProjectFile = "local-get-project-file";
         public const string GetProjectFileDescription = "Gets the content of a file in the project. The project name is required and must match the current project. The path to the file is also required.";
 
         public const string projectNameParam = "projectName";
@@ -51,7 +51,8 @@ namespace DaemonsMCP
 
         public async Task<JsonRpcResponse> HandleRequest(JsonRpcRequest request){ 
             var response = new JsonRpcResponse()
-            {                
+            {
+                JsonRpc = "2.0",
                 Id = request.Id,
                 Result = null,
                 Error = null
@@ -63,8 +64,8 @@ namespace DaemonsMCP
                 case Px.listProjectDirectory :
                     if (request.Params == null || !request.Params.Value.TryGetProperty(Px.projectNameParam, out var projectName) || projectName.GetString() != ProjectName)
                     {
-                        response.Error = new { code = -32602, 
-                            message = $"[DaemonsMCP][Project] Invalid params:  {Px.projectNameParam}  is required and must match a project.." };
+                        response.Error = new { code = -32602,
+                          JsonRpc = "2.0", message = $"[DaemonsMCP][Project] Invalid params:  {Px.projectNameParam}  is required and must match a project.." };
                         break;                    
                     }
                     var path = request.Params.Value.TryGetProperty(Px.pathParam, out var p) ? p.GetString() : string.Empty;
@@ -88,8 +89,8 @@ namespace DaemonsMCP
                     
                     if (request.Params == null || !request.Params.Value.TryGetProperty(Px.projectNameParam, out var projectName2) || projectName2.GetString() != ProjectName)
                     {
-                        response.Error = new { code = -32602, 
-                            message = $"[DaemonsMCP][Project] Invalid params:  {Px.projectNameParam}  is required and must match the current project.." };
+                        response.Error = new { code = -32602,
+                          JsonRpc = "2.0", message = $"[DaemonsMCP][Project] Invalid params:  {Px.projectNameParam}  is required and must match the current project.." };
                         break;                    
                     }
                     var path2 = request.Params.Value.TryGetProperty(Px.pathParam, out var p2) ? p2.GetString() : string.Empty;
@@ -115,22 +116,23 @@ namespace DaemonsMCP
                 case Px.getProjectFile :
                     if (request.Params == null || !request.Params.Value.TryGetProperty(Px.projectNameParam, out var projectName3) || projectName3.GetString() != ProjectName)
                     {
-                        response.Error = new { code = -32602, 
-                            message = $"[DaemonsMCP][Project] Invalid params: {Px.projectNameParam} is required and must match the current project." };
+                        response.Error = new { code = -32602,
+                          JsonRpc = "2.0", message = $"[DaemonsMCP][Project] Invalid params: {Px.projectNameParam} is required and must match the current project." };
                         break;                    
                     }
                     var filePath = request.Params.Value.TryGetProperty("path", out var fPath) ? fPath.GetString() : string.Empty;
                     if (string.IsNullOrEmpty(filePath)) {
-                        response.Error = new { code = -32602, message = $"[DaemonsMCP][Project] Invalid params: {Px.pathParam} is required." };
+                        response.Error = new { JsonRpc = "2.0", code = -32602, message = $"[DaemonsMCP][Project] Invalid params: {Px.pathParam} is required." };
                         break;                    
                     }
                     var fullFilePath = System.IO.Path.Combine(ProjectPath, filePath);
                     if (!File.Exists(fullFilePath)) {
-                        response.Error = new { code = -32602, message = $"[DaemonsMCP][Project] File not found: {fullFilePath}" };
+                        response.Error = new { JsonRpc = "2.0", code = -32602, message = $"[DaemonsMCP][Project] File not found: {fullFilePath}" };
                         break;                    
                     }
                     if (!SecurityFilters.IsFileAllowed(fullFilePath)) {
-                        response.Error = new { code = -32602, 
+                        response.Error = new {
+                          JsonRpc = "2.0", code = -32602, 
                             message = "[DaemonsMCP][Project] Access to this file type is not allowed for security reasons."
                         };
                         break;
@@ -150,7 +152,7 @@ namespace DaemonsMCP
                         }
                         catch (Exception ex)
                         {
-                            response.Error = new { code = -32603, message = $"[DaemonsMCP][Project] Error reading file content: {ex.Message}" };
+                            response.Error = new { JsonRpc = "2.0", code = -32603, message = $"[DaemonsMCP][Project] Error reading file content: {ex.Message}" };
                             return response;
                         }
                     }
