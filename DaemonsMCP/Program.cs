@@ -46,13 +46,21 @@ namespace DaemonsMCP
                         Tx.InitializedNotification => null, // No response for notifications
                         Tx.ListMethods => ToolsHandler.HandleToolsList(request),
                         Tx.CallMethod => await ToolsHandler.HandleToolsCall(request).ConfigureAwait(false),
-                        _ => new JsonRpcResponse
+                        Tx.ListResources => HandleResourcesList(request),
+                        Tx.PromptsList => HandlePromptsList(request),
+                      _ => new JsonRpcResponse
                         {                           
                            Error = new { code = -32601, message = "[DaemonsMCP] Method not found" },
                            Id = request.Id
                         }
                     };
-              
+
+                    if(response == null)
+                    {
+                        // If response is null, it means it's a notification
+                        await Console.Error.WriteLineAsync($"[DaemonsMCP] Processed notification: {request.Method}").ConfigureAwait(false);
+                        continue;
+                    }
                     string responseJson = JsonSerializer.Serialize(response);
                     await Console.Out.WriteLineAsync(responseJson).ConfigureAwait(false);
                     await Console.Out.FlushAsync().ConfigureAwait(false);
@@ -62,7 +70,7 @@ namespace DaemonsMCP
                 {                    
                     await Console.Error.WriteLineAsync($"[DaemonsMCP][Error1]: {je.Message}").ConfigureAwait(false);
                 }
-                 catch (Exception ex)
+                catch (Exception ex)
                 {
                     await Console.Error.WriteLineAsync($"[DaemonsMCP][Error2]: {ex.Message}").ConfigureAwait(false);
                 }
@@ -71,8 +79,8 @@ namespace DaemonsMCP
             }
         }
 
-         private static JsonRpcInitResponse HandleInitialize(JsonRpcRequest request)
-         {
+        private static JsonRpcInitResponse HandleInitialize(JsonRpcRequest request)
+        {
             return new JsonRpcInitResponse
             {
                 JsonRpc = "2.0",
@@ -91,7 +99,22 @@ namespace DaemonsMCP
                 },
                 Id = request.Id
             };
-         }
+        }
+
+        private static JsonRpcResponse HandleResourcesList(JsonRpcRequest request) {
+            return new JsonRpcResponse {
+                JsonRpc = "2.0",
+                Result = new { resources = new object[] { } }, 
+                Id = request.Id
+            };
+        }
+        private static JsonRpcResponse HandlePromptsList(JsonRpcRequest request) {
+            return new JsonRpcResponse {
+                JsonRpc = "2.0",
+                Result = new { prompts = Array.Empty<object>() },
+                Id = request.Id
+            };
+        }
 
     }
 }

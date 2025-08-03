@@ -12,7 +12,9 @@ namespace DaemonsMCP
         public const string ListMethods = "tools/list";
         public const string CallMethod = "tools/call";
         public const string Initialize = "initialize";
-        public const string InitializedNotification = "notifications/initialized";                                                      
+        public const string InitializedNotification = "notifications/initialized"; 
+        public const string ListResources = "resources/list";
+        public const string PromptsList = "prompts/list";
     }
 
    static class ToolsHandler
@@ -244,7 +246,8 @@ namespace DaemonsMCP
                 Id = id
             };
         }
-    }
+    
+  }
 
     public class McpTool
     {
@@ -265,10 +268,11 @@ namespace DaemonsMCP
     
         [JsonPropertyName("properties")]
         public Dictionary<string, InputSchemaProperty> Properties { get; set; } = new Dictionary<string, InputSchemaProperty>();
-    
+
         [JsonPropertyName("required")]
-        public string[] Required { get; set; } = new string[] { };
-    }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string[]? Required { get; set; } = null;
+        }
 
     public class InputSchemaProperty
     {
@@ -278,4 +282,6 @@ namespace DaemonsMCP
         [JsonPropertyName("description")]
         public string Description { get; set; } = "";
     }
+
+
 }
