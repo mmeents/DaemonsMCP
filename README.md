@@ -109,7 +109,7 @@ Show me the directories in the DaemonsMCP project
 
 ### Examine Specific Files
 ```
-Show me the content of ProjectTools.cs.cs in the DaemonsMCP project
+Show me the content of ProjectTools.cs in the DaemonsMCP project
 ```
 *Returns: Full file content with metadata (size, encoding, MIME type)*
 
@@ -125,7 +125,7 @@ List all .cs files in the DaemonsMCP/DaemonsMCP directory
 DaemonsMCP/
 ├── DaemonsMCP/              # Main MCP service
 │   ├── Program.cs           # MCPSharp service initialization
-│   ├── ProjectTools.cs.cs   # MCP tools with attributes
+│   ├── ProjectTools.cs   # MCP tools with attributes
 │   ├── ProjectHandler.cs    # Core file system operations
 │   ├── GlobalConfig.cs      # Configuration management
 │   ├── SecurityFilter.cs    # File access security
