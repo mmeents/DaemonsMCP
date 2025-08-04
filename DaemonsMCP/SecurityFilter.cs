@@ -111,5 +111,203 @@ namespace DaemonsMCP
         public static void ResetCache() {
           _maxFileSizeBytes = null;
         }
+
+
+    /// <summary>
+    /// Determines if write operations are allowed for the specified file path.
+    /// This includes creating new files and updating existing files.
+    /// </summary>
+    /// <param name="filePath">The full path to the file</param>
+    /// <returns>True if write operations are allowed, false otherwise</returns>
+    public static bool IsWriteAllowed(string filePath) {
+      // First check if writes are globally enabled
+      if (GlobalConfig.IsConfigured && !GlobalConfig.Security.AllowWrite) {
+        return false;
       }
+
+      // Check if the path is write-protected
+      if (IsPathWriteProtected(filePath)) {
+        return false;
+      }
+
+      // Check if the file itself is allowed (same rules as reading)
+      if (!IsFileAllowed(filePath)) {
+        return false;
+      }
+
+      // Check write-specific file size limits
+      if (!IsWriteFileSizeAllowed(filePath)) {
+        return false;
+      }
+
+      // Additional write-specific security checks
+      return IsWritePathSafe(filePath);
+    }
+
+    /// <summary>
+    /// Determines if delete operations are allowed for the specified file path.
+    /// More restrictive than write operations due to irreversible nature.
+    /// </summary>
+    /// <param name="filePath">The full path to the file</param>
+    /// <returns>True if delete operations are allowed, false otherwise</returns>
+    public static bool IsDeleteAllowed(string filePath) {
+      // Delete requires write permissions to be enabled
+      if (!IsWriteAllowed(filePath)) {
+        return false;
+      }
+
+      var fileName = Path.GetFileName(filePath);
+      var extension = Path.GetExtension(filePath);
+
+      // Additional restrictions for delete operations
+      var criticalFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+      {
+                "Program.cs", "Startup.cs", "Main.cs",
+                ".csproj", ".sln", ".gitignore", "README.md",
+                "package.json", "requirements.txt", "Dockerfile"
+            };
+
+      var criticalExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+      {
+                ".sln", ".csproj", ".vbproj", ".fsproj"
+            };
+
+      // Don't allow deletion of critical project files
+      if (criticalFiles.Contains(fileName) || criticalExtensions.Contains(extension)) {
+        return false;
+      }
+
+      // Don't allow deletion of files in critical directories
+      var criticalDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+      {
+                ".git", ".vs", "Properties"
+            };
+
+      var directory = Path.GetDirectoryName(filePath);
+      if (directory != null && criticalDirectories.Any(critical =>
+          directory.Contains(critical, StringComparison.OrdinalIgnoreCase))) {
+        return false;
+      }
+
+      return true;
+    }
+
+    /// <summary>
+    /// Checks if a path is in the write-protected paths list.
+    /// </summary>
+    /// <param name="filePath">The full path to check</param>
+    /// <returns>True if the path is write-protected, false otherwise</returns>
+    public static bool IsPathWriteProtected(string filePath) {
+      if (!GlobalConfig.IsConfigured) {
+        // Use default protected paths when no config
+        return BlockedDirectories.Any(blocked =>
+            filePath.Contains(blocked, StringComparison.OrdinalIgnoreCase));
+      }
+
+      var security = GlobalConfig.Security;
+      var normalizedPath = Path.GetFullPath(filePath).Replace('\\', '/');
+
+      return security.WriteProtectedPaths.Any(protectedPath =>
+      {
+        var normalizedProtected = protectedPath.Replace('\\', '/');
+
+        // Check if the file path contains the protected path
+        return normalizedPath.Contains(normalizedProtected, StringComparison.OrdinalIgnoreCase) ||
+               // Check if it's a direct match for directory protection
+               normalizedPath.StartsWith(normalizedProtected.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
+      });
+    }
+
+    /// <summary>
+    /// Validates that the file path is safe for write operations (prevents directory traversal attacks).
+    /// </summary>
+    /// <param name="filePath">The file path to validate</param>
+    /// <returns>True if the path is safe, false otherwise</returns>
+    private static bool IsWritePathSafe(string filePath) {
+      try {
+        // Check for directory traversal attempts
+        if (filePath.Contains("..") || filePath.Contains("~/")) {
+          return false;
+        }
+
+        // Check for absolute paths that might escape project boundaries
+        if (Path.IsPathRooted(filePath)) {
+          // Allow only if it's within a configured project path
+          return GlobalConfig.Projects.Values.Any(project =>
+              filePath.StartsWith(project.Path, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Additional checks for suspicious patterns
+        var suspiciousPatterns = new[] { "\\\\", "//", "%", "$", "`" };
+        if (suspiciousPatterns.Any(pattern => filePath.Contains(pattern))) {
+          return false;
+        }
+
+        // Ensure the path can be properly normalized
+        _ = Path.GetFullPath(filePath);
+
+        return true;
+      } catch (Exception) {
+        // If path normalization fails, it's not safe
+        return false;
+      }
+    }
+
+    /// <summary>
+    /// Checks if the file size is within write operation limits.
+    /// </summary>
+    /// <param name="filePath">The file path (used to get current size if file exists)</param>
+    /// <param name="contentSize">Optional: size of content to be written</param>
+    /// <returns>True if size is allowed, false otherwise</returns>
+    private static bool IsWriteFileSizeAllowed(string filePath, long? contentSize = null) {
+      var maxWriteSize = GetMaxWriteFileSizeBytes();
+
+      // If we have content size, check that
+      if (contentSize.HasValue) {
+        return contentSize.Value <= maxWriteSize;
+      }
+
+      // If file exists, check current size
+      if (File.Exists(filePath)) {
+        try {
+          var fileInfo = new FileInfo(filePath);
+          return fileInfo.Length <= maxWriteSize;
+        } catch {
+          return false;
+        }
+      }
+
+      // For new files, assume it's okay (will be checked when content is provided)
+      return true;
+    }
+
+    /// <summary>
+    /// Public method to check if content size is allowed for write operations.
+    /// </summary>
+    /// <param name="contentSize">Size of content in bytes</param>
+    /// <returns>True if size is allowed, false otherwise</returns>
+    public static bool IsWriteContentSizeAllowed(long contentSize) {
+      return contentSize <= GetMaxWriteFileSizeBytes();
+    }
+
+    /// <summary>
+    /// Gets the maximum allowed file size for write operations.
+    /// </summary>
+    /// <returns>Maximum file size in bytes</returns>
+    private static long GetMaxWriteFileSizeBytes() {
+      if (!GlobalConfig.IsConfigured) {
+        return 5 * 1024 * 1024; // 5MB default
+      }
+
+      try {
+        return FileSizeHelper.ParseFileSize(GlobalConfig.Security.MaxFileWriteSize);
+      } catch {
+        return 5 * 1024 * 1024; // 5MB fallback
+      }
+    }
+
+    // Existing methods (IsFileSizeAllowed, GetMaxFileSizeBytes, ResetCache) remain unchanged
+    private static long? _maxWriteFileSizeBytes;
+
+  }
 }

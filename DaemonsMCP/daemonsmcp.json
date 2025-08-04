@@ -5,29 +5,56 @@
         "version": "1.0.0"
     },
     "projects": [
- //       {
- //           "name": "MyProject",
- //           "description": "Project description",
- //           "path": "relative/or/absolute/path",
- //           "enabled": true
- //      },
         {
             "name": "DaemonsMCP",
-            "description": "This Project DaemonsMCP",
-            "path": "C:\\GithubMM\\DaemonsMCP",
-            "enabled": true
-        },
-        {
-            "name": "PackedTables.NET",
-            "description": "This Project PackedTables.NET",
-            "path": "C:\\GithubMM\\PackedTables.NET",
+            "description": "DaemonsMCP in a sandbox",
+            "path": "C:\\MCPSandbox\\DaemonsMCP",
             "enabled": true
         }
-
     ],
     "security": {
-        "blockedExtensions": [ ".exe", ".dll", ".bat", ".cmd", ".sh" ],        
-        "allowedExtensions": [ ".sln", ".csproj", ".cs", ".sql", ".html", ".htm", ".js", ".py", ".md", ".json", ".resx" ],
-        "maxFileSize": "10MB"
+        "blockedExtensions": [
+            ".exe",
+            ".dll",
+            ".bat",
+            ".cmd",
+            ".sh",
+            ".key",
+            ".pem",
+            ".p12",
+            ".pfx",
+            ".crt",
+            ".cer",
+            ".db",
+            ".sqlite",
+            ".sqlite3",
+            ".log"
+        ],
+        "allowedExtensions": [
+            ".sln",
+            ".csproj",
+            ".cs",
+            ".sql",
+            ".html",
+            ".htm",
+            ".js",
+            ".py",
+            ".md",
+            ".json",
+            ".resx"
+        ],
+        "maxFileSize": "10MB",
+        "allowWrite": true,
+        "writeProtectedPaths": [
+            ".git",
+            ".vs",
+            "bin",
+            "obj",
+            "node_modules",
+            "logs",
+            "temp",
+            ".ssh"
+        ],
+        "maxFileWriteSize": "5MB"
     }
 }

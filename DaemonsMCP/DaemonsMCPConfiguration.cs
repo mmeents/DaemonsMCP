@@ -63,5 +63,18 @@ namespace DaemonsMCP {
 
     [JsonPropertyName("maxDirectoryDepth")]
     public int MaxDirectoryDepth { get; set; } = 10;
+
+    [JsonPropertyName("allowWrite")]
+    public bool AllowWrite { get; set; } = false;
+
+    [JsonPropertyName("writeProtectedPaths")]
+    public List<string> WriteProtectedPaths { get; set; } = new()
+    {
+            "/etc", "/var", "/usr/local", "/bin", "/sbin"
+    };
+
+    [JsonPropertyName("maxFileWriteSize")]
+    public string MaxFileWriteSize { get; set; } = "5MB";
+
   }
 }
