@@ -1,52 +1,34 @@
-﻿# DaemonsMCP
+# DaemonsMCP
 
-**Give LLMs hands-on control of your codebase** 👁️‍🗨️✋
+**Give LLMs eyes on your codebase** 👁️‍🗨️
 
-DaemonsMCP is a comprehensive C# MCP (Model Context Protocol) service that provides LLMs with secure, full-featured access to explore, read, and **write** to local codebases. Built on MCPSharp for reliable transport and JSON-RPC communication, it gives your AI assistant the ability to see, navigate, understand, and **modify** your project files just like a developer would.
+DaemonsMCP is a robust C# MCP (Model Context Protocol) service that provides LLMs with secure, comprehensive access to explore and analyze local codebases. Built on MCPSharp for reliable transport and JSON-RPC communication, it gives your AI assistant the ability to see, navigate, and understand your project files just like a developer would.
 
-✅ **Fully Working** - Complete CRUD operations tested and compatible with Claude Desktop and other MCP clients!
+✅ **Fully Working** - Tested and compatible with Claude Desktop and other MCP clients!
 
 ## 🚀 Features
 
 - **🔍 Codebase Exploration**: Browse projects, directories, and files with intuitive tools
-- **📝 Full Write Operations**: Create, update, and delete files and directories
-- **🛡️ Enterprise Security**: Multi-layer security validation with configurable permissions
-- **💾 Automatic Backups**: Timestamped backups for all destructive operations
 - **📁 Multi-Project Support**: Manage multiple codebases from a single service  
+- **🛡️ Security First**: Built-in file type filtering and path validation
 - **⚡ High Performance**: Compiled C# with MCPSharp for fast, reliable responses
-- **🌐 Cross-Platform**: Robust path normalization for Windows, Linux, and macOS
 - **🧩 Extensible**: Clean architecture ready for custom tools and capabilities
 - **📋 Rich Metadata**: File size, MIME types, encoding detection, and content analysis
 - **🔄 Battle-Tested Transport**: Uses MCPSharp framework for robust JSON-RPC communication
-- **🔒 Safety First**: Explicit confirmations required for destructive operations
 
 ## 🛠️ Available Tools
 
-### File Operations
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `local-get-project-file` | Read file content with full metadata | `projectName`, `path` |
-| `local-create-project-file` | Create new files with content | `projectName`, `path`, `content`, `createDirectories?`, `overwrite?` |
-| `local-update-project-file` | Update existing files with new content | `projectName`, `path`, `content`, `createBackup?`, `backupSuffix?` |
-| `local-delete-project-file` | Delete files with safety confirmations | `projectName`, `path`, `createBackup?`, `confirmDeletion` |
-
-### Directory Operations  
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `local-list-project-directories` | List directories in a project | `projectName`, `path?`, `filter?` |
-| `local-create-project-directory` | Create new directories | `projectName`, `path`, `createParents?` |
-| `local-delete-project-directory` | Delete directories with confirmations | `projectName`, `path`, `recursive?`, `confirmDeletion` |
-
-### Project Management
 | Tool | Description | Parameters |
 |------|-------------|------------|
 | `local-list-projects` | Get all configured projects with metadata | None |
+| `local-list-project-directories` | List directories in a project | `projectName`, `path?`, `filter?` |
 | `local-list-project-files` | List files in a project directory | `projectName`, `path?`, `filter?` |
+| `local-get-project-file` | Read file content with full metadata | `projectName`, `path` |
 
 ## 📋 Prerequisites
 
 - **.NET 9.0** or later
-- **Windows, Linux, or macOS** (cross-platform compatible)
+- **Windows** (primary support - cross-platform compatible)
 - **MCP-compatible client** (Claude Desktop, Continue, etc.)
 
 ## ⚙️ Installation
@@ -57,38 +39,23 @@ git clone https://github.com/mmeents/DaemonsMCP.git
 cd DaemonsMCP
 ```
 
-### 2. Configure Your Projects and Security
+### 2. Configure Your Projects
 Create or edit `DaemonsMCP/daemonsmcp.json`:
 
 ```json
 {
-  "version": "1.0",
-  "daemon": {
-    "name": "DaemonMCP",
-    "version": "1.0.0"
-  },
   "projects": [
     {
       "name": "DaemonsMCP",
       "description": "Your main project description",
-      "path": "C:\\path\\to\\DaemonsMCP",
-      "enabled": true
+      "path": "C:\\GithubMM\\DaemonsMCP"
     },
     {
       "name": "YourProject", 
       "description": "Another project description",
-      "path": "C:\\path\\to\\your\\project",
-      "enabled": true
+      "path": "C:\\path\\to\\your\\project"
     }
-  ],
-  "security": {
-    "allowWrite": true,
-    "allowedExtensions": [".cs", ".js", ".py", ".md", ".txt", ".json", ".xml", ".yml", ".yaml"],
-    "blockedExtensions": [".exe", ".dll", ".bat", ".cmd", ".sh"],
-    "maxFileSize": "10MB",
-    "maxFileWriteSize": "5MB",
-    "writeProtectedPaths": [".git", ".vs", "bin", "obj", "node_modules"]
-  }
+  ]
 }
 ```
 
@@ -126,7 +93,7 @@ After updating the configuration, fully restart Claude Desktop to load the new M
 
 ## 🎯 Usage Examples
 
-Once connected to your MCP client, you can perform complete development workflows:
+Once connected to your MCP client, you can:
 
 ### Explore Available Projects
 ```
@@ -140,35 +107,11 @@ Show me the directories in the DaemonsMCP project
 ```
 *Returns: Clean JSON array of directory names*
 
-### Read Files
+### Examine Specific Files
 ```
 Show me the content of ProjectTools.cs in the DaemonsMCP project
 ```
 *Returns: Full file content with metadata (size, encoding, MIME type)*
-
-### Create New Files
-```
-Create a new utility class called StringHelper.cs with basic string extension methods
-```
-*Creates: New file with automatic directory creation if needed*
-
-### Update Existing Files
-```
-Add a new method to the StringHelper.cs file for reversing strings
-```
-*Updates: File content with automatic backup creation*
-
-### Delete Files Safely
-```
-Delete the test file I created earlier, but make sure to back it up first
-```
-*Deletes: File with explicit confirmation and automatic backup*
-
-### Create Directory Structures
-```
-Create a new directory called "Utilities" in the project
-```
-*Creates: Directory with parent creation if needed*
 
 ### Search for Files
 ```
@@ -182,12 +125,11 @@ List all .cs files in the DaemonsMCP/DaemonsMCP directory
 DaemonsMCP/
 ├── DaemonsMCP/              # Main MCP service
 │   ├── Program.cs           # MCPSharp service initialization
-│   ├── ProjectTools.cs      # Complete CRUD MCP tools
-│   ├── SecurityFilter.cs    # Enhanced multi-layer security
+│   ├── ProjectTools.cs   # MCP tools with attributes
+│   ├── ProjectHandler.cs    # Core file system operations
 │   ├── GlobalConfig.cs      # Configuration management
+│   ├── SecurityFilter.cs    # File access security
 │   ├── MimeHelper.cs        # File type detection
-│   ├── FileSizeHelper.cs    # File size parsing utilities
-│   ├── DaemonsMCPConfiguration.cs # Configuration model
 │   └── daemonsmcp.json      # Project configuration
 ├── DaemonsTester/           # Test client for validation
 └── README.md
@@ -195,25 +137,11 @@ DaemonsMCP/
 
 ## 🛡️ Security Features
 
-### Read Operations
 - **File Type Filtering**: Configurable whitelist of allowed file extensions
 - **Path Validation**: Prevents directory traversal attacks  
 - **Binary File Detection**: Safely handles non-text files
 - **Project Sandboxing**: Access strictly limited to configured project directories
-
-### Write Operations
-- **Global Write Toggle**: `allowWrite` flag to enable/disable all write operations
-- **Write-Protected Paths**: Configurable list of protected directories (`.git`, `bin`, `obj`, etc.)
-- **File Size Limits**: Separate limits for read and write operations
-- **Content Size Validation**: Pre-validation of content before writing
-- **Critical File Protection**: Extra protection for project files (`.csproj`, `Program.cs`, etc.)
-- **Path Safety Validation**: Prevents directory traversal and malicious path patterns
-
-### Safety Features
-- **Automatic Backups**: Timestamped backups for all update and delete operations
-- **Explicit Confirmations**: Required `confirmDeletion=true` for all destructive operations
-- **Project Boundary Enforcement**: All operations validated within project directories
-- **Cross-Platform Path Normalization**: Handles path differences across operating systems
+- **Security-First Design**: All file operations go through security validation
 
 ## 🔮 Architecture & Technical Details
 
@@ -225,37 +153,30 @@ DaemonsMCP leverages the [MCPSharp](https://github.com/afrise/MCPSharp) framewor
 - **Error Handling**: Graceful exception management and JSON-RPC compliance
 
 ### Custom Enhancements
-- **Complete CRUD Operations**: Full create, read, update, delete functionality
-- **Enterprise Security Model**: Multi-layer validation with comprehensive safety checks
-- **Configuration-Driven**: JSON-based configuration for projects and security settings
-- **Cross-Platform Compatibility**: Robust path handling for Windows, Linux, and macOS
+- **Manual JSON Serialization**: For complete control over response format
+- **Project Configuration System**: Flexible JSON-based project management
 - **Advanced File Handling**: MIME type detection, encoding analysis, binary file support
 - **Performance Optimized**: Efficient file system operations with proper filtering
-- **Professional Error Handling**: Detailed error messages with proper exception types
 
 ## 🚧 Roadmap
 
-- **✅ Read-only file access** (Complete - Fully Working)
+- **✅ Read-only file access** (Current - Fully Working)
 - **✅ Robust transport layer** (MCPSharp integration complete)
-- **✅ Complete write operations** (Complete - create, update, delete files and directories)
-- **✅ Enterprise security system** (Complete - multi-layer validation)
-- **✅ Cross-platform support** (Complete - Windows, Linux, macOS)
+- **🚧 Write operations** (create, update, delete files)
 - **📋 Planned**: Full-text search across codebases
 - **📋 Planned**: File watching and change notifications
-- **📋 Planned**: Additional tools (conversation whiteboard, git operations)
+- **📋 Planned**: Additonal tools (conversation whiteboard so these different conversation threads can chat with each other.)
 - **📋 Planned**: Code intelligence (syntax highlighting, AST parsing)
-- **📋 Planned**: Batch operations for multiple files
 
 ## 🤝 Contributing
 
 Contributions are welcome! Areas where help is especially appreciated:
 
 - **Additional tool implementations** (search, git operations, etc.)
+- **Cross-platform testing** (Linux/macOS validation)
 - **Performance optimizations**
 - **Documentation improvements** 
 - **Integration examples** (VS Code, other MCP clients)
-- **Advanced security features**
-- **Testing and validation**
 
 ### Development Setup
 
@@ -277,17 +198,10 @@ Contributions are welcome! Areas where help is especially appreciated:
 - Verify the executable path in your configuration is correct
 - Check that your projects are properly configured in `daemonsmcp.json`
 
-**Write operations not working:**
-- Ensure `allowWrite: true` in your security configuration
-- Check that file extensions are in the `allowedExtensions` list
-- Verify the target directory is not in `writeProtectedPaths`
-- Confirm you have write permissions on the target directory
-
 **File access errors:**
 - Confirm project paths exist and are accessible
 - Check that file extensions are allowed in security filters
 - Verify path separators match your operating system
-- Ensure file sizes are within the configured limits
 
 **Build issues:**
 - Ensure .NET 9.0 is installed
@@ -302,7 +216,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 - Built on the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) specification
 - Powered by [MCPSharp](https://github.com/afrise/MCPSharp) for robust transport
-- Inspired by the need to give LLMs better codebase understanding and modification capabilities
+- Inspired by the need to give LLMs better codebase understanding
 - Special thanks to the MCP community for feedback and testing
 - Super Special thanks to Claude Desktop for being an amazing MCP client!
 
@@ -314,4 +228,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ---
 
-**Ready to give your LLM complete development superpowers? Star ⭐ this repo and let's build the future of AI-assisted development together!**
+**Ready to give your LLM superpowers? Star ⭐ this repo and let's build the future of AI-assisted development together!**
