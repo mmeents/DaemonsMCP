@@ -78,8 +78,9 @@ namespace DaemonsMCP
           try {
             var fileInfo = new FileInfo(filePath);
             return IsFileSizeAllowed(fileInfo.Length);
-          } catch {
+          } catch (Exception e) {
             // If we can't get file size, assume it's too large
+            Console.Error.WriteLine($"[DaemonsMCP][Security] File Size lookup excepts {e.Message}");
             return false;
           }
         }
@@ -120,22 +121,26 @@ namespace DaemonsMCP
     public static bool IsWriteAllowed(string filePath) {
       // First check if writes are globally enabled
       if (GlobalConfig.IsConfigured && !GlobalConfig.Security.AllowWrite) {
+        Console.Error.WriteLine($"[DaemonsMCP][Security] Setting AllowWrite says no");
         return false;
       }
 
       // Check if the path is write-protected
       if (IsPathWriteProtected(filePath)) {
+        Console.Error.WriteLine($"[DaemonsMCP][Security] Setting IsPathWriteProtected true {filePath}");
         return false;
       }
 
       // Check if the file itself is allowed (same rules as reading)
       if (!IsFileAllowed(filePath)) {
+        Console.Error.WriteLine($"[DaemonsMCP][Security] Setting IsFileAllowed false {filePath}");
         return false;
       }
 
       // Check write-specific file size limits (if file exists create will check later)
       if (File.Exists(filePath)) {
         if (!IsWriteFileSizeAllowed(filePath)) {
+          Console.Error.WriteLine($"[DaemonsMCP][Security] Setting IsWriteFileSizeAllowed false {filePath}");
           return false;
         }
       }
@@ -227,27 +232,33 @@ namespace DaemonsMCP
       try {
         // Check for directory traversal attempts
         if (filePath.Contains("..") || filePath.Contains("~/")) {
+          Console.Error.WriteLine($"[DaemonsMCP][Security] Directory traversal attempt detected: {filePath}");
           return false;
         }
 
         // Additional checks for suspicious patterns
         var suspiciousPatterns = new[] { "%", "$", "`" };
         if (suspiciousPatterns.Any(pattern => filePath.Contains(pattern))) {
+          Console.Error.WriteLine($"[DaemonsMCP][Security] Suspicious pattern detected in path: {filePath}");
           return false;
         }
+
         // Ensure the path can be properly normalized
         var checkPath = Path.GetFullPath(filePath);        
 
         // Check for absolute paths that might escape project boundaries
         if (Path.IsPathRooted(filePath)) {
           // Allow only if it's within a configured project path
-          return GlobalConfig.Projects.Values.Any(project =>
+          var boundryCheck = GlobalConfig.Projects.Values.Any(project =>
               filePath.StartsWith(project.Path, StringComparison.OrdinalIgnoreCase));
+          if (!boundryCheck) { Console.Error.WriteLine($"final rooted boundy check false"); }
+          return boundryCheck;
         }       
 
         return true;
-      } catch (Exception) {
+      } catch (Exception e) {
         // If path normalization fails, it's not safe
+        Console.Error.WriteLine($"[DaemonsMCP][Security] caught exception {filePath} {e.Message}");
         return false;
       }
     }
