@@ -76,6 +76,10 @@ namespace DaemonsMCP
 
         public static bool IsFileSizeAllowed(string filePath) {
           try {
+            if (!File.Exists(filePath)) {
+              // If file doesn't exist, assume size is okay (will be checked on write)
+              return true;
+            }
             var fileInfo = new FileInfo(filePath);
             return IsFileSizeAllowed(fileInfo.Length);
           } catch (Exception e) {
