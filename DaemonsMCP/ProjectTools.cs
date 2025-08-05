@@ -385,6 +385,9 @@ namespace DaemonsMCP {
       string? backupPath = null;
       FileInfo originalFileInfo = new FileInfo(fullFilePath);
 
+      string OriginalFileName = originalFileInfo.Name;
+      int originalFileSize = (int)originalFileInfo.Length;
+
       try {
         // Create backup if requested (before deletion)
         if (createBackup) {
@@ -404,9 +407,9 @@ namespace DaemonsMCP {
         return new {
           success = true,
           operation = "delete",
-          fileName = originalFileInfo.Name,
+          fileName = OriginalFileName,
           path = relativePath,
-          deletedSize = originalFileInfo.Length,
+          deletedSize = originalFileSize,
           deletedAt = DateTime.Now,
           backupCreated = createBackup,
           backupPath = relativeBackupPath,
@@ -554,6 +557,7 @@ namespace DaemonsMCP {
 
       try {
         var dirInfo = new DirectoryInfo(fullDirPath);
+        var dirName = dirInfo.Name;
         var relativePath = dirInfo.FullName.Substring(project.Path.Length).TrimStart(Path.DirectorySeparatorChar);
         var fileCount = recursive ? Directory.GetFiles(fullDirPath, "*", SearchOption.AllDirectories).Length : 0;
         var subdirCount = recursive ? Directory.GetDirectories(fullDirPath, "*", SearchOption.AllDirectories).Length : 0;
@@ -564,7 +568,7 @@ namespace DaemonsMCP {
         return new {
           success = true,
           operation = "delete-directory",
-          directoryName = dirInfo.Name,
+          directoryName = dirName,
           path = relativePath,
           deletedAt = DateTime.Now,
           recursive = recursive,
