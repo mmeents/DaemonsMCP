@@ -27,8 +27,7 @@
             ".cer",
             ".db",
             ".sqlite",
-            ".sqlite3",
-            ".log"
+            ".sqlite3"            
         ],
         "allowedExtensions": [
             ".sln",
@@ -40,8 +39,10 @@
             ".js",
             ".py",
             ".md",
+            ".txt",
             ".json",
-            ".resx"
+            ".resx",
+            ".log"
         ],
         "maxFileSize": "10MB",
         "allowWrite": true,
@@ -51,8 +52,6 @@
             "bin",
             "obj",
             "node_modules",
-            "logs",
-            "temp",
             ".ssh"
         ],
         "maxFileWriteSize": "5MB"

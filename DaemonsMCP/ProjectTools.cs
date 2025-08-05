@@ -37,6 +37,7 @@ namespace DaemonsMCP {
       }
 
       var fullPath = string.IsNullOrEmpty(path) ? project.Path : Path.Combine(project.Path, path);
+      fullPath = Path.GetFullPath(fullPath);
 
       var searchPattern = string.IsNullOrEmpty(filter) ? "*" : filter;
       var directories = Directory.GetDirectories(fullPath, searchPattern, SearchOption.TopDirectoryOnly);
@@ -65,6 +66,7 @@ namespace DaemonsMCP {
       }
 
       var fullPath = string.IsNullOrEmpty(path) ? project.Path : Path.Combine(project.Path, path);
+      fullPath = Path.GetFullPath(fullPath);
       var searchPattern = string.IsNullOrEmpty(filter) ? "*" : filter;
 
       var files = Directory.GetFiles(fullPath, searchPattern, SearchOption.TopDirectoryOnly)
@@ -94,13 +96,14 @@ namespace DaemonsMCP {
       }
 
       var fullFilePath = Path.Combine(project.Path, path);
+      fullFilePath = Path.GetFullPath(fullFilePath);
 
       if (!File.Exists(fullFilePath)) {
         throw new FileNotFoundException($"File not found: {fullFilePath}");
       }
 
       if (!SecurityFilters.IsFileAllowed(fullFilePath)) {
-        throw new UnauthorizedAccessException("Access to this file type is not allowed for security reasons.");
+        throw new UnauthorizedAccessException("Get Access to this file type is not allowed for security reasons.");
       }
 
       var fileInfo = new FileInfo(fullFilePath);
@@ -162,13 +165,12 @@ namespace DaemonsMCP {
       }
 
       // Build full path
-      var fullFilePath = Path.Combine(project.Path, path);
+      var fullFilePath = Path.GetFullPath(Path.Combine(project.Path, path));
 
       // SAFETY CHECK: Ensure path is within project boundaries
       var normalizedProjectPath = Path.GetFullPath(project.Path);
-      var normalizedFilePath = Path.GetFullPath(fullFilePath);
-      if (!normalizedFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException("File path must be within the project directory");
+      if (!fullFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
+        throw new UnauthorizedAccessException($"File path must be within the project directory {fullFilePath}");
       }
 
       // Security validations
@@ -186,6 +188,8 @@ namespace DaemonsMCP {
       }
 
       try {
+        
+      
         // Create directory if needed
         var directory = Path.GetDirectoryName(fullFilePath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory)) {
@@ -194,6 +198,12 @@ namespace DaemonsMCP {
           } else {
             throw new DirectoryNotFoundException($"Directory does not exist: {Path.GetDirectoryName(path)}");
           }
+        }
+
+        if (File.Exists(fullFilePath) && overwrite) {
+          var suffix =  $".NewExistedBackup.{DateTime.Now:yyyyMMdd_HHmmss}";
+          var backupPath = fullFilePath + suffix;
+          File.Copy(fullFilePath, backupPath, true);                    
         }
 
         // Write the file
@@ -254,13 +264,13 @@ namespace DaemonsMCP {
       }
 
       // Build full path
-      var fullFilePath = Path.Combine(project.Path, path);
+      var fullFilePath = Path.GetFullPath(Path.Combine(project.Path, path));
 
       // SAFETY CHECK: Ensure path is within project boundaries
       var normalizedProjectPath = Path.GetFullPath(project.Path);
-      var normalizedFilePath = Path.GetFullPath(fullFilePath);
-      if (!normalizedFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException("File path must be within the project directory");
+      
+      if (!fullFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
+        throw new UnauthorizedAccessException($"File path must be within the project directory {fullFilePath}");
       }
 
       // Check if file exists
@@ -354,13 +364,12 @@ namespace DaemonsMCP {
       }
 
       // Build full path
-      var fullFilePath = Path.Combine(project.Path, path);
+      var fullFilePath = Path.GetFullPath(Path.Combine(project.Path, path));
 
       // SAFETY CHECK: Ensure path is within project boundaries
-      var normalizedProjectPath = Path.GetFullPath(project.Path);
-      var normalizedFilePath = Path.GetFullPath(fullFilePath);
-      if (!normalizedFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException("File path must be within the project directory");
+      var normalizedProjectPath = Path.GetFullPath(project.Path);      
+      if (!fullFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
+        throw new UnauthorizedAccessException($"File path must be within the project directory {fullFilePath}");
       }
 
       // Check if file exists
@@ -439,7 +448,7 @@ namespace DaemonsMCP {
       }
 
       // Build full path
-      var fullDirPath = Path.Combine(project.Path, path);
+      var fullDirPath = Path.Combine(project.Path, path);      
 
       // SAFETY CHECK: Ensure path is within project boundaries
       var normalizedProjectPath = Path.GetFullPath(project.Path);
@@ -523,18 +532,17 @@ namespace DaemonsMCP {
       }
 
       // Build full path
-      var fullDirPath = Path.Combine(project.Path, path);
+      var fullDirPath = Path.GetFullPath(Path.Combine(project.Path, path));
 
       // SAFETY CHECK: Ensure path is within project boundaries
-      var normalizedProjectPath = Path.GetFullPath(project.Path);
-      var normalizedDirPath = Path.GetFullPath(fullDirPath);
-      if (!normalizedDirPath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException("Directory path must be within the project directory");
+      var normalizedProjectPath = Path.GetFullPath(project.Path);      
+      if (!fullDirPath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
+        throw new UnauthorizedAccessException($"Directory path must be within the project directory {fullDirPath}");
       }
 
       // Check if directory exists
       if (!Directory.Exists(fullDirPath)) {
-        throw new DirectoryNotFoundException($"Directory not found: {path}");
+        throw new DirectoryNotFoundException($"Directory not found: {fullDirPath}");
       }
 
       // SAFETY: Extra protection for critical directories

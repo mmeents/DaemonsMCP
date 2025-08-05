@@ -70,7 +70,7 @@ namespace DaemonsMCP {
     [JsonPropertyName("writeProtectedPaths")]
     public List<string> WriteProtectedPaths { get; set; } = new()
     {
-            "/etc", "/var", "/usr/local", "/bin", "/sbin"
+            "etc", "var", "usr/local", "bin", "sbin"
     };
 
     [JsonPropertyName("maxFileWriteSize")]

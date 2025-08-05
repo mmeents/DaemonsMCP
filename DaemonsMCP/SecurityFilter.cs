@@ -21,15 +21,12 @@ namespace DaemonsMCP
 
         private static readonly HashSet<string> BlockedExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
-            ".key", ".pem", ".p12", ".pfx", ".crt", ".cer",
-            ".db", ".sqlite", ".sqlite3",
-            ".log" // might contain sensitive info
+            ".key", ".pem", ".p12", ".pfx", ".crt", ".cer",".db", ".sqlite", ".sqlite3"
         };
 
         private static readonly HashSet<string> BlockedDirectories = new(StringComparer.OrdinalIgnoreCase)
         {
-            ".git", ".vs", "bin", "obj", "node_modules",
-            "logs", "temp", ".ssh"
+            ".git", ".vs", "bin", "obj", "node_modules",".ssh"
         };
 
         public static bool IsFileAllowed(string filePath)
@@ -37,6 +34,7 @@ namespace DaemonsMCP
             var fileName = Path.GetFileName(filePath);
             var extension = Path.GetExtension(filePath);
             var directory = Path.GetDirectoryName(filePath);
+
             if (!IsFileSizeAllowed(filePath)) {            
                 return false;
             }
@@ -135,9 +133,11 @@ namespace DaemonsMCP
         return false;
       }
 
-      // Check write-specific file size limits
-      if (!IsWriteFileSizeAllowed(filePath)) {
-        return false;
+      // Check write-specific file size limits (if file exists create will check later)
+      if (File.Exists(filePath)) {
+        if (!IsWriteFileSizeAllowed(filePath)) {
+          return false;
+        }
       }
 
       // Additional write-specific security checks
@@ -205,11 +205,11 @@ namespace DaemonsMCP
       }
 
       var security = GlobalConfig.Security;
-      var normalizedPath = Path.GetFullPath(filePath).Replace('\\', '/');
+      var normalizedPath = Path.GetFullPath(filePath);
 
       return security.WriteProtectedPaths.Any(protectedPath =>
       {
-        var normalizedProtected = protectedPath.Replace('\\', '/');
+        var normalizedProtected = protectedPath;
 
         // Check if the file path contains the protected path
         return normalizedPath.Contains(normalizedProtected, StringComparison.OrdinalIgnoreCase) ||
@@ -230,21 +230,20 @@ namespace DaemonsMCP
           return false;
         }
 
+        // Additional checks for suspicious patterns
+        var suspiciousPatterns = new[] { "%", "$", "`" };
+        if (suspiciousPatterns.Any(pattern => filePath.Contains(pattern))) {
+          return false;
+        }
+        // Ensure the path can be properly normalized
+        var checkPath = Path.GetFullPath(filePath);        
+
         // Check for absolute paths that might escape project boundaries
         if (Path.IsPathRooted(filePath)) {
           // Allow only if it's within a configured project path
           return GlobalConfig.Projects.Values.Any(project =>
               filePath.StartsWith(project.Path, StringComparison.OrdinalIgnoreCase));
-        }
-
-        // Additional checks for suspicious patterns
-        var suspiciousPatterns = new[] { "\\\\", "//", "%", "$", "`" };
-        if (suspiciousPatterns.Any(pattern => filePath.Contains(pattern))) {
-          return false;
-        }
-
-        // Ensure the path can be properly normalized
-        _ = Path.GetFullPath(filePath);
+        }       
 
         return true;
       } catch (Exception) {
