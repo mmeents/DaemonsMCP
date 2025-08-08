@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DaemonsMCP
 {
-    public static class SecurityFilters
+    public static class SecurityFilter
     {
         private static readonly HashSet<string> BlockedFiles = new(StringComparer.OrdinalIgnoreCase)
         {

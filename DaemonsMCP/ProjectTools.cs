@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,9 +33,7 @@ namespace DaemonsMCP {
         [Description("Project name from list-projects")] string projectName,
         [Description("Path to the directory or file. If empty, the root of the project is used.")] string? path = null,
         [Description("Filter for files or directories. If empty, no filter is applied.")] string? filter = null) {
-      if (!GlobalConfig.Projects.TryGetValue(projectName, out Project? project)) {
-        throw new ArgumentException($"Invalid project name: {projectName}");
-      }
+      var project = ValidationHelper.GetValidatedProject(projectName);      
 
       var fullPath = string.IsNullOrEmpty(path) ? project.Path : Path.Combine(project.Path, path);
       fullPath = Path.GetFullPath(fullPath);
@@ -61,16 +60,14 @@ namespace DaemonsMCP {
         [Description("Project name from list-projects")] string projectName,
         [Description("Path to the directory or file. If empty, the root of the project is used.")] string? path = null,
         [Description("Filter for files or directories. If empty, no filter is applied.")] string? filter = null) {
-      if (!GlobalConfig.Projects.TryGetValue(projectName, out Project? project)) {
-        throw new ArgumentException($"Invalid project name: {projectName}");
-      }
+      var project = ValidationHelper.GetValidatedProject(projectName);
 
       var fullPath = string.IsNullOrEmpty(path) ? project.Path : Path.Combine(project.Path, path);
       fullPath = Path.GetFullPath(fullPath);
       var searchPattern = string.IsNullOrEmpty(filter) ? "*" : filter;
 
       var files = Directory.GetFiles(fullPath, searchPattern, SearchOption.TopDirectoryOnly)
-          .Where(file => SecurityFilters.IsFileAllowed(file))
+          .Where(file => SecurityFilter.IsFileAllowed(file))
           .Select(file => file.Substring(project.Path.Length).TrimStart(Path.DirectorySeparatorChar))
           .ToArray();
 
@@ -87,31 +84,27 @@ namespace DaemonsMCP {
     public static async Task<object> GetProjectFile(
         [Description("Project name from list-projects")] string projectName,
         [Description("Path to the file")] string path) {
-      if (!GlobalConfig.Projects.TryGetValue(projectName, out Project? project)) {
-        throw new ArgumentException($"Invalid project name: {projectName}");
-      }
+      var project = ValidationHelper.GetValidatedProject(projectName);
+      var fullFilePath = ValidationHelper.BuildAndValidatePath(project, path, false);
 
       if (string.IsNullOrEmpty(path)) {
         throw new ArgumentException("Path is required");
       }
-
-      var fullFilePath = Path.Combine(project.Path, path);
-      fullFilePath = Path.GetFullPath(fullFilePath);
-
+      
       if (!File.Exists(fullFilePath)) {
         throw new FileNotFoundException($"File not found: {fullFilePath}");
       }
 
-      if (!SecurityFilters.IsFileAllowed(fullFilePath)) {
+      if (!SecurityFilter.IsFileAllowed(fullFilePath)) {
         throw new UnauthorizedAccessException("Access to this file type is not allowed for security reasons.");
       }
 
       var fileInfo = new FileInfo(fullFilePath);
       var relativePath = fileInfo.FullName.Substring(project.Path.Length).TrimStart(Path.DirectorySeparatorChar);
       var fileExtension = fileInfo.Extension.ToLowerInvariant();
-      var fileEncoding = MimeTypesMap.DetectFileEncoding(fullFilePath);
-      string contentType = MimeTypesMap.GetMimeType(fileExtension);
-      bool isBinary = MimeTypesMap.IsBinaryFile(fullFilePath);
+      var fileEncoding = MimeHelper.DetectFileEncoding(fullFilePath);
+      string contentType = MimeHelper.GetMimeType(fileExtension);
+      bool isBinary = MimeHelper.IsBinaryFile(fullFilePath);
 
       var fileContent = "";
       if (!isBinary) {
@@ -147,9 +140,7 @@ namespace DaemonsMCP {
         [Description("Allow overwriting existing files (default: false for safety)")] bool overwrite = false) {
 
       // Validate inputs
-      if (string.IsNullOrWhiteSpace(projectName)) {
-        throw new ArgumentException("Project name is required", nameof(projectName));
-      }
+      var project = ValidationHelper.GetValidatedProject(projectName);
 
       if (string.IsNullOrWhiteSpace(path)) {
         throw new ArgumentException("File path is required", nameof(path));
@@ -159,26 +150,16 @@ namespace DaemonsMCP {
         throw new ArgumentException("Content cannot be null", nameof(content));
       }
 
-      // Get project
-      if (!GlobalConfig.Projects.TryGetValue(projectName, out Project? project)) {
-        throw new ArgumentException($"Invalid project name: {projectName}");
-      }
-
       // Build full path
-      var fullFilePath = Path.GetFullPath(Path.Combine(project.Path, path));
-
-      // SAFETY CHECK: Ensure path is within project boundaries
-      var normalizedProjectPath = Path.GetFullPath(project.Path);
-      if (!fullFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException($"File path must be within the project directory {fullFilePath}");
-      }
+      var fullFilePath = ValidationHelper.BuildAndValidatePath(project, path, false);
+            
 
       // Security validations
-      if (!SecurityFilters.IsWriteAllowed(fullFilePath)) {
+      if (!SecurityFilter.IsWriteAllowed(fullFilePath)) {
         throw new UnauthorizedAccessException("Write operation not allowed for security reasons");
       }
 
-      if (!SecurityFilters.IsWriteContentSizeAllowed(Encoding.UTF8.GetByteCount(content))) {
+      if (!SecurityFilter.IsWriteContentSizeAllowed(Encoding.UTF8.GetByteCount(content))) {
         throw new ArgumentException("Content size exceeds maximum allowed for write operations");
       }
 
@@ -201,7 +182,7 @@ namespace DaemonsMCP {
         }
 
         if (File.Exists(fullFilePath) && overwrite) {
-          var suffix =  $".NewExistedBackup.{DateTime.Now:yyyyMMdd_HHmmss}";
+          var suffix =  $".existed.backup.{DateTime.Now:yyyyMMdd_HHmmss}";
           var backupPath = fullFilePath + suffix;
           File.Copy(fullFilePath, backupPath, true);                    
         }
@@ -246,32 +227,11 @@ namespace DaemonsMCP {
         [Description("Suffix for backup file (default: .backup.{timestamp})")] string? backupSuffix = null) {
 
       // Validate inputs
-      if (string.IsNullOrWhiteSpace(projectName)) {
-        throw new ArgumentException("Project name is required", nameof(projectName));
-      }
-
-      if (string.IsNullOrWhiteSpace(path)) {
-        throw new ArgumentException("File path is required", nameof(path));
-      }
-
-      if (content == null) {
-        throw new ArgumentException("Content cannot be null", nameof(content));
-      }
-
-      // Get project
-      if (!GlobalConfig.Projects.TryGetValue(projectName, out Project? project)) {
-        throw new ArgumentException($"Invalid project name: {projectName}");
-      }
+      var project = ValidationHelper.GetValidatedProject(projectName);
+      ValidationHelper.ValidateProjectContentInput(projectName, path, content);
 
       // Build full path
-      var fullFilePath = Path.GetFullPath(Path.Combine(project.Path, path));
-
-      // SAFETY CHECK: Ensure path is within project boundaries
-      var normalizedProjectPath = Path.GetFullPath(project.Path);
-      
-      if (!fullFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException($"File path must be within the project directory {path}");
-      }
+      var fullFilePath = ValidationHelper.BuildAndValidatePath(project, path, false);
 
       // Check if file exists
       if (!File.Exists(fullFilePath)) {
@@ -279,11 +239,11 @@ namespace DaemonsMCP {
       }
 
       // Security validations
-      if (!SecurityFilters.IsWriteAllowed(fullFilePath)) {
+      if (!SecurityFilter.IsWriteAllowed(fullFilePath)) {
         throw new UnauthorizedAccessException("Write operation not allowed for security reasons");
       }
 
-      if (!SecurityFilters.IsWriteContentSizeAllowed(Encoding.UTF8.GetByteCount(content))) {
+      if (!SecurityFilter.IsWriteContentSizeAllowed(Encoding.UTF8.GetByteCount(content))) {
         throw new ArgumentException("Content size exceeds maximum allowed for write operations");
       }
 
@@ -350,27 +310,14 @@ namespace DaemonsMCP {
       }
 
       // Validate inputs
-      if (string.IsNullOrWhiteSpace(projectName)) {
-        throw new ArgumentException("Project name is required", nameof(projectName));
-      }
-
+      var project = ValidationHelper.GetValidatedProject(projectName);
+      
       if (string.IsNullOrWhiteSpace(path)) {
         throw new ArgumentException("File path is required", nameof(path));
       }
 
-      // Get project
-      if (!GlobalConfig.Projects.TryGetValue(projectName, out Project? project)) {
-        throw new ArgumentException($"Invalid project name: {projectName}");
-      }
-
       // Build full path
-      var fullFilePath = Path.GetFullPath(Path.Combine(project.Path, path));
-
-      // SAFETY CHECK: Ensure path is within project boundaries
-      var normalizedProjectPath = Path.GetFullPath(project.Path);
-      if (!fullFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException($"File path must be within the project directory {fullFilePath}");
-      }
+      var fullFilePath = ValidationHelper.BuildAndValidatePath(project, path, false);
 
       // Check if file exists
       if (!File.Exists(fullFilePath)) {
@@ -378,7 +325,7 @@ namespace DaemonsMCP {
       }
 
       // Security validations - delete is most restrictive
-      if (!SecurityFilters.IsDeleteAllowed(fullFilePath)) {
+      if (!SecurityFilter.IsDeleteAllowed(fullFilePath)) {
         throw new UnauthorizedAccessException("Delete operation not allowed for security reasons");
       }
 
@@ -437,31 +384,17 @@ namespace DaemonsMCP {
         [Description("Create parent directories if they don't exist")] bool createParents = true) {
 
       // Validate inputs
-      if (string.IsNullOrWhiteSpace(projectName)) {
-        throw new ArgumentException("Project name is required", nameof(projectName));
-      }
+      var project = ValidationHelper.GetValidatedProject(projectName);
 
       if (string.IsNullOrWhiteSpace(path)) {
         throw new ArgumentException("Directory path is required", nameof(path));
       }
 
-      // Get project
-      if (!GlobalConfig.Projects.TryGetValue(projectName, out Project? project)) {
-        throw new ArgumentException($"Invalid project name: {projectName}");
-      }
-
       // Build full path
-      var fullDirPath = Path.Combine(project.Path, path);      
-
-      // SAFETY CHECK: Ensure path is within project boundaries
-      var normalizedProjectPath = Path.GetFullPath(project.Path);
-      var normalizedDirPath = Path.GetFullPath(fullDirPath);
-      if (!normalizedDirPath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException("Directory path must be within the project directory");
-      }
+      var fullDirPath = ValidationHelper.BuildAndValidatePath(project, path, true);           
 
       // Check if path is write-protected
-      if (SecurityFilters.IsPathWriteProtected(fullDirPath)) {
+      if (SecurityFilter.IsPathWriteProtected(fullDirPath)) {
         throw new UnauthorizedAccessException("Cannot create directory in write-protected location");
       }
 
@@ -521,27 +454,14 @@ namespace DaemonsMCP {
       }
 
       // Validate inputs
-      if (string.IsNullOrWhiteSpace(projectName)) {
-        throw new ArgumentException("Project name is required", nameof(projectName));
-      }
+      var project = ValidationHelper.GetValidatedProject(projectName);
 
       if (string.IsNullOrWhiteSpace(path)) {
         throw new ArgumentException("Directory path is required", nameof(path));
       }
 
-      // Get project
-      if (!GlobalConfig.Projects.TryGetValue(projectName, out Project? project)) {
-        throw new ArgumentException($"Invalid project name: {projectName}");
-      }
-
       // Build full path
-      var fullDirPath = Path.GetFullPath(Path.Combine(project.Path, path));
-
-      // SAFETY CHECK: Ensure path is within project boundaries
-      var normalizedProjectPath = Path.GetFullPath(project.Path);      
-      if (!fullDirPath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException($"Directory path must be within the project directory {path}");
-      }
+      var fullDirPath = ValidationHelper.BuildAndValidatePath(project, path, true);
 
       // Check if directory exists
       if (!Directory.Exists(fullDirPath)) {

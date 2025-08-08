@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DaemonsMCP
 {
-   public static class MimeTypesMap
+   public static class MimeHelper
     {
         private static readonly string _defaultExtension = "bin";
         private static readonly string _defaultMimeType = "application/octet-stream";
