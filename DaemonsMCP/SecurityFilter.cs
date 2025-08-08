@@ -253,10 +253,10 @@ namespace DaemonsMCP
         // Check for absolute paths that might escape project boundaries
         if (Path.IsPathRooted(filePath)) {
           // Allow only if it's within a configured project path
-          var boundryCheck = GlobalConfig.Projects.Values.Any(project =>
+          var boundaryCheck = GlobalConfig.Projects.Values.Any(project =>
               filePath.StartsWith(project.Path, StringComparison.OrdinalIgnoreCase));
-          if (!boundryCheck) { Console.Error.WriteLine($"final rooted boundy check false"); }
-          return boundryCheck;
+          if (!boundaryCheck) { Console.Error.WriteLine($"final rooted boundy check false"); }
+          return boundaryCheck;
         }       
 
         return true;
