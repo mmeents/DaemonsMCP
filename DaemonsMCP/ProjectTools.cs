@@ -103,7 +103,7 @@ namespace DaemonsMCP {
       }
 
       if (!SecurityFilters.IsFileAllowed(fullFilePath)) {
-        throw new UnauthorizedAccessException("Get Access to this file type is not allowed for security reasons.");
+        throw new UnauthorizedAccessException("Access to this file type is not allowed for security reasons.");
       }
 
       var fileInfo = new FileInfo(fullFilePath);
@@ -270,7 +270,7 @@ namespace DaemonsMCP {
       var normalizedProjectPath = Path.GetFullPath(project.Path);
       
       if (!fullFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException($"File path must be within the project directory {fullFilePath}");
+        throw new UnauthorizedAccessException($"File path must be within the project directory {path}");
       }
 
       // Check if file exists
@@ -338,7 +338,7 @@ namespace DaemonsMCP {
     /// <param name="confirmDeletion">Explicit confirmation required for safety</param>
     /// <returns>Operation result</returns>
     [McpTool("local-delete-project-file")]
-    public static async Task<object> DeleteProjectFile(
+    public static object DeleteProjectFile(
         [Description("Project name from list-projects")] string projectName,
         [Description("Path to the file to delete")] string path,
         [Description("Create backup before deletion (highly recommended)")] bool createBackup = true,
@@ -367,7 +367,7 @@ namespace DaemonsMCP {
       var fullFilePath = Path.GetFullPath(Path.Combine(project.Path, path));
 
       // SAFETY CHECK: Ensure path is within project boundaries
-      var normalizedProjectPath = Path.GetFullPath(project.Path);      
+      var normalizedProjectPath = Path.GetFullPath(project.Path);
       if (!fullFilePath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
         throw new UnauthorizedAccessException($"File path must be within the project directory {fullFilePath}");
       }
@@ -540,12 +540,12 @@ namespace DaemonsMCP {
       // SAFETY CHECK: Ensure path is within project boundaries
       var normalizedProjectPath = Path.GetFullPath(project.Path);      
       if (!fullDirPath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase)) {
-        throw new UnauthorizedAccessException($"Directory path must be within the project directory {fullDirPath}");
+        throw new UnauthorizedAccessException($"Directory path must be within the project directory {path}");
       }
 
       // Check if directory exists
       if (!Directory.Exists(fullDirPath)) {
-        throw new DirectoryNotFoundException($"Directory not found: {fullDirPath}");
+        throw new DirectoryNotFoundException($"Directory not found: {path}");
       }
 
       // SAFETY: Extra protection for critical directories
