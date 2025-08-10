@@ -1,27 +1,43 @@
-﻿using MCPSharp;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using DaemonsMCP.Core.Config;
+using DaemonsMCP.Core.Services;
+using DaemonsMCP.Core;
 
 namespace DaemonsMCP
 {
-  static class Program {
-    static async Task Main() {
-      // Initialize configuration
-      GlobalConfig.Initialize();
+  class Program {
+    static async Task Main(string[] args) {
+      var host = CreateHostBuilder(args).Build();
 
-      if (!GlobalConfig.Projects.Any()) {
-        await Console.Error.WriteLineAsync("[DaemonsMCP] No projects configured.");
-        return;
-      }
-
-      await Console.Error.WriteLineAsync($"[DaemonsMCP] Starting with {GlobalConfig.Projects.Count} projects");
-
-      // Register tools
-      MCPServer.Register<ProjectTools>();
-
-      // Start the MCPSharp server
-      await MCPServer.StartAsync("DaemonsMCP", "1.0.0");
+      await host.RunAsync();
     }
+
+    static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureServices((context, services) => {
+              // Configuration
+              services.AddSingleton<IAppConfig, AppConfig>();
+
+              // Core services
+              services.AddScoped<IValidationService, ValidationService>();
+              services.AddScoped<ISecurityService, SecurityService>();
+              services.AddScoped<IProjectsService, ProjectService>();
+              services.AddScoped<IProjectFolderService, ProjectFolderService>();
+              services.AddScoped<IProjectFileService, ProjectFileService>();
+
+              // MCP Tools (injected with dependencies)
+              services.AddScoped<DaemonsTools>();
+
+              // Hosted service for MCP protocol
+              services.AddHostedService<DaemonsMcpHostedService>();
+            })
+            .ConfigureLogging(logging => {
+              logging.ClearProviders();
+              logging.AddConsole();
+              logging.SetMinimumLevel(LogLevel.Information);
+            });
   }
 
 }

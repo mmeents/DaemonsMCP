@@ -1,4 +1,5 @@
 ﻿using DaemonsMCP;
+using DaemonsMCP.Core.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,11 +12,14 @@ namespace DaemonsMCPTester
 {
     public class MCPClient : IDisposable
     {
-        private const string MCPExecutablePath = @"C:\GithubMM\DaemonsMCP\DaemonsMCP\DaemonsMCP.csproj";
-        private Process _mcpProcess;
-        private StreamWriter _stdin;
-        private StreamReader _stdout;
-        private StreamReader _stderr;
+    // Important: Update this path to point to your MCP project for testing
+    // This should be the path to the DaemonsMCP.csproj file in your MCP project
+    // Ensure this path is correct and accessible from your test environment
+    private const string MCPExecutablePath = @"C:\MCPSandbox\DaemonsMCPDev\DaemonsMCP\DaemonsMCP.csproj";
+        private Process? _mcpProcess;
+        private StreamWriter? _stdin;
+        private StreamReader? _stdout;
+        private StreamReader? _stderr;
         private bool _isInitialized = false;
         private int _requestId = 1;
         private readonly Form1 _parentForm;
@@ -55,13 +59,18 @@ namespace DaemonsMCPTester
                 _stderr = _mcpProcess.StandardError;
 
                 // Start background tasks to monitor stdout/stderr
+                if (_stdout == null || _stderr == null || _stdin == null)
+                {
+                    throw new Exception("[Form1][MCPClient] Failed to initialize MCP process streams");
+                }
                 _ = Task.Run(async () =>
                 {
                     try
                     {
-                        string line;
-                        while ((line = await _stderr.ReadLineAsync().ConfigureAwait(false)) != null)
+                        string? line;
+                        while (_stderr != null && (line = await _stderr.ReadLineAsync().ConfigureAwait(false)) != null)
                         {
+                            
                             _parentForm?.AppendOutput($"[Form1][MCPClient] Received from STDERR: {line}");
                             System.Diagnostics.Debug.WriteLine($"[MCP-STDERR] {line}");
                         }
@@ -93,7 +102,7 @@ namespace DaemonsMCPTester
         {
             var initRequest = new JsonRpcRequest
             {
-                Method = Tx.Initialize,
+                Method = Cx.InitializeCmd,
                 Params = new
                 {
                     protocolVersion = "2025-06-18",
@@ -117,10 +126,12 @@ namespace DaemonsMCPTester
 
         private async Task SendInitializedNotification()
         {
+            if (_stdin == null)
+                throw new InvalidOperationException("[Form1][MCPClient] MCP Client stdin not initialized");
             var notification = new
             {
                 jsonrpc = "2.0",
-                method = Tx.InitializedNotification
+                method = Cx.InitializedNotificationCmd
             };
 
             var json = JsonSerializer.Serialize(notification);
@@ -150,7 +161,12 @@ namespace DaemonsMCPTester
         {
             try
             {
-               var json = JsonSerializer.Serialize(request);
+                if (_stdin == null)
+                    throw new InvalidOperationException("[Form1][MCPClient] MCP Client stdin not initialized");
+                if (_stdout == null)
+                  throw new InvalidOperationException("[Form1][MCPClient] MCP Client stdout not initialized");
+
+                var json = JsonSerializer.Serialize(request);
                 _parentForm?.AppendOutput($"[Form1][MCPClient] Sending: {json}");
                 System.Diagnostics.Debug.WriteLine($"Sending: {json}");
                 
@@ -160,7 +176,7 @@ namespace DaemonsMCPTester
                   // Keep reading until we get the response with matching ID
                 string? response = null;
                 int attempts = 0;
-                int maxAttempts = 5;
+                int maxAttempts = 10;
                 
                 do
                 {

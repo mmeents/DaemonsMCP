@@ -2,19 +2,51 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace DaemonsMCP {
-  public static class FileSizeHelper {
+namespace DaemonsMCP.Core.Extensions {
+  public static class Sx {
+    public static string[] Parse(this string content, string delims) {
+      return content.Split(delims.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    public static string ParseFirst(this string content, string delims) {
+      string[] sr = content.Parse(delims);
+      if (sr.Length > 0) {
+        return sr[0];
+      }
+      return "";
+    }
+
+    public static string ParseLast(this string content, string delims) {
+      string[] sr = content.Parse(delims);
+      if (sr.Length > 0) {
+        return sr[^1];
+      }
+      return "";
+    }
+
+    public static string ResolvePath(this string path) {
+      // Handle relative paths
+      if (!Path.IsPathRooted(path)) {
+        // Relative to config file directory or current directory
+        return Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), path));
+      }
+
+      // Handle cross-platform path separators
+      return Path.GetFullPath(path);
+    }
+
     private static readonly Dictionary<string, long> SizeMultipliers = new(StringComparer.OrdinalIgnoreCase)
-    {
+{
             { "B", 1L },
             { "KB", 1024L },
             { "MB", 1024L * 1024L },
             { "GB", 1024L * 1024L * 1024L },
             { "TB", 1024L * 1024L * 1024L * 1024L }
-        };
+    };
 
     private static readonly Regex SizeRegex = new(@"^\s*(\d+(?:\.\d+)?)\s*([KMGT]?B?)\s*$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -26,7 +58,7 @@ namespace DaemonsMCP {
     /// <param name="sizeString">Size string like "10MB"</param>
     /// <returns>Size in bytes</returns>
     /// <exception cref="ArgumentException">If the format is invalid</exception>
-    public static long ParseFileSize(string sizeString) {
+    public static long ParseFileSize(this string sizeString) {
       if (string.IsNullOrWhiteSpace(sizeString))
         throw new ArgumentException("Size string cannot be null or empty", nameof(sizeString));
 
@@ -52,22 +84,6 @@ namespace DaemonsMCP {
         throw new ArgumentException($"Size cannot be negative: '{sizeString}'", nameof(sizeString));
 
       return result;
-    }
-
-    /// <summary>
-    /// Try to parse a file size string, returning false if invalid
-    /// </summary>
-    /// <param name="sizeString">Size string to parse</param>
-    /// <param name="sizeInBytes">Parsed size in bytes</param>
-    /// <returns>True if parsing succeeded</returns>
-    public static bool TryParseFileSize(string sizeString, out long sizeInBytes) {
-      sizeInBytes = 0;
-      try {
-        sizeInBytes = ParseFileSize(sizeString);
-        return true;
-      } catch {
-        return false;
-      }
     }
 
     /// <summary>
@@ -103,5 +119,11 @@ namespace DaemonsMCP {
         _ => unit.ToUpperInvariant()
       };
     }
+
+    public static readonly JsonSerializerOptions DefaultJsonOptions = new() {
+      PropertyNameCaseInsensitive = true,
+      ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true
+      };
   }
 }

@@ -8,8 +8,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>    
-    <ProjectReference Include="..\DaemonsMCP\DaemonsMCP.csproj" />
+  <ItemGroup>
+    <ProjectReference Include="..\DaemonsMCP.Core\DaemonsMCP.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -8,7 +8,7 @@
         {
             "name": "DaemonsMCP",
             "description": "DaemonsMCP in a sandbox",
-            "path": "C:\\MCPSandbox\\DaemonsMCP",
+            "path": "C:\\MCPSandbox\\DaemonsMCPDev",
             "enabled": true
         }
     ],

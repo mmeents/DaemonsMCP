@@ -2,6 +2,7 @@ using DaemonsMCP;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using DaemonsMCP.Core.Extensions;
 
 namespace DaemonsMCPTester
 {
@@ -44,10 +45,10 @@ namespace DaemonsMCPTester
                 
                 var request = new JsonRpcRequest
                 {
-                    Method = Tx.CallMethod,
+                    Method = Cx.CallMethodCmd,
                     Params = new
                     {
-                        name = Px.listProjects,
+                        name = Cx.ListProjectsCmd,
                         arguments = new { }
                     },
                     Id = _requestId++
@@ -76,10 +77,10 @@ namespace DaemonsMCPTester
                 
                 var request = new JsonRpcRequest
                 {
-                    Method = Tx.CallMethod,
+                    Method = Cx.CallMethodCmd,
                     Params = new
                     {
-                        name = Px.listProjectDirectory,
+                        name = Cx.ListFoldersCmd,
                         arguments = new
                         {
                             projectName = _projectNameTextBox.Text,
@@ -113,10 +114,10 @@ namespace DaemonsMCPTester
                 
                 var request = new JsonRpcRequest
                 {
-                    Method = Tx.CallMethod,
+                    Method = Cx.CallMethodCmd,
                     Params = new
                     {
-                        name = Px.listProjectFiles,
+                        name = Cx.ListFilesCmd,
                         arguments = new
                         {
                             projectName = _projectNameTextBox.Text,
@@ -150,10 +151,10 @@ namespace DaemonsMCPTester
                 
                 var request = new JsonRpcRequest
                 {
-                    Method = Tx.CallMethod,
+                    Method = Cx.CallMethodCmd,
                     Params = new
                     {
-                        name = Px.getProjectFile,
+                        name = Cx.GetFileCmd,
                         arguments = new
                         {
                             projectName = _projectNameTextBox.Text,
@@ -201,9 +202,9 @@ namespace DaemonsMCPTester
         [JsonPropertyName("jsonrpc")]
         public string JsonRpc { get; set; } = "2.0";
         [JsonPropertyName("method")]
-        public string Method { get; set; }
+        public string Method { get; set; } = "";
         [JsonPropertyName("params")]
-        public object Params { get; set; }
+        public object? Params { get; set; }
         [JsonPropertyName("id")]
         public int Id { get; set; }
     }
@@ -225,7 +226,5 @@ namespace DaemonsMCPTester
         Task InitializeAsync();
         Task<string> SendRequestAsync(JsonRpcRequest request);        
     }
-
-    
 
 }
