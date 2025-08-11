@@ -60,8 +60,8 @@ namespace DaemonsMCP.Core {
         [Description(Cx.CreateFolderOptionDesc)] bool createDirectories = true) {
       try { 
         var result = await _projectFolderService.CreateFolderAsync(projectName, path, createDirectories).ConfigureAwait(false);
-        
-        return result;
+
+        return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
         var opResult = OperationResult.CreateFailure(Cx.CreateFolderCmd, $"Failed: {ex.Message}", ex);
         return JsonSerializer.Serialize(opResult);
@@ -75,7 +75,7 @@ namespace DaemonsMCP.Core {
         [Description(Cx.CreateFolderOptionDesc)] bool deleteDirectories = true) {
       try { 
         var result = await _projectFolderService.DeleteFolderAsync(projectName, path, deleteDirectories).ConfigureAwait(false);
-        return result;
+        return JsonSerializer.Serialize(result);
 
       } catch (Exception ex) {
         var opResult = OperationResult.CreateFailure(Cx.DeleteFolderCmd, $"Failed: {ex.Message}", ex);
@@ -105,7 +105,7 @@ namespace DaemonsMCP.Core {
         [Description(Cx.FilePathParamDesc)] string path) {
       try { 
         var fileContent = await _projectFileService.GetFileAsync(projectName, path).ConfigureAwait(false);
-        return fileContent;
+        return JsonSerializer.Serialize(fileContent); 
       } catch (Exception ex) {
         var opResult = OperationResult.CreateFailure(Cx.GetFileCmd, $"Failed: {ex.Message}", ex);
         return JsonSerializer.Serialize(opResult);
@@ -135,7 +135,7 @@ namespace DaemonsMCP.Core {
         [Description(Cx.CreateFolderOptionDesc)] bool createBackup = true) {
       try { 
         var result = await _projectFileService.UpdateFileAsync(projectName, path, content, createBackup).ConfigureAwait(false);
-        return result;
+        return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
         var opResult = OperationResult.CreateFailure(Cx.UpdateFileCmd, $"Failed: {ex.Message}", ex);
         return JsonSerializer.Serialize(opResult);
@@ -148,7 +148,7 @@ namespace DaemonsMCP.Core {
         [Description(Cx.FilePathParamDesc)] string path) {
       try { 
         var result = await _projectFileService.DeleteFileAsync(projectName, path).ConfigureAwait(false);
-        return result;
+        return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
         var opResult = OperationResult.CreateFailure(Cx.DeleteFileCmd, $"Failed: {ex.Message}", ex);
         return JsonSerializer.Serialize(opResult);
