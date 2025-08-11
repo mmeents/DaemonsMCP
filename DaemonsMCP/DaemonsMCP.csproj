@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="MCPSharp" Version="1.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
     <PackageReference Include="PackedTables.Net" Version="1.1.6" />
     <PackageReference Include="System.Formats.Asn1" Version="9.0.8" />

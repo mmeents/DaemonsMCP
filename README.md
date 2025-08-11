@@ -4,7 +4,7 @@
 
 DaemonsMCP is a comprehensive C# MCP (Model Context Protocol) service that provides LLMs with secure, full-featured access to explore, read, and **write** to local codebases. Built on MCPSharp for reliable transport and JSON-RPC communication, it gives your AI assistant the ability to see, navigate, understand, and **modify** your project files just like a developer would.
 
-✅ **Fully Working** - Complete CRUD operations tested and compatible with Claude Desktop and other MCP clients!
+✅ **V2 - Enterprise DI Architecture** - Complete CRUD operations with dependency injection, enhanced security, and code intelligence capabilities!
 
 ## 🚀 Features
 
@@ -15,10 +15,11 @@ DaemonsMCP is a comprehensive C# MCP (Model Context Protocol) service that provi
 - **📁 Multi-Project Support**: Manage multiple codebases from a single service  
 - **⚡ High Performance**: Compiled C# with MCPSharp for fast, reliable responses
 - **🌐 Cross-Platform**: Robust path normalization for Windows, Linux, and macOS
-- **🧩 Extensible**: Clean architecture ready for custom tools and capabilities
+- **🧩 Extensible DI Architecture**: Clean dependency injection for enterprise-grade extensibility
 - **📋 Rich Metadata**: File size, MIME types, encoding detection, and content analysis
 - **🔄 Battle-Tested Transport**: Uses MCPSharp framework for robust JSON-RPC communication
 - **🔒 Safety First**: Explicit confirmations required for destructive operations
+- **🧠 Code Intelligence**: Advanced C# code analysis and manipulation capabilities
 
 ## 🛠️ Available Tools
 
@@ -43,6 +44,21 @@ DaemonsMCP is a comprehensive C# MCP (Model Context Protocol) service that provi
 | `local-list-projects` | Get all configured projects with metadata | None |
 | `local-list-project-files` | List files in a project directory | `projectName`, `path?`, `filter?` |
 
+### Code Intelligence (Coming Soon)
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `local-sync-indexes` | Index and analyze C# code structure across projects | `projectName?`, `forceRefresh?` |
+| `local-list-project-classes` | List all classes in a project with metadata | `projectName`, `namespace?`, `filter?` |
+| `local-get-class-details` | Get detailed class information including members | `projectName`, `className`, `includeMembers?` |
+| `local-list-class-methods` | List all methods in a specific class | `projectName`, `className`, `filter?` |
+| `local-list-class-properties` | List all properties in a specific class | `projectName`, `className`, `filter?` |
+| `local-insert-class-method` | Add a new method to an existing class | `projectName`, `className`, `methodCode`, `insertLocation?` |
+| `local-update-class-method` | Update an existing method in a class | `projectName`, `className`, `methodName`, `newCode` |
+| `local-delete-class-method` | Remove a method from a class | `projectName`, `className`, `methodName`, `confirmDeletion` |
+| `local-insert-class-property` | Add a new property to an existing class | `projectName`, `className`, `propertyCode`, `insertLocation?` |
+| `local-update-class-property` | Update an existing property in a class | `projectName`, `className`, `propertyName`, `newCode` |
+| `local-delete-class-property` | Remove a property from a class | `projectName`, `className`, `propertyName`, `confirmDeletion` |
+
 ## 📋 Prerequisites
 
 - **.NET 9.0** or later
@@ -62,10 +78,10 @@ Create or edit `DaemonsMCP/daemonsmcp.json`:
 
 ```json
 {
-  "version": "1.0",
+  "version": "2.0",
   "daemon": {
     "name": "DaemonMCP",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "projects": [
     {
@@ -176,19 +192,42 @@ List all .cs files in the DaemonsMCP/DaemonsMCP directory
 ```
 *Returns: Filtered list of C# source files*
 
+### Code Intelligence Operations (Coming Soon)
+```
+Index all the C# code in the DaemonsMCP project and show me the classes
+```
+*Indexes: Analyzes code structure and returns class hierarchy*
+
+```
+Show me all the methods in the ProjectFileService class
+```
+*Returns: Detailed method signatures, parameters, and return types*
+
+```
+Add a new validation method to the SecurityService class
+```
+*Inserts: New method with proper formatting and placement*
+
 ## 🔧 Project Structure
 
 ```
 DaemonsMCP/
-├── DaemonsMCP/              # Main MCP service
-│   ├── Program.cs           # MCPSharp service initialization
-│   ├── ProjectTools.cs      # Complete CRUD MCP tools
-│   ├── SecurityFilter.cs    # Enhanced multi-layer security
-│   ├── GlobalConfig.cs      # Configuration management
-│   ├── MimeHelper.cs        # File type detection
-│   ├── FileSizeHelper.cs    # File size parsing utilities
-│   ├── DaemonsMCPConfiguration.cs # Configuration model
+├── DaemonsMCP/              # Main MCP service application
+│   ├── Program.cs           # DI container and hosted service setup
 │   └── daemonsmcp.json      # Project configuration
+├── DaemonsMCP.Core/         # Core business logic and services
+│   ├── Services/            # Business logic services
+│   │   ├── ProjectService.cs        # Project management
+│   │   ├── ProjectFileService.cs    # File operations
+│   │   ├── ProjectFolderService.cs  # Directory operations
+│   │   ├── SecurityService.cs       # Security validation
+│   │   └── ValidationService.cs     # Input validation
+│   ├── Models/              # Data models and DTOs
+│   ├── Config/              # Configuration management
+│   ├── DaemonsTools.cs      # MCP tool implementations
+│   ├── DaemonsToolsBridge.cs # MCPSharp integration bridge
+│   ├── DiServiceBridge.cs   # DI container bridge
+│   └── DaemonsMcpHostedService.cs # Background service host
 ├── DaemonsTester/           # Test client for validation
 └── README.md
 ```
@@ -209,6 +248,12 @@ DaemonsMCP/
 - **Critical File Protection**: Extra protection for project files (`.csproj`, `Program.cs`, etc.)
 - **Path Safety Validation**: Prevents directory traversal and malicious path patterns
 
+### Code Intelligence Security
+- **AST-Only Analysis**: Code parsing without execution for safety
+- **Syntax Validation**: Ensures inserted code is syntactically correct
+- **Backup Before Modification**: Automatic backups for all code changes
+- **Class Boundary Respect**: Modifications stay within class boundaries
+
 ### Safety Features
 - **Automatic Backups**: Timestamped backups for all update and delete operations
 - **Explicit Confirmations**: Required `confirmDeletion=true` for all destructive operations
@@ -224,6 +269,14 @@ DaemonsMCP leverages the [MCPSharp](https://github.com/afrise/MCPSharp) framewor
 - **Attribute-Based Tools**: Clean, declarative tool definitions
 - **Error Handling**: Graceful exception management and JSON-RPC compliance
 
+### V2 Enterprise Architecture
+- **Dependency Injection**: Full Microsoft.Extensions.DependencyInjection integration
+- **Hosted Services**: Proper .NET background service lifecycle management
+- **Service Separation**: Clean separation of concerns across multiple services
+- **Bridge Pattern**: Seamless integration between MCPSharp and DI container
+- **Configurable Logging**: Production-ready logging with multiple providers
+- **Scoped Operations**: Proper resource management and disposal
+
 ### Custom Enhancements
 - **Complete CRUD Operations**: Full create, read, update, delete functionality
 - **Enterprise Security Model**: Multi-layer validation with comprehensive safety checks
@@ -235,21 +288,43 @@ DaemonsMCP leverages the [MCPSharp](https://github.com/afrise/MCPSharp) framewor
 
 ## 🚧 Roadmap
 
+### ✅ **V1 - Core Foundation (Complete)**
 - **✅ Read-only file access** (Complete - Fully Working)
 - **✅ Robust transport layer** (MCPSharp integration complete)
 - **✅ Complete write operations** (Complete - create, update, delete files and directories)
 - **✅ Enterprise security system** (Complete - multi-layer validation)
 - **✅ Cross-platform support** (Complete - Windows, Linux, macOS)
+
+### ✅ **V2 - Enterprise Architecture (Complete)**
+- **✅ Dependency injection architecture** (Complete - Full DI container integration)
+- **✅ Service-oriented design** (Complete - Clean service separation)
+- **✅ Hosted service lifecycle** (Complete - Proper startup/shutdown)
+- **✅ Enhanced error handling** (Complete - Production-ready logging)
+- **✅ Improved configuration management** (Complete - Flexible config loading)
+
+### 🚧 **V3 - Code Intelligence (In Progress)**
+- **📋 Planned**: **SyncIndexs tool** - Index and analyze C# code structure across projects
+- **📋 Planned**: **Class discovery and navigation** - Browse classes, methods, and properties
+- **📋 Planned**: **Code insertion tools** - Add methods and properties to existing classes
+- **📋 Planned**: **Code update tools** - Modify existing methods and properties
+- **📋 Planned**: **Code deletion tools** - Remove methods and properties safely
+- **📋 Planned**: **AST-based parsing** - Syntax tree analysis for accurate code manipulation
+- **📋 Planned**: **IntelliSense-like features** - Type information and member discovery
+
+### 🔮 **V4 - Advanced Features (Future)**
 - **📋 Planned**: Full-text search across codebases
 - **📋 Planned**: File watching and change notifications
-- **📋 Planned**: Additional tools (conversation whiteboard, git operations)
-- **📋 Planned**: Code intelligence (syntax highlighting, AST parsing)
+- **📋 Planned**: Project templates and scaffolding
+- **📋 Planned**: Code refactoring tools (rename, extract method, etc.)
 - **📋 Planned**: Batch operations for multiple files
+- **📋 Planned**: Integration with build systems (MSBuild, dotnet CLI)
+- **📋 Planned**: Code metrics and analysis (complexity, coverage)
 
 ## 🤝 Contributing
 
 Contributions are welcome! Areas where help is especially appreciated:
 
+- **Code Intelligence Implementation** (AST parsing, C# analysis)
 - **Additional tool implementations** (search, git operations, etc.)
 - **Performance optimizations**
 - **Documentation improvements** 
@@ -293,6 +368,11 @@ Contributions are welcome! Areas where help is especially appreciated:
 - Ensure .NET 9.0 is installed
 - Run `dotnet restore` to install dependencies including MCPSharp
 - Check that all project references are resolved
+
+**V2 Specific Issues:**
+- Ensure all services are properly registered in the DI container
+- Check that the configuration file is accessible during startup
+- Verify that MCPSharp bridge is properly initialized
 
 ## 📝 License
 
