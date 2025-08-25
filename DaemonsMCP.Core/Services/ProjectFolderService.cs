@@ -112,7 +112,7 @@ namespace DaemonsMCP.Core.Services {
         var fileCount = recursive ? Directory.GetFiles(fullDirPath, "*", SearchOption.AllDirectories).Length : 0;
         var subdirCount = recursive ? Directory.GetDirectories(fullDirPath, "*", SearchOption.AllDirectories).Length : 0;
 
-        // Delete directory
+        // DeleteClassItem directory
         Directory.Delete(fullDirPath, recursive);
 
         var opResult = OperationResult.CreateSuccess(

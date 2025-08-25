@@ -11,25 +11,23 @@ namespace DaemonsMCP.Tests.Core
     [TestClass]
     public class DaemonsToolsTests
     {
-        private Mock<IAppConfig> _mockConfig;
-        private Mock<IProjectsService> _mockProjectsService;
-        private Mock<IProjectFolderService> _mockProjectFolderService;
-        private Mock<IProjectFileService> _mockProjectFileService;
+        private Mock<IAppConfig> _mockConfig = new();
+        private Mock<IProjectsService> _mockProjectsService = new();
+        private Mock<IProjectFolderService> _mockProjectFolderService = new();
+        private Mock<IProjectFileService> _mockProjectFileService = new();
+        private Mock<IIndexService> _mockIndexService = new();        
+        private Mock<IClassService> _mockClassService = new();
         private DaemonsTools _daemonsTools;
 
-        [TestInitialize]
-        public void TestInitialize()
+        public DaemonsToolsTests()
         {
-            _mockConfig = new Mock<IAppConfig>();
-            _mockProjectsService = new Mock<IProjectsService>();
-            _mockProjectFolderService = new Mock<IProjectFolderService>();
-            _mockProjectFileService = new Mock<IProjectFileService>();
-
             _daemonsTools = new DaemonsTools(
                 _mockConfig.Object,
                 _mockProjectsService.Object,
                 _mockProjectFolderService.Object,
-                _mockProjectFileService.Object
+                _mockProjectFileService.Object,
+                _mockIndexService.Object,
+                _mockClassService.Object
             );
         }
 

@@ -3,6 +3,8 @@ using DaemonsMCP.Core.Services;
 using DaemonsMCP.Core.Models;
 using FluentAssertions;
 using Moq;
+using Castle.Core.Logging;
+using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 
 namespace DaemonsMCP.Tests.Services
 {
@@ -10,6 +12,7 @@ namespace DaemonsMCP.Tests.Services
     public class SecurityServiceTests
     {
         private Mock<IAppConfig> _mockConfig;
+        private Mock<ILoggerFactory> _mockLoggerFactory = new Mock<ILoggerFactory>();
         private SecurityService _securityService;
         private SecuritySettings _testSecuritySettings;
 
@@ -27,7 +30,7 @@ namespace DaemonsMCP.Tests.Services
                 WriteProtectedPaths = [".git", ".vs", "bin", "obj"]
             };
             _mockConfig.Setup(c => c.Security).Returns(_testSecuritySettings);
-            _securityService = new SecurityService(_mockConfig.Object);
+            _securityService = new SecurityService(_mockLoggerFactory.Object, _mockConfig.Object);
         }
 
         [TestMethod]

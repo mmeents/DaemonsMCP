@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using DaemonsMCP.Core.Config;
+using DaemonsMCP.Core.Extensions;
 
 namespace DaemonsMCP.Core.Models {
   public class ProjectModel {
@@ -15,5 +18,24 @@ namespace DaemonsMCP.Core.Models {
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
     public string Path { get; set; } = "";
+
+    private string _IndexPath = "";
+    public string IndexPath { 
+      get {  
+        if (!string.IsNullOrEmpty(_IndexPath)) return _IndexPath;
+        _IndexPath = System.IO.Path.GetFullPath( System.IO.Path.Combine(this.Path.ResolvePath(), Cx.DaemonsFolderName));
+        return _IndexPath;
+      }
+    }
+
+    private string _BackupPath = "";
+    public string BackupPath {
+      get {
+        if (!string.IsNullOrEmpty(_BackupPath)) return _BackupPath;
+        _BackupPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(this.IndexPath, Cx.BackupFolderName));
+        return _BackupPath;
+      }
+
+    }
   }
 }

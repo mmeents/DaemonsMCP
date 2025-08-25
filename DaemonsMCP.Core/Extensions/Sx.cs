@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DaemonsMCP.Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,6 +40,29 @@ namespace DaemonsMCP.Core.Extensions {
       return Path.GetFullPath(path);
     }
 
+    public static string CopyToBackup(this ProjectModel project, string filePath) {
+
+      if (project == null) throw new ArgumentNullException(nameof(project));
+      if (string.IsNullOrEmpty(filePath)) throw new ArgumentNullException(nameof(filePath));
+
+      string resolvedFilePath = Path.GetFullPath(filePath);
+      if (!resolvedFilePath.StartsWith(project.Path, StringComparison.OrdinalIgnoreCase)) {
+        throw new ArgumentException("File path is not within the project directory", nameof(filePath));
+      }
+
+      string relativePath = Path.GetRelativePath(project.Path, resolvedFilePath);
+      string backupDir = Path.Combine(project.BackupPath, Path.GetDirectoryName(relativePath) ?? "");
+      Directory.CreateDirectory(backupDir);
+      string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+      string fileName = Path.GetFileName(resolvedFilePath);
+      string extension = Path.GetExtension(fileName);
+      string backupFileName = $"{fileName}.bakup{timestamp}.{extension}";
+      string backupFilePath = Path.Combine(backupDir, backupFileName);
+      File.Copy(resolvedFilePath, backupFilePath, true);
+      return backupFilePath;
+    }
+
+    #region File Size Parsing and Formatting
     private static readonly Dictionary<string, long> SizeMultipliers = new(StringComparer.OrdinalIgnoreCase)
 {
             { "B", 1L },
@@ -125,5 +149,7 @@ namespace DaemonsMCP.Core.Extensions {
       ReadCommentHandling = JsonCommentHandling.Skip,
         AllowTrailingCommas = true
       };
+
+    #endregion
   }
 }

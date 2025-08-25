@@ -102,7 +102,7 @@
       _getFileButton.Name = "_getFileButton";
       _getFileButton.Size = new Size(92, 43);
       _getFileButton.TabIndex = 9;
-      _getFileButton.Text = "Get File";
+      _getFileButton.Text = "GetFileItemById File";
       _getFileButton.Click += GetFileButton_Click;
       // 
       // splitContainer1

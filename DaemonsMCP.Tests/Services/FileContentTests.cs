@@ -5,6 +5,7 @@ using FluentAssertions;
 using Moq;
 using System.IO;
 using System.Text;
+using Castle.Core.Logging;
 
 namespace DaemonsMCP.Tests.Services
 {
@@ -17,8 +18,9 @@ namespace DaemonsMCP.Tests.Services
         private ProjectFileService _fileService;
         private string _testProjectPath;
         private string _testProjectName;
+        private Mock<Microsoft.Extensions.Logging.ILoggerFactory> _mockLoggerFactory = new Mock<Microsoft.Extensions.Logging.ILoggerFactory>();
 
-        [TestInitialize]
+    [TestInitialize]
         public void TestInitialize()
         {
             _mockConfig = new Mock<IAppConfig>();
@@ -30,7 +32,7 @@ namespace DaemonsMCP.Tests.Services
             var testProject = new ProjectModel(_testProjectName, "Test Description", _testProjectPath);
 
             Directory.CreateDirectory(_testProjectPath);
-            _fileService = new ProjectFileService(_mockConfig.Object, _mockValidationService.Object, _mockSecurityService.Object);
+            _fileService = new ProjectFileService(_mockConfig.Object, _mockLoggerFactory.Object, _mockValidationService.Object, _mockSecurityService.Object );
 
             // Setup common validation mock behavior
             _mockValidationService

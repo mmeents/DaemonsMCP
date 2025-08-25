@@ -12,7 +12,7 @@ namespace DaemonsMCPTester
 {
     public class MCPClient : IDisposable
     {
-    // Important: Update this path to point to your MCP project for testing
+    // Important: UpdateClassItem this path to point to your MCP project for testing
     // This should be the path to the DaemonsMCP.csproj file in your MCP project
     // Ensure this path is correct and accessible from your test environment
     private const string MCPExecutablePath = @"C:\MCPSandbox\DaemonsMCPDev\DaemonsMCP\DaemonsMCP.csproj";
@@ -102,7 +102,7 @@ namespace DaemonsMCPTester
         {
             var initRequest = new JsonRpcRequest
             {
-                Method = Cx.InitializeCmd,
+                Method = Cx.ToolInitializeCmd,
                 Params = new
                 {
                     protocolVersion = "2025-06-18",
@@ -131,7 +131,7 @@ namespace DaemonsMCPTester
             var notification = new
             {
                 jsonrpc = "2.0",
-                method = Cx.InitializedNotificationCmd
+                method = Cx.ToolInitializedNotificationCmd
             };
 
             var json = JsonSerializer.Serialize(notification);

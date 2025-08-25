@@ -45,7 +45,7 @@ namespace DaemonsMCPTester
                 
                 var request = new JsonRpcRequest
                 {
-                    Method = Cx.CallMethodCmd,
+                    Method = Cx.ToolCallMethodCmd,
                     Params = new
                     {
                         name = Cx.ListProjectsCmd,
@@ -77,7 +77,7 @@ namespace DaemonsMCPTester
                 
                 var request = new JsonRpcRequest
                 {
-                    Method = Cx.CallMethodCmd,
+                    Method = Cx.ToolCallMethodCmd,
                     Params = new
                     {
                         name = Cx.ListFoldersCmd,
@@ -114,7 +114,7 @@ namespace DaemonsMCPTester
                 
                 var request = new JsonRpcRequest
                 {
-                    Method = Cx.CallMethodCmd,
+                    Method = Cx.ToolCallMethodCmd,
                     Params = new
                     {
                         name = Cx.ListFilesCmd,
@@ -151,7 +151,7 @@ namespace DaemonsMCPTester
                 
                 var request = new JsonRpcRequest
                 {
-                    Method = Cx.CallMethodCmd,
+                    Method = Cx.ToolCallMethodCmd,
                     Params = new
                     {
                         name = Cx.GetFileCmd,

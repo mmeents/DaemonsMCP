@@ -20,6 +20,8 @@ namespace DaemonsMCP.Core.Services {
     public void ValidateContent(string content);
 
     public void ValidatePrepToSave(string path, string fullPath, string content, bool overwrite);
+
+    public void ValidateClassContent(ClassContent content);
   }
 
 }

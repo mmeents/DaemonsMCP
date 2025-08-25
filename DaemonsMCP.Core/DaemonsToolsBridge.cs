@@ -1,4 +1,5 @@
 ﻿using DaemonsMCP.Core.Extensions;
+using DaemonsMCP.Core.Models;
 using MCPSharp;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,12 @@ namespace DaemonsMCP.Core {
   public class DaemonsToolsBridge {
     private static DaemonsTools GetTools() => DIServiceBridge.GetService<DaemonsTools>();
 
-    // Projects 
+    #region Projects 
     [McpTool(Cx.ListProjectsCmd, Cx.ListProjectsDesc)]
     public static async Task<object> ListProjects() => await GetTools().ListProjects();
+    #endregion
 
-    // Project Folders
+    #region Project Folders
     [McpTool(Cx.ListFoldersCmd, Cx.ListFoldersDesc)]
     public static async Task<object> ListProjectDirectories(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
@@ -37,10 +39,11 @@ namespace DaemonsMCP.Core {
     public static async Task<object> DeleteProjectDirectory(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FolderPathParamDesc)] string path,
-        [Description(Cx.CreateFolderOptionDesc)] bool deleteDirectories = true)
+        [Description(Cx.DeleteFolderOptionDesc)] bool deleteDirectories = true)
         => await GetTools().DeleteProjectDirectory(projectName, path, deleteDirectories);
+    #endregion
 
-    // Project Files
+    #region Project Files
     [McpTool(Cx.ListFilesCmd, Cx.ListFilesDesc)]
     public static async Task<object> ListProjectFiles(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
@@ -76,5 +79,79 @@ namespace DaemonsMCP.Core {
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FilePathParamDesc)] string path)
         => await GetTools().DeleteProjectFile(projectName, path);
+    #endregion
+
+    #region Index
+
+    [McpTool(Cx.ResyncIndexCmd, Cx.ResyncIndexCmdDesc)]
+    public static async Task<object> RebuildIndex(
+         [Description(Cx.ForceRebuildOptionDesc)] bool forceRebuild = false)
+        => await GetTools().RebuildIndex(forceRebuild);
+
+    [McpTool(Cx.StatusIndexCmd, Cx.StatusIndexCmdDesc)]
+    public static async Task<object> GetIndexStatus()
+        => await GetTools().GetIndexStatus();
+
+    [McpTool(Cx.ChangeStatusIndexCmd, Cx.ChangeStatusIndexCmdDesc)]
+    public static async Task<object> ChangeIndexStatus(
+        [Description(Cx.ChangeStatusIndexEnableDesc)] bool enableIndex)  
+      => await GetTools().ChangeIndexStatus(enableIndex);
+
+    #endregion
+
+    #region Class Operations
+
+    [McpTool(Cx.ListClassesCmd, Cx.ListClassesCmdDesc)]
+    public static async Task<object> GetClassesAsync(
+        [Description(Cx.ProjectNameParamDesc)] string projectName,
+        [Description(Cx.PageNoParamDesc)] int pageNo = 1,
+        [Description(Cx.ItemsPerPageParamDesc)] int itemsPerPage = 100,
+        [Description(Cx.NamespaceFilterParamDesc)] string? namespaceFilter = null,
+        [Description(Cx.ClassFilterParamDesc)] string? classFilter = null) 
+      => await GetTools().GetClassesAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classFilter);
+
+    [McpTool(Cx.GetClassCmd, Cx.GetClassCmdDesc)]
+    public static async Task<object> GetClassContentAsync(
+        [Description(Cx.ProjectNameParamDesc)] string projectName,
+        [Description(Cx.ClassIdParamDesc)] int classId) 
+      => await GetTools().GetClassContentAsync(projectName, classId);
+
+    [McpTool(Cx.AddUpdateClassCmd, Cx.AddUpdateClassCmdDesc)]
+    public static async Task<object> AddUpdateClassAsync(
+        [Description(Cx.ProjectNameParamDesc)] string projectName,
+        [Description(Cx.ClassContentParamDesc)] ClassContent classContent
+        ) 
+      => await GetTools().AddUpdateClassAsync(projectName, classContent);
+
+
+    #endregion
+
+    #region Method Operations
+
+    [McpTool(Cx.ListMethodsCmd, Cx.ListClassMethodsCmdDesc)]
+    public static async Task<object> GetMethodsAsync(
+        [Description(Cx.ProjectNameParamDesc)] string projectName,
+        [Description(Cx.PageNoParamDesc)] int pageNo = 1,
+        [Description(Cx.ItemsPerPageParamDesc)] int itemsPerPage = 100,
+        [Description(Cx.NamespaceFilterParamDesc)] string? namespaceFilter = null,
+        [Description(Cx.ClassFilterParamDesc)] string? classFilter = null,
+        [Description(Cx.MethodFilterParamDesc)] string? methodFilter = null)
+      => await GetTools().GetMethodsAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classFilter, methodFilter);
+
+    [McpTool(Cx.GetClassMethodCmd, Cx.GetClassMethodCmdDesc)]
+    public static async Task<object> GetMethodContentAsync(
+      [Description(Cx.ProjectNameParamDesc)] string projectName,
+      [Description(Cx.MethodIdParamDesc)] int methodId
+    ) => await GetTools().GetMethodContentAsync(projectName, methodId);
+
+    [McpTool(Cx.AddUpdateMethodCmd, Cx.AddUpdateMethodCmdDesc)]
+    public static async Task<object> AddUpdateMethodAsync(
+      [Description(Cx.ProjectNameParamDesc)] string projectName,
+      [Description(Cx.MethodContentParamDesc)] MethodContent methodContent
+    ) => await GetTools().AddUpdateMethodAsync(projectName, methodContent);
+
+
+    #endregion
+
   }
 }

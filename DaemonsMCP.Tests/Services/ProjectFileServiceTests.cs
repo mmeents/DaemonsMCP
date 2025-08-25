@@ -5,6 +5,7 @@ using FluentAssertions;
 using Moq;
 using System.IO;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace DaemonsMCP.Tests.Services
 {
@@ -18,8 +19,9 @@ namespace DaemonsMCP.Tests.Services
         private string _testProjectPath;
         private string _testFilePath;
         private ValidationContext _testContext;
+        private Mock<ILoggerFactory> _mockLoggerFactory = new Mock<ILoggerFactory>();
 
-        [TestInitialize]
+    [TestInitialize]
         public void TestInitialize()
         {
             _mockConfig = new Mock<IAppConfig>();
@@ -40,7 +42,7 @@ namespace DaemonsMCP.Tests.Services
             };
 
             Directory.CreateDirectory(_testProjectPath);
-            _fileService = new ProjectFileService(_mockConfig.Object, _mockValidationService.Object, _mockSecurityService.Object);
+            _fileService = new ProjectFileService(_mockConfig.Object, _mockLoggerFactory.Object, _mockValidationService.Object, _mockSecurityService.Object);
         }
 
         [TestCleanup]

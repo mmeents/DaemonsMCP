@@ -7,23 +7,29 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using PackedTables.Net;
+using Microsoft.Extensions.Logging;
 
 namespace DaemonsMCP.Core.Config 
 {
   public class AppConfig : IAppConfig {
-    public AppConfig(string? configPath = null) {
+    private readonly ILogger<AppConfig> _logger;
+    public AppConfig(ILoggerFactory loggerFactory, string? configPath = null) {
+      _logger = loggerFactory.CreateLogger<AppConfig>();
       if (Cx.IsDebug) { 
-        Console.Error.WriteLine($"{Cx.Dd0} Current Directory: {Directory.GetCurrentDirectory()}");
-        Console.Error.WriteLine($"{Cx.Dd0} Executable Directory: {AppContext.BaseDirectory}");
-        Console.Error.WriteLine($"{Cx.Dd0} Process Name: {System.Diagnostics.Process.GetCurrentProcess().ProcessName}");
+        _logger.LogDebug($"{Cx.Dd0} Initializing AppConfig with config path: {configPath ?? "default"}");
+        _logger.LogDebug($"{Cx.Dd0} Current Directory: {Directory.GetCurrentDirectory()}");
+        _logger.LogDebug($"{Cx.Dd0} Executable Directory: {AppContext.BaseDirectory}");
+        _logger.LogDebug($"{Cx.Dd0} Process MethodName: {System.Diagnostics.Process.GetCurrentProcess().ProcessName}");
       }
-      _config = LoadConfiguration(configPath) ?? new();
+      _config = LoadConfiguration(configPath);
       _projects = LoadProjectsFromConfig();
       var projectCount = _projects?.Count ?? 0;
-      if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd0} Initialized with {projectCount} projects");
+      if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Initialized with {projectCount} projects");
     }
-    private DaemonsMcpConfiguration? _config;
+    private DaemonsMcpConfiguration? _config = null;
     private Dictionary<string, DaemonsMCP.Core.Models.ProjectModel>? _projects;
+    
     public bool IsConfigured => _config != null;
     public string? ConfigPath { get; private set;}
     public VersionSettings Version => _config?.Version ?? new VersionSettings();
@@ -46,14 +52,14 @@ namespace DaemonsMCP.Core.Config
           var config = JsonSerializer.Deserialize<DaemonsMcpConfiguration>(jsonContent, Sx.DefaultJsonOptions);
 
           if (config != null) {
-            if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd0} Loaded configuration from: {configPath}");
+            if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Loaded configuration from: {configPath}");
             ConfigPath = configPath; // Store the path for later use
             return config;
           }
         } catch (JsonException ex) {
-          if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd0} Invalid JSON in {configPath}: {ex.Message}");
+          if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Invalid JSON in {configPath}: {ex.Message}");
         } catch (Exception ex) {
-          if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd0} Error reading {configPath}: {ex.Message}");
+          if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Error reading {configPath}: {ex.Message}");
         }
       }
 
@@ -95,7 +101,7 @@ namespace DaemonsMCP.Core.Config
           // Validate project configuration
           if (string.IsNullOrWhiteSpace(projectConfig.Name) ||
               string.IsNullOrWhiteSpace(projectConfig.Path)) {
-            if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd0} Skipping invalid project configuration");
+            if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Skipping invalid project configuration");
             continue;
           }
 
@@ -104,7 +110,7 @@ namespace DaemonsMCP.Core.Config
 
           // Validate path exists
           if (!Directory.Exists(resolvedPath)) {
-            if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd0} Warning: Project path does not exist: {resolvedPath}");
+            if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Warning: Project path does not exist: {resolvedPath}");
             continue;
           }
 
@@ -117,10 +123,10 @@ namespace DaemonsMCP.Core.Config
           projects[project.Name] = project;
         }
 
-        if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd0} Loaded {projects.Count} projects from configuration");
+        if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Loaded {projects.Count} projects from configuration");
         return projects;
       } catch (Exception ex) {
-        if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd0} Error loading configuration: {ex.Message}");
+        if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Error loading configuration: {ex.Message}");
         return null;
       }
     }
@@ -129,7 +135,7 @@ namespace DaemonsMCP.Core.Config
       _config = LoadConfiguration(configPath) ?? new();
       _projects = LoadProjectsFromConfig();
       var projectCount = _projects?.Count ?? 0;
-      if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd0} Reloaded with {projectCount} projects");
+      if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Reloaded with {projectCount} projects");
     }
   }    
 

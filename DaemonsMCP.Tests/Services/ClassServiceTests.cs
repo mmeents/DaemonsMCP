@@ -1,0 +1,117 @@
+﻿using DaemonsMCP.Core.Config;
+using DaemonsMCP.Core.Models;
+using DaemonsMCP.Core.Repositories;
+using DaemonsMCP.Core.Services;
+using Microsoft.Extensions.Logging;
+using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+
+namespace DaemonsMCP.Tests.Services {
+
+  [TestClass]
+  public class ClassServiceTests {
+  
+    private readonly IClassService? _classService;    
+    private readonly Mock<ILoggerFactory>? _mockLoggerFactory = new();
+    private readonly Mock<IIndexRepository>? _mockIndexRepository = new();
+
+    private readonly IClassService? _classService2;
+    private readonly IIndexRepository? _indexRepository;
+    private readonly Mock<IValidationService>? _mockValidationService;
+    private readonly Mock<ILogger<AppConfig>> _appConfigLogger = new();
+
+    public ClassServiceTests() { 
+      _mockLoggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>())).Returns(_appConfigLogger.Object);
+
+      _classService = new ClassService( _mockLoggerFactory.Object, _mockIndexRepository.Object, _mockValidationService.Object );
+      var appConfig = new AppConfig( _mockLoggerFactory.Object );
+      _indexRepository = new IndexRepository(_mockLoggerFactory.Object, appConfig, _mockValidationService.Object);
+      _classService2 = new ClassService( _mockLoggerFactory.Object, _indexRepository, _mockValidationService.Object);
+    }
+
+    [TestMethod]
+    public async Task GetClassesAsync_ShouldReturnClasses() {
+      // Arrange
+      var projectName = "TestProject";
+      var classes = new List<ClassListing> {
+        new ClassListing { ClassName = "Class1", Namespace = "Namespace1", FileNamePath = "Path1" },
+        new ClassListing { ClassName = "Class2", Namespace = "Namespace2", FileNamePath = "Path2" }
+      };
+      _mockIndexRepository.Setup(repo => repo.GetClassListingsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>() ))
+                          .ReturnsAsync(classes);
+      // Act
+      var result = await _classService.GetClassesAsync(projectName,1, 20, classNameFilter:"Class2").ConfigureAwait(false);
+      // Assert
+      Assert.IsNotNull(result);
+      List<ClassListing> resTest = (List<ClassListing>)(result.Data); 
+      Assert.AreEqual(2, resTest.Count());
+      Assert.AreEqual("Class1", resTest[0].ClassName);
+      Assert.AreEqual("Class2", resTest[1].ClassName);
+
+    }
+
+    [TestMethod]
+    public async Task GetClassesAsync_ShouldReturnClassesFromConfig() { 
+
+      var result = await _classService2.GetClassesAsync("DaemonsMCP1", 1, 20).ConfigureAwait(false);
+     
+
+      // Assert  testing inspected 30 total classes in DaemonsMCP1 project
+      Assert.IsNotNull(result);
+      List<ClassListing> resTest = (List<ClassListing>)(result.Data); 
+      Assert.AreEqual(20, resTest.Count());         
+
+    }
+
+    [TestMethod]
+    public async Task GetClassesAsync_ShouldReturnClassesFromConfig_TestPaging() {
+
+      var result = await _classService2.GetClassesAsync("DaemonsMCP1", 2, 25).ConfigureAwait(false);
+      
+      // Assert  testing inspected 30 total classes in DaemonsMCP1 project
+      Assert.IsNotNull(result);
+      List<ClassListing> resTest = (List<ClassListing>)(result.Data);
+      Assert.AreEqual(5, resTest.Count());     
+
+    }
+
+    [TestMethod]
+    public async Task GetClassesAsync_ShouldReturnClassesFromConfig_TestFilter() {
+
+      var result = await _classService2.GetClassesAsync("DaemonsMCP2", 1, 100, "DaemonsMCP.Tests.Services").ConfigureAwait(false);
+
+      var result2 = await _classService2.GetClassesAsync("DaemonsMCP2", 1, 100, classNameFilter: "ClassServiceTests").ConfigureAwait(false);
+
+      // Assert  testing inspected 30 total classes in DaemonsMCP1 project
+      Assert.IsNotNull(result);
+      List<ClassListing> resTest = (List<ClassListing>)(result.Data);
+      List<ClassListing> res2Test = (List<ClassListing>)(result2.Data);
+
+      Assert.AreEqual(8, resTest.Count());  // sometimes you have to rebuild the index to get all the classes
+      Assert.AreEqual(1, res2Test.Count());
+
+
+
+    }
+
+    // ClassServiceTests
+
+    [TestMethod]
+    public async Task GetClassContentAsync_ShouldReturnClassContent() { 
+
+      var result = await _classService2.GetClassContentAsync("DaemonsMCP2", 85);
+      var resultJson = JsonSerializer.Serialize(result);
+      Console.Write(result);
+
+      Assert.IsTrue(result.Success);
+
+    }
+
+  }
+}

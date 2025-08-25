@@ -24,7 +24,7 @@ namespace DaemonsMCP.Tests.Models {
 
     [TestMethod]
     public void Name_ShouldReturnCorrectValue() {
-      // TODO: Implement test for Name property
+      // TODO: Implement test for MethodName property
     }
 
     [TestMethod]

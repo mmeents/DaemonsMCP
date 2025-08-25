@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 using DaemonsMCP.Core.Config;
 using DaemonsMCP.Core.Extensions;
 using DaemonsMCP.Core.Models;
+using Microsoft.Extensions.Logging;
 
 namespace DaemonsMCP.Core.Services {
   public class SecurityService : ISecurityService {
     private readonly IAppConfig _config;
     private readonly SecuritySettings _settings;
-    public SecurityService(IAppConfig config) {
+    private readonly ILogger<SecurityService> _logger;
+    public SecurityService(ILoggerFactory loggerFactory, IAppConfig config) {
+      _logger = loggerFactory.CreateLogger<SecurityService>() ?? throw new ArgumentNullException(nameof(loggerFactory));
       _config = config ?? throw new ArgumentNullException(nameof(config));
       _settings = _config.Security ?? throw new ArgumentNullException(nameof(_config.Security));
     }
@@ -47,7 +50,7 @@ namespace DaemonsMCP.Core.Services {
       try {
         _maxFileSizeBytes = _config.Security.MaxFileSize.ParseFileSize();
       } catch (Exception ex) {
-        Console.Error.WriteLine($"{Cx.Dd2} Invalid MaxFileSize format '{_config.Security.MaxFileSize}': {ex.Message}. Using default 10MB.");
+        _logger.LogError($"{Cx.Dd2} Invalid MaxFileSize format '{_config.Security.MaxFileSize}': {ex.Message}. Using default 10MB.");
         _maxFileSizeBytes = 10 * 1024 * 1024; // 10MB default
       }
 
@@ -73,7 +76,7 @@ namespace DaemonsMCP.Core.Services {
     }
 
     public bool IsDeleteAllowed(string filePath) {
-      // Delete requires write permissions to be enabled
+      // DeleteClassItem requires write permissions to be enabled
       if (!IsWriteAllowed(filePath)) {
         return false;
       }
@@ -173,26 +176,26 @@ namespace DaemonsMCP.Core.Services {
     public bool IsWriteAllowed(string filePath) {
       // First check if writes are globally enabled
       if (_config.IsConfigured && !_settings.AllowWrite) {
-        if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd2} Setting AllowWrite says no");
+        if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd2} Setting AllowWrite says no");
         return false;
       }
 
       // Check if the path is write-protected
       if (IsPathWriteProtected(filePath)) {
-        if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd2} Setting IsPathWriteProtected true {filePath}");
+        if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd2} Setting IsPathWriteProtected true {filePath}");
         return false;
       }
 
       // Check if the file itself is allowed (same rules as reading)
       if (!IsFileAllowed(filePath)) {
-        if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd2} Setting IsFileAllowed false {filePath}");
+        if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd2} Setting IsFileAllowed false {filePath}");
         return false;
       }
 
       // Check write-specific file size limits (if file exists create will check later)
       if (File.Exists(filePath)) {
         if (!IsWriteFileSizeAllowed(filePath)) {
-          if (Cx.IsDebug) Console.Error.WriteLine($"{Cx.Dd2} Setting IsWriteFileSizeAllowed false {filePath}");
+          if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd2} Setting IsWriteFileSizeAllowed false {filePath}");
           return false;
         }
       }
@@ -214,7 +217,7 @@ namespace DaemonsMCP.Core.Services {
         return IsFileSizeAllowed(fileInfo.Length);
       } catch (Exception e) {
         // If we can't get file size, assume it's too large
-        Console.Error.WriteLine($"[DaemonsMCP][Security] File Size lookup excepts {e.Message}");
+        _logger.LogDebug($"[DaemonsMCP][Security] File Size lookup excepts {e.Message}");
         return false;
       }
     }
@@ -262,14 +265,14 @@ namespace DaemonsMCP.Core.Services {
       try {
         // Check for directory traversal attempts
         if (filePath.Contains("..") || filePath.Contains("~/")) {
-          Console.Error.WriteLine($"{Cx.Dd2} Directory traversal attempt detected: {filePath}");
+          _logger.LogDebug($"{Cx.Dd2} Directory traversal attempt detected: {filePath}");
           return false;
         }
 
         // Additional checks for suspicious patterns
         var suspiciousPatterns = new[] { "%", "$", "`" };
         if (suspiciousPatterns.Any(pattern => filePath.Contains(pattern))) {
-          Console.Error.WriteLine($"{Cx.Dd2} Suspicious pattern detected in path: {filePath}");
+          _logger.LogDebug($"{Cx.Dd2} Suspicious pattern detected in path: {filePath}");
           return false;
         }
 
@@ -282,7 +285,7 @@ namespace DaemonsMCP.Core.Services {
           var boundryCheck = _config.Projects.Values.Any(project =>
               filePath.StartsWith(project.Path, StringComparison.OrdinalIgnoreCase));
           if (!boundryCheck) { 
-            Console.Error.WriteLine($"final rooted boundy check false"); 
+            _logger.LogDebug($"final rooted boundy check false"); 
           }
           return boundryCheck;
         }
@@ -290,7 +293,7 @@ namespace DaemonsMCP.Core.Services {
         return true;
       } catch (Exception e) {
         // If path normalization fails, it's not safe
-        Console.Error.WriteLine($"[DaemonsMCP][Security] caught exception {filePath} {e.Message}");
+        _logger.LogDebug($"[DaemonsMCP][Security] caught exception {filePath} {e.Message}");
         return false;
       }
     }

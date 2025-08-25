@@ -50,7 +50,7 @@ namespace DaemonsMCP.Core.Services {
           throw new FileNotFoundException($"File not found: {fullPath}");
         }
         if (!isDirectory && !_securityService.IsFileAllowed(fullPath)) {
-          throw new UnauthorizedAccessException("Get Access to this file type is not allowed for security reasons.");
+          throw new UnauthorizedAccessException("GetFileItemById Access to this file type is not allowed for security reasons.");
         }
 
         if (isDirectory && !Directory.Exists(fullPath)) { 
@@ -106,6 +106,15 @@ namespace DaemonsMCP.Core.Services {
       }
     }
 
-
+    public void ValidateClassContent(ClassContent content) { 
+      if (content == null)
+          throw new ArgumentException("Class content cannot be null", nameof(content));
+      if (string.IsNullOrWhiteSpace(content.Namespace))
+          throw new ArgumentException("Namespace is required", nameof(content.Namespace));
+      if (string.IsNullOrWhiteSpace(content.ClassName))
+          throw new ArgumentException("Class name is required", nameof(content.ClassName));
+      if (string.IsNullOrWhiteSpace(content.Content))
+          throw new ArgumentException("Class content cannot be empty", nameof(content.Content));
+    }
   }
 }

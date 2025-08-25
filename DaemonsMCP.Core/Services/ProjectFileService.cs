@@ -8,13 +8,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Microsoft.Extensions.Logging;
 
 namespace DaemonsMCP.Core.Services {
   public class ProjectFileService(
       IAppConfig config,
+      ILoggerFactory loggerFactory,
       IValidationService validationService,
       ISecurityService securityService) : IProjectFileService {
     private readonly IAppConfig _config = config;
+    private readonly ILogger<ProjectFileService> _logger = loggerFactory.CreateLogger<ProjectFileService>();
     private readonly IValidationService _validationService = validationService;
     private readonly ISecurityService _securityService = securityService;
 
@@ -84,9 +87,8 @@ namespace DaemonsMCP.Core.Services {
         }
 
         if (File.Exists(fullPath) && overwrite) {
-          var suffix = $".NewExistedBackup.{DateTime.Now:yyyyMMdd_HHmmss}";
-          var backupPath = fullPath + suffix;
-          File.Copy(fullPath, backupPath, true);
+          context.Project.CopyToBackup(fullPath);
+          _logger.LogInformation("Backup created for file being overwritten: {FilePath}", fullPath);
         }
 
         // Write the file
@@ -96,6 +98,7 @@ namespace DaemonsMCP.Core.Services {
         var fileInfo = new FileInfo(fullPath);
         var relativePath = fileInfo.FullName[context.Project.Path.Length..].TrimStart(Path.DirectorySeparatorChar);
 
+        _logger.LogInformation("File created successfully: {FilePath}", fullPath);
         var opResult = OperationResult.CreateSuccess(
           Cx.InsertFileCmd,
           $"File created successfully: {path}",
@@ -109,6 +112,7 @@ namespace DaemonsMCP.Core.Services {
 
         return opResult;
       } catch (Exception ex) {
+        _logger.LogError(ex, "Error creating file: {FilePath}", path);
         var opResult = OperationResult.CreateFailure(
           Cx.InsertFileCmd,
           $"Failed to create file: {ex.Message}",
@@ -143,7 +147,7 @@ namespace DaemonsMCP.Core.Services {
           File.Copy(fullPath, backupPath, true);
         }
 
-        // Update the file
+        // UpdateClassItem the file
         await File.WriteAllTextAsync(fullPath, content, Encoding.UTF8).ConfigureAwait(false);
 
         // Return success info
@@ -187,7 +191,7 @@ namespace DaemonsMCP.Core.Services {
 
         // Security validations - delete is most restrictive
         if (!_securityService.IsDeleteAllowed(fullPath)) {
-          throw new UnauthorizedAccessException("Delete operation not allowed for security reasons");
+          throw new UnauthorizedAccessException("DeleteClassItem operation not allowed for security reasons");
         }
 
         string? backupPath = null;
@@ -204,7 +208,7 @@ namespace DaemonsMCP.Core.Services {
           File.Copy(fullPath, backupPath, true);
         }
 
-        // Delete the file
+        // DeleteClassItem the file
         File.Delete(fullPath);
 
         // Return success info

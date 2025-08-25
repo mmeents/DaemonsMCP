@@ -13,19 +13,31 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace DaemonsMCP.Core {
+
+  /// <summary>
+  /// DaemonsTools is the DaemonsMCP primary interface. 
+  /// </summary>
+  /// <param name="config"></param>
+  /// <param name="projectsService"></param>
+  /// <param name="projectFolderService"></param>
+  /// <param name="projectFileService"></param>
   public class DaemonsTools(
     IAppConfig config,
     IProjectsService projectsService,
     IProjectFolderService projectFolderService,
-    IProjectFileService projectFileService
+    IProjectFileService projectFileService,
+    IIndexService IndexService,
+    IClassService classService
     ) {
 
     private readonly IAppConfig _config = config ?? throw new ArgumentNullException(Cx.ErrorNoConfig);
     private readonly IProjectsService _projectsService = projectsService;
     private readonly IProjectFolderService _projectFolderService = projectFolderService;    
     private readonly IProjectFileService _projectFileService = projectFileService;
+    private readonly IIndexService _indexService = IndexService;
+    private readonly IClassService _classService = classService;
 
-    // Projects 
+    #region Projects 
 
     [McpTool(Cx.ListProjectsCmd, Cx.ListProjectsDesc)]
     public async Task<object> ListProjects() {
@@ -38,7 +50,9 @@ namespace DaemonsMCP.Core {
       }
     }
 
-    // Project Folders
+    #endregion
+
+    #region Project Folders
     [McpTool(Cx.ListFoldersCmd, Cx.ListFoldersDesc)]
     public async Task<object> ListProjectDirectories(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
@@ -83,8 +97,9 @@ namespace DaemonsMCP.Core {
       }
     }
 
+    #endregion
 
-    // Project Files
+    #region Project Files
     [McpTool(Cx.ListFilesCmd, Cx.ListFilesDesc)]
     public async Task<object> ListProjectFiles(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
@@ -154,6 +169,111 @@ namespace DaemonsMCP.Core {
         return JsonSerializer.Serialize(opResult);
       }
     }
+    #endregion
+
+    #region Index Operations 
+        
+    public async Task<object> RebuildIndex( bool forceRebuild = false) {
+      try { 
+        var result = await _indexService.RebuildIndexAsync(forceRebuild).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure(Cx.ResyncIndexCmd, $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> GetIndexStatus() {
+      try { 
+        var status = _indexService.GetIndexStatus();
+        return JsonSerializer.Serialize(status);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure(Cx.StatusIndexCmd, $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> ChangeIndexStatus( bool enabled) {
+      try { 
+        _indexService.Enabled = enabled;
+        var status = _indexService.GetIndexStatus();
+        return JsonSerializer.Serialize(status);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure(Cx.ChangeStatusIndexCmd, $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    #endregion
+
+    #region Class Operations
+
+    public async Task<object> GetClassesAsync(string projectName, int pageNo =1, int itemsPerPage=100, string? namespaceFilter = null, string? classNameFilter = null) {
+      try {
+        var result = await _classService.GetClassesAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classNameFilter).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure(Cx.ListClassesCmd, $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> GetClassContentAsync(string projectName, int classId) {
+      try {
+        var result = await _classService.GetClassContentAsync(projectName, classId).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure(Cx.GetClassCmd, $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> AddUpdateClassAsync(string projectName, ClassContent content) {
+      try { 
+        var result = await _classService.AddUpdateClassContentAsync(projectName, content).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure(Cx.AddUpdateClassCmd, $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    #endregion
+
+    #region Method Operations
+
+    public async Task<object> GetMethodsAsync(string projectName, int pageNo = 1, int itemsPerPage = 100, string? namespaceFilter = null, string? classNameFilter = null, string? methodNameFilter = null) {
+      try { 
+        var result = await _classService.GetMethodsAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classNameFilter, methodNameFilter).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure(Cx.ListMethodsCmd, $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> GetMethodContentAsync(string projectName, int methodId) {
+      try { 
+        var result = await _classService.GetMethodContentAsync(projectName, methodId).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure(Cx.GetClassMethodCmd, $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> AddUpdateMethodAsync(string projectName, MethodContent content) {
+      try { 
+        var result = await _classService.AddUpdateMethodAsync(projectName, content).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure(Cx.AddUpdateMethodCmd, $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    #endregion
+
 
 
   }

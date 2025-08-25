@@ -1,7 +1,10 @@
 ﻿using DaemonsMCP.Core.Config;
 using DaemonsMCP.Core.Models;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
+using Serilog;
+using Serilog.Core;
 using System.IO;
 
 namespace DaemonsMCP.Tests.Config
@@ -11,41 +14,91 @@ namespace DaemonsMCP.Tests.Config
     {
         private string _testConfigPath;
         private string _testConfigFile;
+        private readonly ILoggerFactory _loggerFactory;
 
-        [TestInitialize]
-        public void TestInitialize()
+        
+        public AppConfigTests()
         {
             _testConfigPath = Path.Combine(Path.GetTempPath(), "DaemonsMCPTests", Guid.NewGuid().ToString());
             _testConfigFile = Path.Combine(_testConfigPath, "daemonsmcp.json");
             Directory.CreateDirectory(_testConfigPath);
+            File.Copy("daemonsmcp.json", _testConfigFile, true); // Assuming the test config file is in the project root
+
+            var testLogsPath = Path.Combine(Path.GetTempPath(), "DaemonsMCP-Tests", "logs");
+            Directory.CreateDirectory(testLogsPath);
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning)) // Reduce Microsoft logging noise
+                .MinimumLevel.Override("System", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning))
+                .Enrich.FromLogContext()
+                .Enrich.FromLogContext()
+                .WriteTo.File(
+                    path: Path.Combine(testLogsPath, "test-indexservice-.log"),
+                    rollingInterval: RollingInterval.Day,
+                    outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"
+                )
+                .WriteTo.Debug() // Shows in Visual Studio Debug Output window
+                .CreateLogger();
+
+            _loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog(Log.Logger));
+
+          Log.Information("=== IndexServiceTests started ===");
+          Log.Information("Test logs will be written to: {LogPath}", testLogsPath);
         }
 
-        [TestCleanup]
+
+       [TestCleanup]
         public void TestCleanup()
         {
             if (Directory.Exists(_testConfigPath))
             {
                 Directory.Delete(_testConfigPath, true);
             }
+            Log.Information("=== IndexServiceTests completed ===");
+            Log.CloseAndFlush();
+            _loggerFactory?.Dispose();
         }
 
         [TestMethod]
         public void Constructor_WithValidConfigPath_ShouldLoadConfiguration()
-        {
-            // TODO: Implement test for constructor with valid config path
-        }
+        {            
+            var config = new AppConfig(_loggerFactory, _testConfigPath);
+
+            config.Should().NotBeNull();
+            config.IsConfigured.Should().BeTrue();
+            config.ConfigPath.Should().Be(_testConfigFile);
+            config.Projects.Should().NotBeNull();
+            config.Projects.Count.Should().BeGreaterThan(0);
+    }
 
         [TestMethod]
         public void Constructor_WithInvalidConfigPath_ShouldUseDefaults()
-        {
-            // TODO: Implement test for constructor with invalid config path
+        {            
+            var invalidPath = Path.Combine(_testConfigPath, "invalid");
+            var config = new AppConfig(_loggerFactory, invalidPath);
+
+           config.Should().NotBeNull();
+           config.IsConfigured.Should().BeFalse();
+           config.ConfigPath.Should().BeNull();
+           config.Projects.Should().NotBeNull();
+           config.Projects.Count.Should().Be(0);
+
         }
 
         [TestMethod]
         public void Constructor_WithNullConfigPath_ShouldSearchDefaultPaths()
         {
             // TODO: Implement test for constructor with null config path
-        }
+            var config = new AppConfig(null);
+    
+            config.Should().NotBeNull();
+            config.IsConfigured.Should().BeTrue();
+            config.Projects.Should().NotBeNull();
+            config.Projects.Count.Should().BeGreaterThan(0);
+
+
+    }
 
         [TestMethod]
         public void LoadConfiguration_WithValidJsonFile_ShouldReturnConfiguration()
