@@ -49,7 +49,7 @@ namespace DaemonsMCP.Core.Services {
         _projectIndexModels = _appConfig.Projects.Select(p => new IndexProjectItem() { 
             Name = p.Value.Name,
             Path = p.Value.Path,
-            ProjectIndex = _indexRepository.GetProjectIndex(p.Value.Name) ?? new ProjectIndexModel(loggerFactory, p.Value, _validationService)
+            ProjectIndex = _indexRepository.GetProjectIndex(p.Value.Name) ?? new ProjectIndexModel(loggerFactory, p.Value, _validationService, securityService)
         }).ToList();
         foreach (var project in _projectIndexModels) {
           if (project.ProjectIndex == null) {

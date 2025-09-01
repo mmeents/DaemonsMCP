@@ -13,9 +13,10 @@ namespace DaemonsMCP.Core.Services {
 
   public class ProjectIndexWatchService : IDisposable {    
     // This service is responsible for watching the project directory for changes
-    public ProjectIndexWatchService(ILoggerFactory loggerFactory, ProjectIndexModel projectIndexModel) {      
+    public ProjectIndexWatchService(ILoggerFactory loggerFactory, ProjectIndexModel projectIndexModel, ISecurityService securityService) {      
       _logger = loggerFactory?.CreateLogger<ProjectIndexWatchService>() ?? throw new ArgumentNullException(nameof(loggerFactory), "LoggerFactory cannot be null");
       _projectIndexModel = projectIndexModel ?? throw new ArgumentNullException(nameof(projectIndexModel), "ProjectIndexModel cannot be null");
+      _securityService = securityService ?? throw new ArgumentNullException(nameof(securityService), "SecurityService cannot be null");
 
       if (string.IsNullOrWhiteSpace(_projectIndexModel.ProjectPath))
         throw new ArgumentException("Project root path cannot be null or empty", nameof(_projectIndexModel.ProjectPath));
@@ -28,6 +29,7 @@ namespace DaemonsMCP.Core.Services {
 
        ProjectRootPath = _projectIndexModel.ProjectPath ?? throw new ArgumentNullException(nameof(_projectIndexModel.ProjectPath), "Project root path cannot be null");
        _logger.LogDebug($"🚀 Project {_projectIndexModel.ProjectName} Index Watch Service started ");
+       StartupScanToFillQueue();
        StartWatching();
     }
 
@@ -43,6 +45,7 @@ namespace DaemonsMCP.Core.Services {
 
     private volatile bool _isDisposed = false;
     private readonly ILogger<ProjectIndexWatchService> _logger; 
+    private readonly ISecurityService _securityService;
     private ProjectIndexModel _projectIndexModel;
     public string ProjectRootPath { get; private set; }
     private FileSystemWatcher? _watcher;
@@ -142,6 +145,26 @@ namespace DaemonsMCP.Core.Services {
       } catch (Exception ex) {
         _logger.LogError($"❌ Failed to restart watcher: {ex.Message}");
       }
+    }
+
+    private void StartupScanToFillQueue() {
+      if (_isDisposed) return;
+      if (!Directory.Exists(ProjectRootPath)) return;
+      var csFiles = Directory.GetFiles(ProjectRootPath, "*.cs", SearchOption.AllDirectories)
+        .Where(file => _securityService.IsFileAllowed(file))
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+      foreach (var file in csFiles) {
+        _changeQueue.Enqueue(new FileChangeItem {
+          FilePath = file,
+          ChangeType = WatcherChangeTypes.Created,
+          Timestamp = DateTime.UtcNow
+        });
+      }
+      if (_projectIndexModel != null && _projectIndexModel.IndexService != null) {
+        _projectIndexModel.IndexService.StartTimer();
+      }
+      if (Cx.IsDebug) _logger.LogDebug($"🔍 Startup scan queued {csFiles.Count} .cs files to index.");
     }
 
 

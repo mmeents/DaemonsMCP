@@ -20,8 +20,8 @@ namespace DaemonsMCP.Tests.Services {
     private readonly IIndexRepository _indexRepository;
     private readonly IIndexService _indexService;
     public IndexServiceTests() {
-      var testLogsPath = Path.Combine(Path.GetTempPath(), "DaemonsMCP-Tests", "logs");
-      Directory.CreateDirectory(testLogsPath);
+      var logsPath = Path.Combine("C:\\MCPSandbox", "logs");
+      Directory.CreateDirectory(logsPath);      
 
       Log.Logger = new LoggerConfiguration()
           .MinimumLevel.Debug()
@@ -29,7 +29,7 @@ namespace DaemonsMCP.Tests.Services {
           .MinimumLevel.Override("System", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning))
           .Enrich.FromLogContext()
           .WriteTo.File(
-              path: Path.Combine(testLogsPath, "test-indexservice-.log"),
+              path: Path.Combine(logsPath, "test-indexservice-.log"),
               rollingInterval: RollingInterval.Day,
               outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"
           )
@@ -39,12 +39,12 @@ namespace DaemonsMCP.Tests.Services {
       _loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog(Log.Logger));
 
       Log.Information("🚀 === IndexServiceTests started ===");
-      Log.Information("Test logs will be written to: {LogPath}", testLogsPath);
+      Log.Information("Test logs will be written to: {LogPath}", logsPath);
 
       _config = new AppConfig(_loggerFactory);        
       _securityService = new SecurityService(_loggerFactory, _config);
       _validationService = new ValidationService(_config, _securityService);
-      _indexRepository = new IndexRepository(_loggerFactory, _config, _validationService);
+      _indexRepository = new IndexRepository(_loggerFactory, _config, _validationService,_securityService);
       _indexService = new IndexService(_loggerFactory, _config, _validationService, _securityService, _indexRepository);
 
     }

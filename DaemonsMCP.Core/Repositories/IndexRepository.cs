@@ -17,12 +17,12 @@ namespace DaemonsMCP.Core.Repositories {
     private readonly ILogger<IndexRepository> _logger;
     private readonly IValidationService _validationService;
     private readonly ConcurrentDictionary<string, ProjectIndexModel> _projectIndexs = new ConcurrentDictionary<string, ProjectIndexModel>();
-    public IndexRepository(ILoggerFactory loggerFactory, IAppConfig appConfig, IValidationService validationService) {
+    public IndexRepository(ILoggerFactory loggerFactory, IAppConfig appConfig, IValidationService validationService, ISecurityService securityService) {
       _appConfig = appConfig;
       _logger = loggerFactory.CreateLogger<IndexRepository>() ?? throw new ArgumentNullException(nameof(loggerFactory));
       _validationService = validationService;
       foreach (var project in _appConfig.Projects) {
-        _projectIndexs[project.Key] = new ProjectIndexModel(loggerFactory, project.Value, _validationService);
+        _projectIndexs[project.Key] = new ProjectIndexModel(loggerFactory, project.Value, _validationService, securityService);
       }
       
     }

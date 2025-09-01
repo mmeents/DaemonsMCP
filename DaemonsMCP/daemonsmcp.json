@@ -4,11 +4,17 @@
         "name": "DaemonMCP",
         "version": "1.1.0"
     },
-    "projects": [        
+    "projects": [
         {
             "name": "DaemonsMCP2",
             "description": "DaemonsMCP V2 Di based version, ",
             "path": "C:\\MCPSandbox\\DaemonsMCPDev",
+            "enabled": true
+        },
+        {
+            "name": "PackedTables.NET",
+            "description": "PackedTables.NET 1.1.6",
+            "path": "C:\\GithubMM\\PackedTables.NET",
             "enabled": true
         }
     ],

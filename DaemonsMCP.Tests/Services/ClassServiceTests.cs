@@ -23,15 +23,17 @@ namespace DaemonsMCP.Tests.Services {
 
     private readonly IClassService? _classService2;
     private readonly IIndexRepository? _indexRepository;
+    private readonly ISecurityService _securityService;
     private readonly Mock<IValidationService>? _mockValidationService;
     private readonly Mock<ILogger<AppConfig>> _appConfigLogger = new();
 
     public ClassServiceTests() { 
       _mockLoggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>())).Returns(_appConfigLogger.Object);
-
+      
       _classService = new ClassService( _mockLoggerFactory.Object, _mockIndexRepository.Object, _mockValidationService.Object );
       var appConfig = new AppConfig( _mockLoggerFactory.Object );
-      _indexRepository = new IndexRepository(_mockLoggerFactory.Object, appConfig, _mockValidationService.Object);
+      _securityService = new SecurityService(_mockLoggerFactory.Object, appConfig);
+      _indexRepository = new IndexRepository(_mockLoggerFactory.Object, appConfig, _mockValidationService.Object, _securityService);
       _classService2 = new ClassService( _mockLoggerFactory.Object, _indexRepository, _mockValidationService.Object);
     }
 

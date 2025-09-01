@@ -24,6 +24,7 @@ namespace DaemonsMCP.Core.Models {
     private readonly ILogger<ProjectIndexModel> _logger;
     private readonly ProjectIndexWatchService? _watchService = null;  // reference to child file watching component.
     private readonly IValidationService _validationService;
+    private readonly ISecurityService _securityService;
     private readonly ProjectModel _project;
 
     public string ProjectName { get; set; } = string.Empty;  // key for the dictionary
@@ -42,11 +43,12 @@ namespace DaemonsMCP.Core.Models {
     public TableModel Properties { get; set; }
     public TableModel Events { get; set; }
 
-    public ProjectIndexModel(ILoggerFactory loggerFactory, ProjectModel project, IValidationService validationService ) 
+    public ProjectIndexModel(ILoggerFactory loggerFactory, ProjectModel project, IValidationService validationService, ISecurityService securityService ) 
     {
       _logger = loggerFactory.CreateLogger<ProjectIndexModel>() ?? throw new ArgumentNullException(nameof(loggerFactory));
       _project = project ?? throw new ArgumentNullException(nameof(project));
       _validationService = validationService;
+      _securityService = securityService ?? throw new ArgumentNullException(nameof(securityService));
       IndexFolderPath = project.IndexPath;
       ProjectName = project.Name;
       ProjectPath = project.Path;
@@ -63,7 +65,7 @@ namespace DaemonsMCP.Core.Models {
       Properties = IndexTables[Cx.PropertiesTbl] ?? IndexTables.MakePropertiesTable();
       Events = IndexTables[Cx.EventsTbl] ?? IndexTables.MakeEventsTable();
 
-      _watchService = new ProjectIndexWatchService(loggerFactory, this);
+      _watchService = new ProjectIndexWatchService(loggerFactory, this, _securityService);
     }
 
     public void Dispose() {
