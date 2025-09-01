@@ -7,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
+using Serilog.Events; 
+using Serilog.Extensions.Hosting;
 
 namespace DaemonsMCP
 {
@@ -23,10 +25,12 @@ namespace DaemonsMCP
       } finally {
         Log.CloseAndFlush();
       }
+
     }
 
     static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
+            .UseSerilog() 
             .ConfigureServices((context, services) => {
               // Configuration
               services.AddSingleton<IAppConfig, AppConfig>();
@@ -34,12 +38,13 @@ namespace DaemonsMCP
               services.AddSingleton<IValidationService, ValidationService>();              
               services.AddSingleton<IIndexRepository, IndexRepository>();
               services.AddSingleton<IItemRepository, ItemRepository>();
+              services.AddSingleton<IIndexService, IndexService>();
 
               // Core services
               services.AddScoped<IProjectsService, ProjectService>();
               services.AddScoped<IProjectFolderService, ProjectFolderService>();
               services.AddScoped<IProjectFileService, ProjectFileService>();              
-              services.AddScoped<IIndexService, IndexService>();
+              
               services.AddScoped<IClassService, ClassService>();
 
               // MCP Tools (injected with dependencies)
@@ -51,11 +56,11 @@ namespace DaemonsMCP
 
     private static void ConfigureSerilog() {
       // Ensure logs directory exists
-      var logsPath = Path.Combine(AppContext.BaseDirectory, "logs");
+      var logsPath = Path.Combine("C:\\MCPSandbox", "logs");
       Directory.CreateDirectory(logsPath);
 
       Log.Logger = new LoggerConfiguration()
-          .MinimumLevel.Warning() // Adjust as needed
+          .MinimumLevel.Debug()
           .MinimumLevel.Override("Microsoft", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning)) // Reduce Microsoft logging noise
           .MinimumLevel.Override("System", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning))
           .Enrich.FromLogContext()

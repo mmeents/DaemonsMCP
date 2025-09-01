@@ -20,10 +20,11 @@ namespace DaemonsMCP.Core.Repositories {
     public IndexRepository(ILoggerFactory loggerFactory, IAppConfig appConfig, IValidationService validationService) {
       _appConfig = appConfig;
       _logger = loggerFactory.CreateLogger<IndexRepository>() ?? throw new ArgumentNullException(nameof(loggerFactory));
+      _validationService = validationService;
       foreach (var project in _appConfig.Projects) {
         _projectIndexs[project.Key] = new ProjectIndexModel(loggerFactory, project.Value, _validationService);
       }
-      _validationService = validationService;
+      
     }
 
     public ProjectIndexModel? GetProjectIndex(string projectName) {

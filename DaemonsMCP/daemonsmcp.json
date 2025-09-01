@@ -4,16 +4,10 @@
         "name": "DaemonMCP",
         "version": "1.1.0"
     },
-    "projects": [
-        {
-            "name": "DaemonsMCP1",
-            "description": "DaemonsMCP version 1.0.1 allowing you to see edit condfirmed working and is currently running.",
-            "path": "C:\\MCPSandbox\\DaemonsMCP",
-            "enabled": true
-        },
+    "projects": [        
         {
             "name": "DaemonsMCP2",
-            "description": "DaemonsMCP V2 Di based version",
+            "description": "DaemonsMCP V2 Di based version, ",
             "path": "C:\\MCPSandbox\\DaemonsMCPDev",
             "enabled": true
         }
@@ -33,7 +27,7 @@
             ".cer",
             ".db",
             ".sqlite",
-            ".sqlite3"            
+            ".sqlite3"
         ],
         "allowedExtensions": [
             ".sln",
