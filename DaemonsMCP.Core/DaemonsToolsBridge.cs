@@ -15,10 +15,9 @@ namespace DaemonsMCP.Core {
   public class DaemonsToolsBridge {
     private static DaemonsTools GetTools() => DIServiceBridge.GetService<DaemonsTools>();
 
-    #region Projects 
     [McpTool(Cx.ListProjectsCmd, Cx.ListProjectsDesc)]
     public static async Task<object> ListProjects() => await GetTools().ListProjects();
-    #endregion
+
 
     #region Project Folders
     [McpTool(Cx.ListFoldersCmd, Cx.ListFoldersDesc)]
@@ -26,21 +25,21 @@ namespace DaemonsMCP.Core {
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FolderPathParamDesc)] string? path = null,
         [Description(Cx.FolderFilterParamDesc)] string? filter = null)
-        => await GetTools().ListProjectDirectories(projectName, path, filter);
+        => await GetTools().ListProjectDirectories(projectName, path, filter).ConfigureAwait(false);
 
     [McpTool(Cx.CreateFolderCmd, Cx.CreateFolderDesc)]
     public static async Task<object> CreateProjectDirectory(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FolderPathParamDesc)] string path,
         [Description(Cx.CreateFolderOptionDesc)] bool createDirectories = true)
-        => await GetTools().CreateProjectDirectory(projectName, path, createDirectories);
+        => await GetTools().CreateProjectDirectory(projectName, path, createDirectories).ConfigureAwait(false);
 
     [McpTool(Cx.DeleteFolderCmd, Cx.DeleteFolderDesc)]
     public static async Task<object> DeleteProjectDirectory(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FolderPathParamDesc)] string path,
         [Description(Cx.DeleteFolderOptionDesc)] bool deleteDirectories = true)
-        => await GetTools().DeleteProjectDirectory(projectName, path, deleteDirectories);
+        => await GetTools().DeleteProjectDirectory(projectName, path, deleteDirectories).ConfigureAwait(false);
     #endregion
 
     #region Project Files
@@ -49,13 +48,13 @@ namespace DaemonsMCP.Core {
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FilePathParamDesc)] string? path = null,
         [Description(Cx.FileFilterParamDesc)] string? filter = null)
-        => await GetTools().ListProjectFiles(projectName, path, filter);
+        => await GetTools().ListProjectFiles(projectName, path, filter).ConfigureAwait(false);
 
     [McpTool(Cx.GetFileCmd, Cx.GetFileDesc)]
     public static async Task<object> GetProjectFile(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FilePathParamDesc)] string path)
-        => await GetTools().GetProjectFile(projectName, path);
+        => await GetTools().GetProjectFile(projectName, path).ConfigureAwait(false);
 
     [McpTool(Cx.InsertFileCmd, Cx.InsertFileDesc)]
     public static async Task<object> CreateProjectFile(
@@ -64,7 +63,7 @@ namespace DaemonsMCP.Core {
         [Description(Cx.FileContentParamDesc)] string content,
         [Description(Cx.CreateFolderOptionDesc)] bool createDirectories = true,
         [Description(Cx.OverwriteFileOptionDesc)] bool overwrite = false)
-        => await GetTools().CreateProjectFile(projectName, path, content, createDirectories, overwrite);
+        => await GetTools().CreateProjectFile(projectName, path, content, createDirectories, overwrite).ConfigureAwait(false);
 
     [McpTool(Cx.UpdateFileCmd, Cx.UpdateFileDesc)]
     public static async Task<object> UpdateProjectFile(
@@ -72,13 +71,13 @@ namespace DaemonsMCP.Core {
         [Description(Cx.FilePathParamDesc)] string path,
         [Description(Cx.FileContentParamDesc)] string content,
         [Description(Cx.CreateFolderOptionDesc)] bool createBackup = true)
-        => await GetTools().UpdateProjectFile(projectName, path, content, createBackup);
+        => await GetTools().UpdateProjectFile(projectName, path, content, createBackup).ConfigureAwait(false);
 
     [McpTool(Cx.DeleteFileCmd, Cx.DeleteFileDesc)]
     public static async Task<object> DeleteProjectFile(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FilePathParamDesc)] string path)
-        => await GetTools().DeleteProjectFile(projectName, path);
+        => await GetTools().DeleteProjectFile(projectName, path).ConfigureAwait(false);
     #endregion
 
     #region Index
@@ -108,20 +107,20 @@ namespace DaemonsMCP.Core {
         [Description(Cx.ItemsPerPageParamDesc)] int itemsPerPage = 100,
         [Description(Cx.NamespaceFilterParamDesc)] string? namespaceFilter = null,
         [Description(Cx.ClassFilterParamDesc)] string? classFilter = null) 
-      => await GetTools().GetClassesAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classFilter);
+      => await GetTools().GetClassesAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classFilter).ConfigureAwait(false);
 
     [McpTool(Cx.GetClassCmd, Cx.GetClassCmdDesc)]
     public static async Task<object> GetClassContentAsync(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.ClassIdParamDesc)] int classId) 
-      => await GetTools().GetClassContentAsync(projectName, classId);
+      => await GetTools().GetClassContentAsync(projectName, classId).ConfigureAwait(false);
 
     [McpTool(Cx.AddUpdateClassCmd, Cx.AddUpdateClassCmdDesc)]
     public static async Task<object> AddUpdateClassAsync(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.ClassContentParamDesc)] ClassContent classContent
         ) 
-      => await GetTools().AddUpdateClassAsync(projectName, classContent);
+      => await GetTools().AddUpdateClassAsync(projectName, classContent).ConfigureAwait(false);
 
 
     #endregion
@@ -136,22 +135,87 @@ namespace DaemonsMCP.Core {
         [Description(Cx.NamespaceFilterParamDesc)] string? namespaceFilter = null,
         [Description(Cx.ClassFilterParamDesc)] string? classFilter = null,
         [Description(Cx.MethodFilterParamDesc)] string? methodFilter = null)
-      => await GetTools().GetMethodsAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classFilter, methodFilter);
+      => await GetTools().GetMethodsAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classFilter, methodFilter).ConfigureAwait(false);
 
     [McpTool(Cx.GetClassMethodCmd, Cx.GetClassMethodCmdDesc)]
     public static async Task<object> GetMethodContentAsync(
       [Description(Cx.ProjectNameParamDesc)] string projectName,
       [Description(Cx.MethodIdParamDesc)] int methodId
-    ) => await GetTools().GetMethodContentAsync(projectName, methodId);
+    ) => await GetTools().GetMethodContentAsync(projectName, methodId).ConfigureAwait(false);
 
     [McpTool(Cx.AddUpdateMethodCmd, Cx.AddUpdateMethodCmdDesc)]
     public static async Task<object> AddUpdateMethodAsync(
       [Description(Cx.ProjectNameParamDesc)] string projectName,
       [Description(Cx.MethodContentParamDesc)] MethodContent methodContent
-    ) => await GetTools().AddUpdateMethodAsync(projectName, methodContent);
+    ) => await GetTools().AddUpdateMethodAsync(projectName, methodContent).ConfigureAwait(false);
 
 
     #endregion
 
+    #region Nodes Operations
+
+    [McpTool(Cx.GetItemTypesCmd, Cx.GetItemTypesCmdDesc)]
+    public static async Task<object> GetItemTypes([Description(Cx.ProjectNameParamDesc)] string projectName)
+      => await GetTools().GetItemTypes(projectName).ConfigureAwait(false);
+
+    [McpTool(Cx.AddUpdateItemTypeCmd, Cx.AddUpdateItemTypeCmdDesc)]
+    public static async Task<object> AddUpdateItemType(
+        [Description(Cx.ProjectNameParamDesc)] string projectName,
+        [Description(Cx.ItemTypeParamDesc)] ItemType type )
+      => await GetTools().AddUpdateItemType(projectName, type).ConfigureAwait(false);
+
+    [McpTool(Cx.GetStatusTypesCmd, Cx.GetStatusTypesCmdDesc)]
+    public static async Task<object> GetStatusTypes([Description(Cx.ProjectNameParamDesc)] string projectName)
+      => await GetTools().GetStatusTypes(projectName).ConfigureAwait(false);
+
+    [McpTool(Cx.AddUpdateStatusTypeCmd, Cx.AddUpdateStatusTypeCmdDesc)]
+    public static async Task<object> AddUpdateStatusType(
+        [Description(Cx.ProjectNameParamDesc)] string projectName,
+        [Description(Cx.StatusTypeParamDesc)] StatusType status)
+      => await GetTools().AddUpdateStatusType(projectName, status).ConfigureAwait(false);
+
+    [McpTool(Cx.GetNodesCmd, Cx.GetNodesCmdDesc)]
+    public static async Task<object> GetNodes(
+        [Description(Cx.ProjectNameParamDesc)] string projectName,
+        [Description(Cx.NodeIdParamDesc)] int? nodeId = null,
+        [Description(Cx.MaxDepthParamDesc)] int maxDepth = 1,
+        [Description(Cx.StatusFilterParamDesc)] string? statusFilter = null,
+        [Description(Cx.TypeFilterParamDesc)] string? typeFilter = null,
+        [Description(Cx.NameContainsParamDesc)] string? nameContains = null,
+        [Description(Cx.DetailsContainsParamDesc)] string? detailsContains = null)
+      => await GetTools().GetNodes(projectName, nodeId, maxDepth, statusFilter, typeFilter, nameContains, detailsContains).ConfigureAwait(false);
+
+    [McpTool(Cx.GetNodesByIdCmd, Cx.GetNodesByIdCmdDesc)]
+    public static async Task<object> GetNodesById(
+        [Description(Cx.ProjectNameParamDesc)] string projectName,
+        [Description(Cx.NodeIdParamDesc)] int nodeIds)
+      => await GetTools().GetNodeById(projectName, nodeIds).ConfigureAwait(false);
+
+    [McpTool(Cx.AddUpdateNodesCmd, Cx.AddUpdateNodesCmdDesc)]
+    public static async Task<object> AddUpdateNodes(
+        [Description(Cx.ProjectNameParamDesc)] string projectName,
+        [Description(Cx.NodesTreeParamDesc)] Nodes node)
+      => await GetTools().AddUpdateNode(projectName, node).ConfigureAwait(false);
+
+    [McpTool(Cx.AddUpdateNodesListCmd, Cx.AddUpdateNodesListCmdDesc)]
+    public static async Task<object> AddUpdateNodesList(
+      [Description(Cx.ProjectNameParamDesc)] string projectName,
+      [Description(Cx.NodesListTreeParamDesc)] List<Nodes> nodes
+      ) => await GetTools().AddUpdateNodeList(projectName, nodes).ConfigureAwait(false);
+
+    [McpTool(Cx.RemoveNodeCmd, Cx.RemoveNodeCmdDesc)]
+    public static async Task<object> RemoveNode(
+      [Description(Cx.ProjectNameParamDesc)] string projectName,
+      [Description(Cx.NodeIdParamDesc)] int nodeId,
+      [Description(Cx.RemoveStrategyParamDesc)] RemoveStrategy removeStrategy
+    ) => await GetTools().RemoveNode(projectName, nodeId, removeStrategy).ConfigureAwait(false);
+
+    [McpTool(Cx.SaveProjectRepoCmd, Cx.SaveProjectRepoCmdDesc)]
+    public static async Task<object> SaveProjectRepo([Description(Cx.ProjectNameParamDesc)] string projectName)
+      => await GetTools().SaveProjectRepo(projectName).ConfigureAwait(false);
+
+    
+
+    #endregion
   }
 }

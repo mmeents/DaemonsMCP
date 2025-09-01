@@ -33,6 +33,7 @@ namespace DaemonsMCP
               services.AddSingleton<ISecurityService, SecurityService>();
               services.AddSingleton<IValidationService, ValidationService>();              
               services.AddSingleton<IIndexRepository, IndexRepository>();
+              services.AddSingleton<IItemRepository, ItemRepository>();
 
               // Core services
               services.AddScoped<IProjectsService, ProjectService>();

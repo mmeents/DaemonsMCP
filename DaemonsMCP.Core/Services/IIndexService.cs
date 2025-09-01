@@ -9,7 +9,7 @@ namespace DaemonsMCP.Core.Services {
   public interface IIndexService: IDisposable {
     public bool Enabled { get; set; }
     public Task<OperationResult> RebuildIndexAsync(bool IsResync = false);
-    public IndexStatusResult GetIndexStatus();
+    public Task<IndexStatusResult> GetIndexStatus();
     public Task<ProjectIndexModel> ProcessFileAsync(ProjectIndexModel aProjectIndexModel, string filePath, bool IsResync);
 
     public new void Dispose();

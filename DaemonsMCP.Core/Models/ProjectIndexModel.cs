@@ -57,30 +57,12 @@ namespace DaemonsMCP.Core.Models {
       }
       IndexTables.LoadFromFile(IndexFilePath);
 
-      Files = IndexTables[Cx.FileTbl];
-      if (Files == null) {
-        Files = IndexTables.MakeFilesTable();          
-      } 
+      Files = IndexTables[Cx.FileTbl] ?? IndexTables.MakeFilesTable();
+      Classes = IndexTables[Cx.ClassesTbl] ?? IndexTables.MakeClassesTable();
+      Methods = IndexTables[Cx.MethodsTbl] ?? IndexTables.MakeMethodsTable();      
+      Properties = IndexTables[Cx.PropertiesTbl] ?? IndexTables.MakePropertiesTable();
+      Events = IndexTables[Cx.EventsTbl] ?? IndexTables.MakeEventsTable();
 
-      Classes = IndexTables[Cx.ClassesTbl];
-      if (Classes == null) {
-        Classes = IndexTables.MakeClassesTable();          
-      }
-
-      Methods = IndexTables[Cx.MethodsTbl];
-      if (Methods == null) {
-        Methods = IndexTables.MakeMethodsTable();          
-      }
-
-      Properties = IndexTables[Cx.PropertiesTbl];
-      if (Properties == null) {
-        Properties = IndexTables.MakePropertiesTable();          
-      }
-
-      Events = IndexTables[Cx.EventsTbl];
-      if (Events == null) {
-        Events = IndexTables.MakeEventsTable();          
-      }
       _watchService = new ProjectIndexWatchService(loggerFactory, this);
     }
 

@@ -185,7 +185,7 @@ namespace DaemonsMCP.Core {
 
     public async Task<object> GetIndexStatus() {
       try { 
-        var status = _indexService.GetIndexStatus();
+        var status = await _indexService.GetIndexStatus().ConfigureAwait(false);
         return JsonSerializer.Serialize(status);
       } catch (Exception ex) {
         var opResult = OperationResult.CreateFailure(Cx.StatusIndexCmd, $"Failed: {ex.Message}", ex);
@@ -196,7 +196,7 @@ namespace DaemonsMCP.Core {
     public async Task<object> ChangeIndexStatus( bool enabled) {
       try { 
         _indexService.Enabled = enabled;
-        var status = _indexService.GetIndexStatus();
+        var status = await _indexService.GetIndexStatus().ConfigureAwait(false);
         return JsonSerializer.Serialize(status);
       } catch (Exception ex) {
         var opResult = OperationResult.CreateFailure(Cx.ChangeStatusIndexCmd, $"Failed: {ex.Message}", ex);
@@ -274,7 +274,109 @@ namespace DaemonsMCP.Core {
 
     #endregion
 
+    #region Nodes Operations 
 
+    public async Task<object> GetItemTypes(string projectName) {
+      try { 
+        var itemTypes = await _projectsService.GetItemTypes(projectName).ConfigureAwait(false);
+        return JsonSerializer.Serialize(itemTypes);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("GetItemTypes", $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> AddUpdateItemType(string projectName, ItemType itemType) {
+      try { 
+        var result = await _projectsService.AddUpdateItemType(projectName, itemType);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("AddUpdateItemType", $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> GetStatusTypes(string projectName) {
+      try { 
+        var statusTypes = await _projectsService.GetStatusTypes(projectName).ConfigureAwait(false);
+        return JsonSerializer.Serialize(statusTypes);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("GetStatusTypes", $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> AddUpdateStatusType(string projectName, StatusType statusType) {
+      try { 
+        var result = await _projectsService.AddUpdateStatusType(projectName, statusType).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("AddUpdateStatusType", $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> GetNodes(string projectName, int? nodeId = null, int maxDepth = 1, string? statusFilter = null, string? typeFilter = null, string? nameContains = null, string? detailsContains = null) {
+      try { 
+        var nodes = await _projectsService.GetNodes(projectName, nodeId, maxDepth, statusFilter, typeFilter, nameContains, detailsContains).ConfigureAwait(false);
+        return JsonSerializer.Serialize(nodes);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("GetNodes", $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> GetNodeById(string projectName, int nodeId) {
+      try { 
+        var node = await _projectsService.GetNodeById(projectName, nodeId).ConfigureAwait(false);
+        return JsonSerializer.Serialize(node);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("GetNodeById", $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> AddUpdateNode(string projectName, Nodes node) {
+      try { 
+        var result = await _projectsService.AddUpdateNode(projectName, node).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("AddUpdateNode", $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> AddUpdateNodeList(string projectName, List<Nodes> nodes) {
+      try { 
+        var result = await _projectsService.AddUpdateNodeList(projectName, nodes).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("AddUpdateNodeList", $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> RemoveNode(string projectName, int nodeId, RemoveStrategy removeStrategy = RemoveStrategy.PreventIfHasChildren) {
+      try { 
+        var result = await _projectsService.RemoveNode(projectName, nodeId, removeStrategy).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("RemoveNode", $"Failed: {ex.Message}", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> SaveProjectRepo(string projectName) {
+      try {
+        var opResult = await _projectsService.SaveProjectRepo(projectName).ConfigureAwait(false);
+        return JsonSerializer.Serialize(opResult);
+      } catch (Exception ex) { 
+        var opResult = OperationResult.CreateFailure(Cx.SaveProjectRepoCmd, "failed", ex);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    #endregion
 
   }
 }

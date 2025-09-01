@@ -52,16 +52,20 @@ namespace DaemonsMCP.Core.Extensions {
     public const string GetClassMethodCmd = "get-class-method";
     public const string AddUpdateMethodCmd = "add-update-method";
             
-    public const string ListTasksCmd = "list-pending-tasks";
-    public const string GetNextTaskCmd = "get-next-pending-task";
-    public const string MarkTaskStatusCmd = "mark-task-status";
-    public const string AddUpdateTaskCmd = "add-task";
+    public const string GetItemTypesCmd = "list-item-types";
+    public const string GetStatusTypesCmd = "list-status-types";
+    public const string AddUpdateItemTypeCmd = "add-update-item-type";
+    public const string AddUpdateStatusTypeCmd = "add-update-status-type";
+        
+    public const string GetNodesCmd = "list-nodes";
+    public const string GetNodesByIdCmd = "get-nodes-by-id";
+    public const string AddUpdateNodesCmd = "add-update-nodes";
+    public const string AddUpdateNodesListCmd = "add-update-nodes-list";
+
+    public const string RemoveNodeCmd = "remove-node";
     
-    
-    public const string ListKnowledgeCmd = "list-knowledge";
-    public const string AddKnowledgeCmd = "add-knowledge";
-    public const string UpdateKnowledgeCmd = "update-knowledge";
-    public const string DeleteKnowledgeCmd = "delete-knowledge";
+    public const string SaveProjectRepoCmd = "save-project-repo";
+
 
     // Tool descriptions
     public const string ListProjectsDesc = "Gets list of available projects. A project is the configured name and the root folder allowed to access.";
@@ -91,17 +95,19 @@ namespace DaemonsMCP.Core.Extensions {
     public const string UpdateClassMethodCmdDesc = "Updates method by splicing new method over top of old one identified in the get.";
     public const string DeleteMethodCmdDesc = "Deletes a method by name within the specified class.";
 
-    public const string ListTasksCmdDesc = "lists the pending tasks stats";
-    public const string GetNextTaskCmdDesc = "Get the next pending task.  Getting the task with expectation that a call to mark-task-status will follow.";
-    public const string MarkTaskStatusCmdDesc = "Marks the status of the task. ";
-    public const string AddTaskCmdDesc = "Add a task or sub task by naming the parent task and a description.";
-    public const string UpdateTaskCmdDesc = "Update task description";
-    public const string DeleteTaskCmdDesc = "Delete the task.";
+    public const string GetItemTypesCmdDesc = "Lists all the types available for Nodes object. Pass object into add-update-item-type to modify. ";
+    public const string GetStatusTypesCmdDesc = "List all the status types available for Nodes objects. Pass objects into add-update-status-type to modify.";
+    public const string AddUpdateItemTypeCmdDesc = "Add update item type, use to update types listed by list-item-type. use id=0 to add new.";
+    public const string AddUpdateStatusTypeCmdDesc = "Add update status type, use to update status types listed by list-status-types. use id=0 to add new.";
 
-    public const string ListKnowledgeCmdDesc = "List important knowledge any worker should read when working with daemonsmcp server.";
-    public const string AddKnowledgeCmdDesc = "Adds a knowledge card to the list of important knowledge cards";
-    public const string UpdateKnowledgeCmdDesc = "Update a existing knowledge card with new details";
-    public const string DeleteKnowledgeCmdDesc = "Delete the identified knowledge card.";
+    public const string GetNodesCmdDesc = "List nodes command searches for item nodes recursivly maxDepth deep.  item nodes are trees of types and status as listed in each. use add-update-nodes to add or update the tree nodes. ";
+    public const string GetNodesByIdCmdDesc = "Get nodes by id, allows you to grab 1 tree recursiv by id maxLevels deep.";
+    public const string AddUpdateNodesCmdDesc = "Add update nodes command adds or updates depending on tree passed in.  if it has id non zero it tries to update otherwise it tries to add. Recursive adds updates all nodes passed in. ";
+
+    public const string AddUpdateNodesListCmdDesc = "Add update nodes list command adds or updates depending on list of trees passed in.  if it has id non zero it tries to update otherwise it tries to add. Recursive adds updates all nodes passed in. ";
+    public const string RemoveNodeCmdDesc = "Remove a node from the tree. Strategy options: PreventIfHasChildren (default), DeleteCascade, OrphanChildren, ReparentToGrandparent";    
+
+    public const string SaveProjectRepoCmdDesc = "Save project repo command writes Items and Types tables to disk. Should be needed as any update inherently calls save.";
 
 
     // Tool parameter descriptions
@@ -132,6 +138,23 @@ namespace DaemonsMCP.Core.Extensions {
     public const string MethodContentParamDesc = "The MethodContent object returned from GetClass or a modified version to update.";
     public const string MethodIdParamDesc = "The int ID of the Method in the Methods table.";
 
+    public const string NodeIdParamDesc = "The int Id of the node to get the tree for.";
+    public const string MaxDepthParamDesc = "The max depth to recurse when listing nodes, default is 1, meaning get the nodes children. 2 would get children and theirs. 0 will skip children.";
+    public const string StatusFilterParamDesc = "Filter nodes by status type name, uses string.Contains c# type filtering or null for all.";
+    public const string TypeFilterParamDesc = "Filter nodes by item type name, uses string.Contains c# type filtering or null for all.";
+    public const string NameContainsParamDesc = "Filter nodes by name, uses string.Contains c# type filtering or null for all.";
+    public const string DetailsContainsParamDesc = "Filter nodes by details, uses string.Contains c# type filtering or null for all.";
+    public const string NodesTreeParamDesc = "The Nodes tree object to add or update.";
+    public const string ItemTypeParamDesc = "The ItemType object to add or update, result record from get-item-type call.";
+    public const string StatusTypeParamDesc = "The StatusType object to add or update, result record from get-status-type call.";
+    public const string NodesListTreeParamDesc = "The List<Nodes> tree objects to add or update.";
+    public const string RemoveStrategyParamDesc = "How to handle child nodes: PreventIfHasChildren, DeleteCascade, OrphanChildren, or ReparentToGrandparent";
+
+    // Nodes Status and Type defaults
+    public const string TypeNone = "None";
+    public const string TypeInternalRoot = "Internal Categories";
+    public const string TypeStatusTypes = "Status Types";
+    public const string TypeItemTypes = "Item Types";
 
     // Debugging prefixes
     public const string Dd0 = "[DaemonsMCP][Debug]";
@@ -141,6 +164,27 @@ namespace DaemonsMCP.Core.Extensions {
     // Error Messages
     public const string InvalidSkippingProject = "Skipping invalid project configuration";
     public const string ErrorNoConfig = "AppConfig cannot be null";
+
+    // Storage and Process Management
+    public const string TypesTbl = "Types";
+    public const string TypeIdCol = "Id";
+    public const string TypeParentCol = "TypeId"; // self-referencing foreign key
+    public const string TypeEnumCol = "TypeEnum";
+    public const string TypeNameCol = "TypeName";
+    public const string TypeDescriptionCol = "Description";
+
+    public const string ItemsTbl = "Items";
+    public const string ItemIdCol = "Id";         // primary key   
+    public const string ItemParentCol = "ParentId"; // self-referencing foreign key
+    public const string ItemTypeIdCol = "TypeId"; // foreign key to Types table e.g. Bug, Feature, Task
+    public const string ItemStatusCol = "StatusTypeId"; // e.g. Pending, InProgress, Completed        
+    public const string ItemRankCol = "Rank";     // for ordering items of same parent
+    public const string ItemNameCol = "ItemName";
+    public const string ItemDetailsCol = "Details";    
+    public const string ItemCreatedCol = "Created"; // DateTime
+    public const string ItemModifiedCol = "Modified"; // DateTime
+    public const string ItemCompletedCol = "Completed"; // DateTime?
+
 
     // Index Table and column names    
     public const string FileTbl = "Files";

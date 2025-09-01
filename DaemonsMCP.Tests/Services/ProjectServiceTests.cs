@@ -1,31 +1,82 @@
 ﻿using DaemonsMCP.Core.Config;
 using DaemonsMCP.Core.Services;
 using DaemonsMCP.Core.Models;
+using DaemonsMCP.Core.Repositories;
 using FluentAssertions;
 using Moq;
+using Microsoft.Extensions.Logging;
+using Serilog.Core;
+using Serilog;
 
 namespace DaemonsMCP.Tests.Services
 {
     [TestClass]
     public class ProjectServiceTests
     {
-        private Mock<IAppConfig> _mockConfig;
-        private ProjectService _projectService;
+        private IAppConfig _config;
+        private Mock<IAppConfig> _mockConfig = new Mock<IAppConfig>();
+        private readonly Mock<IItemRepository> _mockItemRepository = new();
+        private IItemRepository _itemRepository;
+        private ProjectService _projectService;        
         private Dictionary<string, ProjectModel> _testProjects;
+        private readonly ILoggerFactory _loggerFactory;
+        private ProjectService _service;
+        private readonly IValidationService _validationService;
+        private readonly ISecurityService _securityService;
 
-        [TestInitialize]
-        public void TestInitialize()
+
+        public ProjectServiceTests()
         {
-            _mockConfig = new Mock<IAppConfig>();
-            _testProjects = new Dictionary<string, ProjectModel>
-            {
-                ["Project1"] = new ProjectModel("Project1", "First test project", "C:\\TestProjects\\Project1"),
-                ["Project2"] = new ProjectModel("Project2", "Second test project", "C:\\TestProjects\\Project2"),
-                ["DisabledProject"] = new ProjectModel("DisabledProject", "Disabled project", "C:\\TestProjects\\Disabled")
+          //var testLogsPath = Path.Combine(Path.GetTempPath(), "DaemonsMCP-Tests", "logs");
+          //Directory.CreateDirectory(testLogsPath);
+
+          var logsPath = Path.Combine(AppContext.BaseDirectory, "logs");
+          Directory.CreateDirectory(logsPath);
+
+          Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Warning() // Adjust as needed
+            .MinimumLevel.Override("Microsoft", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning)) // Reduce Microsoft logging noise
+            .MinimumLevel.Override("System", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning))
+            .Enrich.FromLogContext()
+            .WriteTo.File(
+               path: Path.Combine(logsPath, "daemons-.log"),
+               rollingInterval: RollingInterval.Day,
+               retainedFileCountLimit: 7,
+               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"
+            )
+            .WriteTo.File(
+               path: Path.Combine(logsPath, "daemons-errors-.log"),
+               rollingInterval: RollingInterval.Day,
+               retainedFileCountLimit: 30,
+               restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning, // Only warnings and errors
+               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"
+            )
+            .CreateLogger();
+
+          _loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog(Log.Logger));      // Constructor logic if needed
+            _config = new AppConfig(_loggerFactory);
+            _securityService = new SecurityService(_loggerFactory, _config);
+            _validationService = new ValidationService(_config, _securityService);
+            _itemRepository =  new ItemRepository( _config, _loggerFactory);
+            _service = new ProjectService(_config, _itemRepository);
+
+            _testProjects = new Dictionary<string, ProjectModel> {
+              ["Project1"] = new ProjectModel("Project1", "First test project", "C:\\TestProjects\\Project1"),
+              ["Project2"] = new ProjectModel("Project2", "Second test project", "C:\\TestProjects\\Project2"),
+              ["DisabledProject"] = new ProjectModel("DisabledProject", "Disabled project", "C:\\TestProjects\\Disabled")
             };
             _mockConfig.Setup(c => c.Projects).Returns(_testProjects);
-            _projectService = new ProjectService(_mockConfig.Object);
+            _projectService = new ProjectService(_mockConfig.Object, _mockItemRepository.Object);
+
         }
+
+    [TestInitialize]
+        public void TestInitialize()
+        {
+
+        }
+
+    #region GetProjectsAsync Tests
 
         [TestMethod]
         public async Task GetProjectsAsync_WithConfiguredProjects_ShouldReturnAllProjects()
@@ -128,5 +179,25 @@ namespace DaemonsMCP.Tests.Services
         {
             // TODO: Implement test for read-only project collection
         }
+    #endregion
+
+
+        [TestMethod]
+        public async Task GetItemTypes_WithValidProject_ShouldReturnItemTypes() {
+          var projects = await _service.GetProjectsAsync().ConfigureAwait(false);
+          foreach (var project in projects) {
+
+
+            var results3 = await _service.GetNodes(project.Name, nodeId:null, maxDepth:2).ConfigureAwait(false);
+            results3.Should().NotBeNull();
+
+
+          }
+
+
+
+        }
+
+
     }
 }

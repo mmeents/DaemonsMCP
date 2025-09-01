@@ -59,20 +59,23 @@ namespace DaemonsMCP.Core.Services {
         }
     }
 
-    public IndexStatusResult GetIndexStatus() {
-      var statusList = new IndexStatusResult();
-      statusList.Enabled = _isEnabled;
-      foreach (var project in _projectIndexModels) {
-        if (project.ProjectIndex == null) continue;
-        var status = new IndexProjectResult {
-          ProjectName = project.Name,          
-          FileCount = project.ProjectIndex.GetFileCount(),
-          ClassCount = project.ProjectIndex.GetClassCount(),
-          MethodCount = project.ProjectIndex.GetMethodCount(),          
-        };
-        statusList.Projects.Add(status);
-      }
-      return statusList;
+    public async Task<IndexStatusResult> GetIndexStatus() {
+      return await Task.Run(() => {
+        var statusList = new IndexStatusResult();
+        statusList.Enabled = _isEnabled;
+        foreach (var project in _projectIndexModels) {
+          if (project.ProjectIndex == null) continue;
+          var status = new IndexProjectResult {
+            ProjectName = project.Name,
+            FileCount = project.ProjectIndex.GetFileCount(),
+            ClassCount = project.ProjectIndex.GetClassCount(),
+            MethodCount = project.ProjectIndex.GetMethodCount(),
+          };
+          statusList.Projects.Add(status);
+        }
+        return statusList;
+      }).ConfigureAwait(false);
+      
     }
 
     public bool Enabled { 
@@ -203,7 +206,7 @@ namespace DaemonsMCP.Core.Services {
           }
           
         }
-        var status = GetIndexStatus();        
+        var status = await GetIndexStatus().ConfigureAwait(false);        
 
         return OperationResult.CreateSuccess("GetIndex", "Index rebuilt successfully", status);
       } catch (Exception ex) {
