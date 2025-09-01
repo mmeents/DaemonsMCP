@@ -195,8 +195,13 @@ namespace DaemonsMCP.Core.Services {
               projectIndex.RemoveFileAndAllRelated(filesToRemove);
             }          
 
-            foreach (var filePath in projectFiles) {               
-              projectIndex = await ProcessFileAsync(projectIndex, filePath, IsResync).ConfigureAwait(false);
+            foreach (var filePath in projectFiles) {
+              try { 
+                projectIndex = await ProcessFileAsync(projectIndex, filePath, IsResync).ConfigureAwait(false);
+                _logger.LogDebug($"Indexed: {filePath}");
+              } catch (Exception ex) {
+                _logger.LogError(ex, $"Error processing file {filePath} in project {project.Name}: {ex.Message}");
+              }
             }
 
           } catch (Exception ex) {
@@ -250,8 +255,10 @@ namespace DaemonsMCP.Core.Services {
         var classes = namespaceDecl.DescendantNodes().OfType<ClassDeclarationSyntax>();
         foreach (var classDecl in classes) {
           var className = classDecl.Identifier.Text;
+
           int startLine = classDecl.GetLocation().GetLineSpan().StartLinePosition.Line;
           int endLine = classDecl.GetLocation().GetLineSpan().EndLinePosition.Line;
+
           IndexClassItem indexClassItem = new IndexClassItem() {
             FileItemId = indexFileItem.Id,
             FileName = filePath,
@@ -388,12 +395,13 @@ namespace DaemonsMCP.Core.Services {
         if (existingFileItem != null &&
             existingFileItem.Size == fileInfo.Length &&
             Math.Abs((existingFileItem.Modified - fileInfo.LastWriteTimeUtc).TotalSeconds) < 1) {
+          _logger.LogDebug($"Re-index skipped: {Path.GetFileName(filePath)} detected no change");
           return; // No meaningful change
         }
 
         await ProcessFileAsync(project.ProjectIndex, filePath, false);
 
-        if (Cx.IsDebug) _logger.LogDebug($"Re-indexed: {Path.GetFileName(filePath)}");
+        _logger.LogDebug($"Re-indexed: {Path.GetFileName(filePath)}");
 
       } catch (Exception ex) {
         _logger.LogDebug($"Error indexing {filePath}: {ex.Message}");

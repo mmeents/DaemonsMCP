@@ -24,7 +24,8 @@ namespace DaemonsMCP.Tests.Services {
     private readonly IClassService? _classService2;
     private readonly IIndexRepository? _indexRepository;
     private readonly ISecurityService _securityService;
-    private readonly Mock<IValidationService>? _mockValidationService;
+    private readonly Mock<IValidationService>? _mockValidationService = new();
+    private readonly IValidationService _validationService ;
     private readonly Mock<ILogger<AppConfig>> _appConfigLogger = new();
 
     public ClassServiceTests() { 
@@ -34,7 +35,8 @@ namespace DaemonsMCP.Tests.Services {
       var appConfig = new AppConfig( _mockLoggerFactory.Object );
       _securityService = new SecurityService(_mockLoggerFactory.Object, appConfig);
       _indexRepository = new IndexRepository(_mockLoggerFactory.Object, appConfig, _mockValidationService.Object, _securityService);
-      _classService2 = new ClassService( _mockLoggerFactory.Object, _indexRepository, _mockValidationService.Object);
+      _validationService = new ValidationService(appConfig, _securityService);
+      _classService2 = new ClassService( _mockLoggerFactory.Object, _indexRepository, _validationService);
     }
 
     [TestMethod]
@@ -61,7 +63,7 @@ namespace DaemonsMCP.Tests.Services {
     [TestMethod]
     public async Task GetClassesAsync_ShouldReturnClassesFromConfig() { 
 
-      var result = await _classService2.GetClassesAsync("DaemonsMCP1", 1, 20).ConfigureAwait(false);
+      var result = await _classService2.GetClassesAsync("DaemonsMCP", 1, 20).ConfigureAwait(false);
      
 
       // Assert  testing inspected 30 total classes in DaemonsMCP1 project
@@ -74,7 +76,7 @@ namespace DaemonsMCP.Tests.Services {
     [TestMethod]
     public async Task GetClassesAsync_ShouldReturnClassesFromConfig_TestPaging() {
 
-      var result = await _classService2.GetClassesAsync("DaemonsMCP1", 2, 25).ConfigureAwait(false);
+      var result = await _classService2.GetClassesAsync("DaemonsMCP", 2, 25).ConfigureAwait(false);
       
       // Assert  testing inspected 30 total classes in DaemonsMCP1 project
       Assert.IsNotNull(result);
@@ -86,9 +88,9 @@ namespace DaemonsMCP.Tests.Services {
     [TestMethod]
     public async Task GetClassesAsync_ShouldReturnClassesFromConfig_TestFilter() {
 
-      var result = await _classService2.GetClassesAsync("DaemonsMCP2", 1, 100, "DaemonsMCP.Tests.Services").ConfigureAwait(false);
+      var result = await _classService2.GetClassesAsync("PackedTables.NET", 1, 100, namespaceFilter: "PackedTables.NET").ConfigureAwait(false);
 
-      var result2 = await _classService2.GetClassesAsync("DaemonsMCP2", 1, 100, classNameFilter: "ClassServiceTests").ConfigureAwait(false);
+      var result2 = await _classService2.GetClassesAsync("DaemonsMCP", 1, 100, classNameFilter: "ClassServiceTests").ConfigureAwait(false);
 
       // Assert  testing inspected 30 total classes in DaemonsMCP1 project
       Assert.IsNotNull(result);
@@ -107,7 +109,7 @@ namespace DaemonsMCP.Tests.Services {
     [TestMethod]
     public async Task GetClassContentAsync_ShouldReturnClassContent() { 
 
-      var result = await _classService2.GetClassContentAsync("DaemonsMCP2", 85);
+      var result = await _classService2.GetClassContentAsync("DaemonsMCP", 143);
       var resultJson = JsonSerializer.Serialize(result);
       Console.Write(result);
 

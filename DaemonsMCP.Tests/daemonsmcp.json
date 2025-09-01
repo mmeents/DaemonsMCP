@@ -6,7 +6,7 @@
     },
     "projects": [
         {
-            "name": "DaemonsMCP2",
+            "name": "DaemonsMCP",
             "description": "DaemonsMCP V2 Di based version",
             "path": "C:\\MCPSandbox\\DaemonsMCPDev",
             "enabled": true

@@ -530,8 +530,8 @@ namespace DaemonsMCP.Core.Models {
         return results; // Return empty list if no classes in index
       }
       try {
-        bool isNamespaceFilter = !string.IsNullOrWhiteSpace(namespaceFilter);
-        bool isClassNameFilter = !string.IsNullOrWhiteSpace(classNameFilter);
+        bool isNamespaceFilter = !string.IsNullOrEmpty(namespaceFilter);
+        bool isClassNameFilter = !string.IsNullOrEmpty(classNameFilter);
 
         int skipTo = (PageNo - 1) * maxResults;
         int found = 0;
@@ -549,8 +549,8 @@ namespace DaemonsMCP.Core.Models {
             var fileItem = GetFileItemById(classItem.FileItemId);
             if (fileItem != null) {
 
-              isNamespaceMatch = isNamespaceFilter && Classes.Current[Cx.ClassesNamespaceCol].ValueString.Contains(namespaceFilter, StringComparison.OrdinalIgnoreCase);
-              isClassNameMatch = isClassNameFilter && Classes.Current[Cx.ClassesNameCol].ValueString.Contains(classNameFilter, StringComparison.OrdinalIgnoreCase);
+              isNamespaceMatch = (!string.IsNullOrEmpty(namespaceFilter)) && Classes.Current[Cx.ClassesNamespaceCol].ValueString.Contains(namespaceFilter, StringComparison.OrdinalIgnoreCase);
+              isClassNameMatch = (!string.IsNullOrEmpty(classNameFilter)) && Classes.Current[Cx.ClassesNameCol].ValueString.Contains(classNameFilter, StringComparison.OrdinalIgnoreCase);
 
               if (isNamespaceMatch || isClassNameMatch || (!isNamespaceFilter && !isClassNameFilter)) {
                 found++;
@@ -1023,6 +1023,7 @@ namespace DaemonsMCP.Core.Models {
         }
 
         await this.IndexService.ProcessFileAsync(this, fullPath, true).ConfigureAwait(false);
+        _logger.LogDebug("Indexed file: {filePath}", fullPath);
 
         var newMethodIndex = GetMethodByName(methodContent.Namespace, methodContent.ClassName, methodContent.MethodName); // get the new class info
         var newMethodContent = await GetMethodContentById(newMethodIndex.Id).ConfigureAwait(false);

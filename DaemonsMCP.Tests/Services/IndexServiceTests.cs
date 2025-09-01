@@ -61,7 +61,7 @@ namespace DaemonsMCP.Tests.Services {
     public async Task RebuildIndex_ShouldRebuildIndexSuccessfully() {
           
       // Act
-      var result = await _indexService.RebuildIndexAsync(true);
+      var result = await _indexService.RebuildIndexAsync(false);
       // Assert
       Assert.IsTrue(result.Success, "Index rebuild should succeed");
       _indexService?.Dispose();
