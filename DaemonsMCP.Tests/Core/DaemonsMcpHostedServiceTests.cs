@@ -1,6 +1,7 @@
 ﻿using DaemonsMCP.Core;
 using DaemonsMCP.Core.Config;
 using DaemonsMCP.Core.Models;
+using DaemonsMCP.Core.Services;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ namespace DaemonsMCP.Tests.Core
         private Mock<IServiceScopeFactory> _mockScopeFactory;
         private Mock<IAppConfig> _mockConfig;
         private Mock<ILogger<DaemonsMcpHostedService>> _mockLogger;
+        private Mock<IIndexService> _mockIndexService;
         private DaemonsMcpHostedService _hostedService;
         private CancellationTokenSource _cancellationTokenSource;
 
@@ -27,7 +29,8 @@ namespace DaemonsMCP.Tests.Core
             _mockScopeFactory = new Mock<IServiceScopeFactory>();
             _mockConfig = new Mock<IAppConfig>();
             _mockLogger = new Mock<ILogger<DaemonsMcpHostedService>>();
-            
+            _mockIndexService = new Mock<IIndexService>();
+
             _cancellationTokenSource = new CancellationTokenSource();
 
             // Setup service scope creation
@@ -36,7 +39,7 @@ namespace DaemonsMCP.Tests.Core
             _mockScopeFactory.Setup(f => f.CreateScope()).Returns(_mockServiceScope.Object);
             _mockServiceScope.Setup(s => s.ServiceProvider).Returns(_mockServiceProvider.Object);
 
-            _hostedService = new DaemonsMcpHostedService(_mockServiceProvider.Object, _mockLogger.Object);
+            _hostedService = new DaemonsMcpHostedService(_mockServiceProvider.Object, _mockLogger.Object, _mockIndexService.Object);
         }
 
         [TestCleanup]

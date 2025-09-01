@@ -1,4 +1,5 @@
 ﻿using DaemonsMCP.Core.Config;
+using DaemonsMCP.Core.Services;
 using MCPSharp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,9 +11,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DaemonsMCP.Core {
-  public class DaemonsMcpHostedService(IServiceProvider serviceProvider, ILogger<DaemonsMcpHostedService> logger) : BackgroundService {
+  public class DaemonsMcpHostedService(IServiceProvider serviceProvider, ILogger<DaemonsMcpHostedService> logger, IIndexService indexService) : BackgroundService {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly ILogger<DaemonsMcpHostedService> _logger = logger;
+    private readonly IIndexService _indexService = indexService;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
       _logger.LogInformation("DaemonsMCP Service starting...");
