@@ -198,14 +198,14 @@ namespace DaemonsMCP.Core.Extensions {
     public const string ClassesFileIdCol = "FilesId"; // foreign key to Files table
     public const string ClassesFileNameCol = "FileName";
     public const string ClassesNamespaceCol = "Namespace";
-    public const string ClassesNameCol = "MethodName";
+    public const string ClassesNameCol = "Name";
     public const string ClassesLineStartCol = "LineStart";
     public const string ClassesLineEndCol = "LineEnd";
 
     public const string MethodsTbl = "Methods";
     public const string MethodsIdCol = "Id";
     public const string MethodsClassIdCol = "ClassId";
-    public const string MethodsNameCol = "MethodName";
+    public const string MethodsNameCol = "Name";
     public const string MethodsReturnTypeCol = "ReturnType";
     public const string MethodsParametersCol = "Parameters"; // JSON string of parameters
     public const string MethodsLineStartCol = "LineStart";
@@ -214,7 +214,7 @@ namespace DaemonsMCP.Core.Extensions {
     public const string PropertiesTbl = "Properties";
     public const string PropertiesIdCol = "Id";
     public const string PropertiesClassIdCol = "ClassId";
-    public const string PropertiesNameCol = "MethodName";
+    public const string PropertiesNameCol = "Name";
     public const string PropertiesTypeCol = "Type";
     public const string PropertiesLineStartCol = "LineStart";
     public const string PropertiesLineEndCol = "LineEnd";
@@ -224,7 +224,7 @@ namespace DaemonsMCP.Core.Extensions {
     public const string EventsTbl = "Events";
     public const string EventsIdCol = "Id";
     public const string EventsClassIdCol = "ClassId";
-    public const string EventsNameCol = "MethodName";
+    public const string EventsNameCol = "Name";
     public const string EventsTypeCol = "Type"; // Type of the event handler
     public const string EventsLineStartCol = "LineStart";
     public const string EventsLineEndCol = "LineEnd";

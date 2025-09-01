@@ -42,7 +42,10 @@
             ".txt",
             ".json",
             ".resx",
-            ".log"
+            ".log",
+            ".pktbs",
+            ".xml",
+            ".pas"
         ],
         "maxFileSize": "10MB",
         "allowWrite": true,
