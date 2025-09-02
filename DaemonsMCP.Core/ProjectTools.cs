@@ -10,7 +10,7 @@ using MCPSharp;
 namespace DaemonsMCP.Core {
 
   /// <summary>
-  /// Project management tools for DaemonsMCP
+  /// Project management tools for DaemonsMCP, note this out of date and unused. see DaemonsTools.cs for current tools.
   /// </summary>
   public class ProjectTools {
     private readonly AppConfig _config;

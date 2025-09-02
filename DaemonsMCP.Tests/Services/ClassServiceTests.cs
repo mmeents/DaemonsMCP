@@ -109,7 +109,7 @@ namespace DaemonsMCP.Tests.Services {
     [TestMethod]
     public async Task GetClassContentAsync_ShouldReturnClassContent() { 
 
-      var result = await _classService2.GetClassContentAsync("DaemonsMCP", 143);
+      var result = await _classService2.GetClassContentAsync("DaemonsMCP",156);
       var resultJson = JsonSerializer.Serialize(result);
       Console.Write(result);
 

@@ -244,6 +244,8 @@ namespace DaemonsMCP.Core.Services {
 
       // Parse the C# file to extract classes, methods, properties
       var fileContent = await File.ReadAllTextAsync(filePath, Encoding.UTF8).ConfigureAwait(false);
+      var lines = fileContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
       if (string.IsNullOrWhiteSpace(fileContent)) {
         return aProjectIndexModel; // Skip empty files
       }
@@ -258,6 +260,7 @@ namespace DaemonsMCP.Core.Services {
 
           int startLine = classDecl.GetLocation().GetLineSpan().StartLinePosition.Line;
           int endLine = classDecl.GetLocation().GetLineSpan().EndLinePosition.Line;
+          startLine = FindClassStartCutLine(lines, startLine);
 
           IndexClassItem indexClassItem = new IndexClassItem() {
             FileItemId = indexFileItem.Id,
@@ -317,6 +320,62 @@ namespace DaemonsMCP.Core.Services {
       return aProjectIndexModel;
     }
 
+    private int FindClassStartCutLine(string[]? lines, int reportedStartLine) {
+      // sanity check is a bit more. reported class is inside start line but attributes or comments pushes that back. 
+      // so we backtrack to find the line to cut from to include those.
+      if (lines == null || lines.Length == 0) return reportedStartLine;
+      bool ClassFound = false;
+      int classLine = -1;
+      int startLine = reportedStartLine;
+
+      if (startLine > 0) { 
+        var line = lines[startLine].Trim();
+        if (line.StartsWith("class ") || line.Contains(" class ")) {
+          ClassFound = true;
+          classLine = startLine;
+        } else { 
+          if (startLine +1 < lines.Length) {
+            line = lines[startLine+1].Trim();
+            if (line.StartsWith("class ") || line.Contains(" class ")) {
+              ClassFound = true;
+              classLine = startLine + 1;
+            } else if (startLine -1>=0) {
+              line = lines[startLine-1].Trim();
+              if (line.StartsWith("class ") || line.Contains(" class ")) {
+                ClassFound = true;
+                classLine = startLine - 1;
+              }
+            }
+          }
+          if (!ClassFound && startLine + 2 < lines.Length) {
+            line = lines[startLine + 2].Trim();
+            if (line.StartsWith("class ") || line.Contains(" class ")) {
+              ClassFound = true;
+              classLine = startLine + 2;
+            } else if (startLine - 2 >= 0) {
+              line = lines[startLine - 2].Trim();
+              if (line.StartsWith("class ") || line.Contains(" class ")) {
+                ClassFound = true;
+                classLine = startLine - 2;
+              }
+            }
+          }
+        }
+      }
+
+      if (ClassFound) {
+        startLine = classLine;
+        while (startLine > 0 && startLine - 1 > 0) {
+          var line = lines[startLine - 1].Trim();
+          if (line.Contains("}") || line.Contains("{") || line == "") {  // Stop at block boundaries or empty lines
+            break; // Found the class declaration line
+          }
+          startLine--;
+        }
+      }
+
+      return startLine;
+    }
 
     private async Task ProcessQueueBatchAsync(IndexProjectItem project) {
 
