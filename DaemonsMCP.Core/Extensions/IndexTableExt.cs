@@ -77,5 +77,24 @@ namespace DaemonsMCP.Core.Extensions {
       return Events;
     }
 
+
+    public static List<IndexFileItem> RemoveFileRange(this List<IndexFileItem> fileItems, HashSet<string> files) { 
+        var toRemove = fileItems.Where( f => files.Contains(  f.FilePathName));
+        foreach( var rem in toRemove ) {
+          fileItems.Remove(rem);
+        }
+        return fileItems;
+    }
+
+    public static List<IndexClassItem> Subtract(this List<IndexClassItem> classItems, IndexClassItem minusItem) {         
+      classItems.RemoveAll( c => c.Name == minusItem.Name && c.Namespace == minusItem.Namespace); 
+      return classItems;
+    }
+
+    public static List<IndexMethodItem> Subtract(this List<IndexMethodItem> methodItems, IndexMethodItem minusItem) {         
+      methodItems.RemoveAll( m => m.Name == minusItem.Name && m.ClassId == minusItem.ClassId); 
+      return methodItems;
+    }
+
   }
 }

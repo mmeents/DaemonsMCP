@@ -223,7 +223,7 @@ namespace DaemonsMCP.Core.Models {
     }
 
     public StatusType? GetStatusTypeByName(string? name) {
-      if (string.IsNullOrWhiteSpace(name)) return null;
+      if (string.IsNullOrEmpty(name)) return null;
       var candidates = TypesTable.Rows.Where(kvp => kvp.Value[Cx.TypeParentCol].Value.AsInt32() == statusTypesId
         && string.Equals(kvp.Value[Cx.TypeNameCol].ValueString, name));
       if (candidates.Any()) {
@@ -335,7 +335,7 @@ namespace DaemonsMCP.Core.Models {
       if (ItemsTable.Rows.TryGetValue(id, out RowModel? row)) {
         if (row == null) return null;
         var completedStr = row[Cx.ItemCompletedCol].ValueString;
-        DateTime? completedD = string.IsNullOrWhiteSpace(completedStr) ? null : completedStr.AsDateTime();
+        DateTime? completedD = string.IsNullOrEmpty(completedStr) ? null : completedStr.AsDateTime();
         int typeId = row[Cx.ItemTypeIdCol].Value.AsInt32();
         int statusId = row[Cx.ItemStatusCol].Value.AsInt32();
         var result = new Nodes() {
@@ -464,10 +464,10 @@ namespace DaemonsMCP.Core.Models {
       if (node == null) {
         throw new ArgumentException("Node cannot be null");
       }
-      if (string.IsNullOrWhiteSpace(node.Name)) {
+      if (string.IsNullOrEmpty(node.Name)) {
         throw new ArgumentException("Node must have a name");
       }
-      if (string.IsNullOrWhiteSpace(node.TypeName)) {
+      if (string.IsNullOrEmpty(node.TypeName)) {
         node.TypeId = nullTypeId;
       } else {
         var itype = GetItemTypeByName(node.TypeName);
@@ -479,7 +479,7 @@ namespace DaemonsMCP.Core.Models {
           node.TypeId = itype.Id;
         }
       }
-      if (string.IsNullOrWhiteSpace(node.Status)) {
+      if (string.IsNullOrEmpty(node.Status)) {
         node.StatusId = nullTypeId;
       } else {
         var astatus = GetStatusTypeByName(node.Status);

@@ -70,6 +70,7 @@ namespace DaemonsMCP.Core.Services {
             FileCount = project.ProjectIndex.GetFileCount(),
             ClassCount = project.ProjectIndex.GetClassCount(),
             MethodCount = project.ProjectIndex.GetMethodCount(),
+            IndexQueuedCount = project.ProjectIndex.ChangeQueue?.Count ?? 0
           };
           statusList.Projects.Add(status);
         }
@@ -161,6 +162,7 @@ namespace DaemonsMCP.Core.Services {
         }
       } // End of finally block
     }
+    
 
     /// <summary>
     /// RebuildIndexAsync builds the index for each configured project by scanning all .cs
@@ -172,20 +174,21 @@ namespace DaemonsMCP.Core.Services {
     /// <returns></returns>
     public async Task<OperationResult> RebuildIndexAsync(bool IsResync = false) {
       try {
-        string indexData = string.Empty;
-        
+        string indexData = string.Empty;        
         foreach (var project in _projectIndexModels) {
-          List<string> projectFiles = new();
-          var fullPath = Path.GetFullPath( project.Path);
-          var files = Directory.GetFiles(fullPath, "*.cs", SearchOption.AllDirectories)
-             .Where(file => _securityService.IsFileAllowed(file))
-             .ToHashSet(StringComparer.OrdinalIgnoreCase);          
 
-          projectFiles.AddRange(files);
-          var projectIndex = project.ProjectIndex;
+          var projectIndex = project.ProjectIndex;                    // work out the project index object.
           if (projectIndex == null) {
             throw new InvalidOperationException($"Project index not found for project: {project.Name}");
           }
+          
+          List<string> projectFiles = new();                                  // reset list of files to index by project 
+          var fullPath = Path.GetFullPath( project.Path);
+          var files = Directory.GetFiles(fullPath, "*.cs", SearchOption.AllDirectories)
+             .Where(file => _securityService.IsFileAllowed(file))             // get the list of files to index
+             .ToHashSet(StringComparer.OrdinalIgnoreCase);          
+
+          projectFiles.AddRange(files);                              // add to the list of files to index          
 
           try {  
             // Phase 2: Cleanup - Remove files that no longer exist
@@ -219,6 +222,8 @@ namespace DaemonsMCP.Core.Services {
       }
     }
 
+    private List<IndexClassItem> indexClassItemsByFile = new();
+    private List<IndexMethodItem> indexMethodItemsByClass = new();
     public async Task<ProjectIndexModel> ProcessFileAsync(ProjectIndexModel aProjectIndexModel, string filePath, bool IsResync) {
 
       var fileInfo = new FileInfo(filePath);
@@ -240,13 +245,15 @@ namespace DaemonsMCP.Core.Services {
         indexFileItem.Modified = fileInfo.LastWriteTimeUtc;
         aProjectIndexModel.UpdateFileItem(indexFileItem);
       }
-      aProjectIndexModel.ClearClassIndex(indexFileItem); // Clear existing class index for this file
+
+      indexClassItemsByFile = aProjectIndexModel.GetAllClassItems(indexFileItem.Id);
+      //aProjectIndexModel.ClearClassIndex(indexFileItem); // Clear existing class index for this file
 
       // Parse the C# file to extract classes, methods, properties
       var fileContent = await File.ReadAllTextAsync(filePath, Encoding.UTF8).ConfigureAwait(false);
       var lines = fileContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
 
-      if (string.IsNullOrWhiteSpace(fileContent)) {
+      if (string.IsNullOrEmpty(fileContent)) {
         return aProjectIndexModel; // Skip empty files
       }
       var syntaxTree = CSharpSyntaxTree.ParseText(fileContent);
@@ -270,7 +277,8 @@ namespace DaemonsMCP.Core.Services {
             LineStart = startLine,
             LineEnd = endLine
           };
-          indexClassItem = aProjectIndexModel.InsertClassItem(indexClassItem);
+          indexClassItem = aProjectIndexModel.AddUpdateClassItem(indexClassItem);       // update to table
+          indexClassItemsByFile.Subtract(indexClassItem);                               // remove from in-memory list of items to delete
 
           var methods = classDecl.DescendantNodes().OfType<MethodDeclarationSyntax>()
             .Select(m => new IndexMethodItem() {
@@ -282,10 +290,17 @@ namespace DaemonsMCP.Core.Services {
               LineEnd = m.GetLocation().GetLineSpan().EndLinePosition.Line 
             }).ToList();
 
+          indexMethodItemsByClass = aProjectIndexModel.GetAllMethodItemsByClass(indexClassItem.Id);
+
           foreach (var method in methods) {
-            aProjectIndexModel.InsertMethodItem(method);
+            aProjectIndexModel.AddUpdateMethodItem(method);
+            indexMethodItemsByClass.Subtract(method);                      // remove from in-memory list of items to delete
           }
-                    
+
+          foreach (var remMethod in indexMethodItemsByClass) {             // remove any methods not found in this pass for class.
+            aProjectIndexModel.DeleteMethodItem(remMethod);
+          }
+          /*   Removing until needed.       
           var properties = classDecl.DescendantNodes().OfType<PropertyDeclarationSyntax>()
             .Select(p => new IndexPropertyItem() {
               Name = p.Identifier.Text,
@@ -312,9 +327,13 @@ namespace DaemonsMCP.Core.Services {
 
           foreach (var eventItem in events) {
             aProjectIndexModel.InsertEventItem(eventItem);
-          }
+          }  */
 
         } // End of classes in namespace
+
+        foreach (var remClass in indexClassItemsByFile) {  // remove any classes not found in this pass for file.
+          aProjectIndexModel.DeleteClassItem(remClass);
+        }
       }  // End of namespace declarations
 
       return aProjectIndexModel;

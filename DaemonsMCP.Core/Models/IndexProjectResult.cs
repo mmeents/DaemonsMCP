@@ -13,6 +13,7 @@ namespace DaemonsMCP.Core.Models {
     public int FileCount { get; set; } = 0;
     public int ClassCount { get; set; } = 0;
     public int MethodCount { get; set; } = 0;
+    public int IndexQueuedCount { get; set; } = 0;
   }
 
 }

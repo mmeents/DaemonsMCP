@@ -99,8 +99,8 @@ namespace DaemonsMCP.Core.Config
 
         foreach (var projectConfig in _config.Projects.Where(p => p.Enabled)) {
           // Validate project configuration
-          if (string.IsNullOrWhiteSpace(projectConfig.Name) ||
-              string.IsNullOrWhiteSpace(projectConfig.Path)) {
+          if (string.IsNullOrEmpty(projectConfig.Name) ||
+              string.IsNullOrEmpty(projectConfig.Path)) {
             if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Skipping invalid project configuration");
             continue;
           }

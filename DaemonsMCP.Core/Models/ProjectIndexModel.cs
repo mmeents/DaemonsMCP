@@ -194,7 +194,7 @@ namespace DaemonsMCP.Core.Models {
     }
 
     public IndexClassItem? GetClassByName( string classNamespace, string className) {
-      if (Classes.Rows.IsEmpty || string.IsNullOrWhiteSpace(classNamespace) || string.IsNullOrWhiteSpace(className)) {
+      if (Classes.Rows.IsEmpty || string.IsNullOrEmpty(classNamespace) || string.IsNullOrEmpty(className)) {
         return null; // No classes in the index
       }        
       var found = Classes.Rows.Where(c => c.Value[Cx.ClassesNamespaceCol].ValueString == classNamespace &&
@@ -207,7 +207,19 @@ namespace DaemonsMCP.Core.Models {
     }
 
   
-
+    public List<IndexClassItem> GetAllClassItems(int FileId) {
+      var classItems = new List<IndexClassItem>(Classes?.Rows?.Count ?? 0);
+      if ( Classes != null) {         
+        var filteredRows = Classes.Rows.Where(r => r.Value[Cx.ClassesFileIdCol].Value.AsInt32() == FileId);
+        foreach (var row in filteredRows) {
+          var classItem = GetClassById(row.Key);
+          if (classItem != null) {                
+            classItems.Add(classItem);
+          }
+        }
+      }
+      return classItems;
+    }
     public IndexClassItem? GetClassById(int id) {
       if (Classes.Rows.TryGetValue(id, out RowModel? row)) {
         return new IndexClassItem() {
@@ -221,6 +233,21 @@ namespace DaemonsMCP.Core.Models {
         };
       } else { return null; }
     }
+    public IndexClassItem AddUpdateClassItem(IndexClassItem item) {
+      if (item == null) {
+        throw new ArgumentNullException(nameof(item), "Class item cannot be null.");
+      }
+      var existing = GetClassByName(item.Namespace, item.Name);
+      if (existing != null) {
+        item.Id = existing.Id;        
+        UpdateClassItem(item);
+      } else {
+        InsertClassItem(item);
+      }
+      return item;
+    }
+
+
     public IndexClassItem InsertClassItem(IndexClassItem item) {
       var Row = Classes.AddRow();
       item.Id = Row.Id; // assign the new Id back to the item.
@@ -289,6 +316,39 @@ namespace DaemonsMCP.Core.Models {
       return Methods?.Rows?.Count ?? 0;
     }
 
+    public List<IndexMethodItem> GetAllMethodItemsByClass(int ClassId) {
+      var methodItems = new List<IndexMethodItem>(Methods?.Rows?.Count ?? 0);
+      if ( Methods != null) {         
+        var filteredRows = Methods.Rows.Where(r => r.Value[Cx.MethodsClassIdCol].Value.AsInt32() == ClassId);
+        foreach (var row in filteredRows) {
+          var methodItem = GetMethodById(row.Key);
+          if (methodItem != null) {                
+            methodItems.Add(methodItem);
+          }
+        }
+      }
+      return methodItems;
+    }
+
+    public IndexMethodItem? GetMethodByClassId(int classId, string methodName) {
+      if (Methods.Rows.IsEmpty || classId <= 0) {
+        return null; // No methods in the index
+      }
+      if (string.IsNullOrEmpty(methodName)) {
+        throw new ArgumentException("No methods in the index or method name is empty.");
+      }        
+      var found = Methods.Rows.Where(m => m.Value[Cx.MethodsClassIdCol].Value.AsInt32() == classId &&
+      m.Value[Cx.MethodsNameCol].ValueString == methodName).Select(m => m.Value);
+      if (found.Any()) {
+         var row = found.First();
+         var methodItem = this.GetMethodById(row.Id);
+         if (methodItem != null) {
+          return methodItem;
+         }
+      }      
+      return null;
+    }
+
     public IndexMethodItem? GetMethodById(int id) {
       if (Methods.Rows.TryGetValue(id, out RowModel? row)) {
         return new IndexMethodItem() {
@@ -323,7 +383,20 @@ namespace DaemonsMCP.Core.Models {
       return null; // Method not found
     }
 
-    public IndexMethodItem InsertMethodItem(IndexMethodItem item) {
+    public IndexMethodItem? AddUpdateMethodItem(IndexMethodItem item) {
+      if (item == null) {
+        throw new ArgumentNullException(nameof(item), "Method item cannot be null.");
+      }
+      var existing = GetMethodByClassId(item.ClassId, item.Name);
+      if (existing != null) {
+        item.Id = existing.Id;        
+        UpdateMethodItem(item);
+        return item;
+      } else {
+        return InsertMethodItem(item);
+      }
+    }
+    public IndexMethodItem  InsertMethodItem(IndexMethodItem item) {
       var Row = Methods.AddRow();
       item.Id = Row.Id; // assign the new Id back to the item.
       Row[Cx.MethodsIdCol].Value = item.Id;
@@ -640,7 +713,7 @@ namespace DaemonsMCP.Core.Models {
       try { 
 
         if (classContent == null 
-          || string.IsNullOrWhiteSpace(classContent.Namespace) 
+          || string.IsNullOrEmpty(classContent.Namespace) 
           || string.IsNullOrEmpty(classContent.ClassName)) { 
           throw new ArgumentException ("Bad input. Namespace, ClassName are required." );
         }
@@ -702,7 +775,7 @@ namespace DaemonsMCP.Core.Models {
               if (lastLine < 0) lastLine = 0;
               lines.Insert(lastLine, content); // append new content if not inserted
             }
-            if (! string.IsNullOrWhiteSpace( classContent.UsesClauseAdd)) { 
+            if (! string.IsNullOrEmpty( classContent.UsesClauseAdd)) { 
                lines.Insert(0, classContent.UsesClauseAdd); // add uses clause if provided 
             }
             content = string.Join(Environment.NewLine, lines);
@@ -719,7 +792,7 @@ namespace DaemonsMCP.Core.Models {
 
         if (isNewFile) { 
           StringBuilder sb = new StringBuilder();
-          if ( !string.IsNullOrWhiteSpace( classContent.UsesClauseAdd)) { 
+          if ( !string.IsNullOrEmpty( classContent.UsesClauseAdd)) { 
             sb.AppendLine(classContent.UsesClauseAdd);
           }
           sb.AppendLine(Environment.NewLine);
@@ -757,9 +830,9 @@ namespace DaemonsMCP.Core.Models {
         return results; // Return empty list if no methods in index
       }
       try {
-        bool isNamespaceFilter = !string.IsNullOrWhiteSpace(namespaceFilter);
-        bool isMethodNameFilter = !string.IsNullOrWhiteSpace(methodNameFilter);
-        bool isClassNameFilter = !string.IsNullOrWhiteSpace(classNameFilter);
+        bool isNamespaceFilter = !string.IsNullOrEmpty(namespaceFilter);
+        bool isMethodNameFilter = !string.IsNullOrEmpty(methodNameFilter);
+        bool isClassNameFilter = !string.IsNullOrEmpty(classNameFilter);
 
         int skipTo = (PageNo - 1) * maxResults;
         int found = 0;
@@ -881,10 +954,10 @@ namespace DaemonsMCP.Core.Models {
       try {
 
         if (methodContent == null
-          || string.IsNullOrWhiteSpace(methodContent.Namespace)
+          || string.IsNullOrEmpty(methodContent.Namespace)
           || string.IsNullOrEmpty(methodContent.ClassName)
-          || string.IsNullOrWhiteSpace(methodContent.MethodName)
-          || string.IsNullOrWhiteSpace(methodContent.Content)) {          
+          || string.IsNullOrEmpty(methodContent.MethodName)
+          || string.IsNullOrEmpty(methodContent.Content)) {          
           throw new ArgumentException("Bad input. Namespace, ClassName, MethodName, Content are required.");
         }
 
@@ -958,7 +1031,7 @@ namespace DaemonsMCP.Core.Models {
               if (lastLine < 0) lastLine = 0;
               lines.Insert(lastLine, content); // append new content if not inserted
             }
-            if (!string.IsNullOrWhiteSpace(methodContent.UsesClauseAdd)) {
+            if (!string.IsNullOrEmpty(methodContent.UsesClauseAdd)) {
               lines.Insert(0, methodContent.UsesClauseAdd); // add uses clause if provided 
             }
             content = string.Join(Environment.NewLine, lines);
@@ -996,7 +1069,7 @@ namespace DaemonsMCP.Core.Models {
               if (lastLine < 0) lastLine = 0;
               lines.Insert(lastLine, content); // append new content if not inserted
             }
-            if (!string.IsNullOrWhiteSpace(methodContent.UsesClauseAdd)) {
+            if (!string.IsNullOrEmpty(methodContent.UsesClauseAdd)) {
             lines.Insert(0, methodContent.UsesClauseAdd); // add uses clause if provided 
             }
             content = string.Join(Environment.NewLine, lines);
@@ -1009,7 +1082,7 @@ namespace DaemonsMCP.Core.Models {
 
         if (isNewFile) {
           StringBuilder sb = new StringBuilder();
-          if (!string.IsNullOrWhiteSpace(methodContent.UsesClauseAdd)) {
+          if (!string.IsNullOrEmpty(methodContent.UsesClauseAdd)) {
             sb.AppendLine(methodContent.UsesClauseAdd);
           }
           sb.AppendLine(Environment.NewLine);

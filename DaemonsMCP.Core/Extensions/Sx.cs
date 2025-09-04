@@ -83,7 +83,7 @@ namespace DaemonsMCP.Core.Extensions {
     /// <returns>Size in bytes</returns>
     /// <exception cref="ArgumentException">If the format is invalid</exception>
     public static long ParseFileSize(this string sizeString) {
-      if (string.IsNullOrWhiteSpace(sizeString))
+      if (string.IsNullOrEmpty(sizeString))
         throw new ArgumentException("Size string cannot be null or empty", nameof(sizeString));
 
       var match = SizeRegex.Match(sizeString.Trim());

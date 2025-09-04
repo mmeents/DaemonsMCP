@@ -15,20 +15,20 @@ namespace DaemonsMCP.Core.Models {
     public Exception? Exception { get; set; }
 
     public static OperationResult CreateSuccess(string operation, string message, object? data = null) { 
-      if (string.IsNullOrWhiteSpace(operation)) { 
+      if (string.IsNullOrEmpty(operation)) { 
         throw new ArgumentException("Operation name must be provided", nameof(operation));
       }
-      if (string.IsNullOrWhiteSpace(message)) {
+      if (string.IsNullOrEmpty(message)) {
         throw new ArgumentException("Operation name must be provided", nameof(message));
       }
       return new() { Success = true, Operation = operation, Message = message, Data = data };
     }
 
     public static OperationResult CreateFailure(string operation, string errorMessage, Exception? exception = null) { 
-      if (string.IsNullOrWhiteSpace(operation)) { 
+      if (string.IsNullOrEmpty(operation)) { 
           throw new ArgumentException("Operation name must be provided", nameof(operation));
       }
-      if (string.IsNullOrWhiteSpace(errorMessage)) {
+      if (string.IsNullOrEmpty(errorMessage)) {
         throw new ArgumentException("Operation name must be provided", nameof(errorMessage));
       }
       return new() { Success = false, Operation = operation, ErrorMessage = errorMessage, Exception = exception };

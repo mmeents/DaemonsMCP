@@ -16,14 +16,14 @@ namespace DaemonsMCP.Core.Services {
     }
 
     public ValidationContext ValidateAndPrepare(string projectName, string path, bool ItemIsDir) { 
-      if (string.IsNullOrWhiteSpace(projectName)) {
+      if (string.IsNullOrEmpty(projectName)) {
         throw new ArgumentException("Project name cannot be null or empty", nameof(projectName));
       }
       ProjectModel? project;
       if (!_config.Projects.TryGetValue(projectName, out project) ){ 
         throw new ArgumentException($"Project '{projectName}' not found", nameof(projectName));
       }
-      if (string.IsNullOrWhiteSpace(path)) {
+      if (string.IsNullOrEmpty(path)) {
         path = string.Empty; // Default to project root if no path is provided
       }
       var fullPath = BuildAndValidatePath(project, path, ItemIsDir);
@@ -68,12 +68,12 @@ namespace DaemonsMCP.Core.Services {
     }
 
     public void ValidateProjectName(string projectName) {
-      if (string.IsNullOrWhiteSpace(projectName))
+      if (string.IsNullOrEmpty(projectName))
         throw new ArgumentException("Project name is required", nameof(projectName));
     }
 
     public void ValidatePath(string path) {
-      if (string.IsNullOrWhiteSpace(path))
+      if (string.IsNullOrEmpty(path))
         throw new ArgumentException("Path is required", nameof(path));
 
       // Basic path safety checks
@@ -109,11 +109,11 @@ namespace DaemonsMCP.Core.Services {
     public void ValidateClassContent(ClassContent content) { 
       if (content == null)
           throw new ArgumentException("Class content cannot be null", nameof(content));
-      if (string.IsNullOrWhiteSpace(content.Namespace))
+      if (string.IsNullOrEmpty(content.Namespace))
           throw new ArgumentException("Namespace is required", nameof(content.Namespace));
-      if (string.IsNullOrWhiteSpace(content.ClassName))
+      if (string.IsNullOrEmpty(content.ClassName))
           throw new ArgumentException("Class name is required", nameof(content.ClassName));
-      if (string.IsNullOrWhiteSpace(content.Content))
+      if (string.IsNullOrEmpty(content.Content))
           throw new ArgumentException("Class content cannot be empty", nameof(content.Content));
     }
   }

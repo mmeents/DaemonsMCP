@@ -25,7 +25,7 @@ namespace DaemonsMCP.Core.Repositories {
       }
     }
     public ProjectItemRepo? GetProjectRepo(string projectName) {
-      if (string.IsNullOrWhiteSpace(projectName)) return null;
+      if (string.IsNullOrEmpty(projectName)) return null;
       if (_projectItemRepos.TryGetValue(projectName, out ProjectItemRepo? repo)) {
         return repo;
       }

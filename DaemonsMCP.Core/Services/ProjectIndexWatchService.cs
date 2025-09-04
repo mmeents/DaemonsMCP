@@ -18,7 +18,7 @@ namespace DaemonsMCP.Core.Services {
       _projectIndexModel = projectIndexModel ?? throw new ArgumentNullException(nameof(projectIndexModel), "ProjectIndexModel cannot be null");
       _securityService = securityService ?? throw new ArgumentNullException(nameof(securityService), "SecurityService cannot be null");
 
-      if (string.IsNullOrWhiteSpace(_projectIndexModel.ProjectPath))
+      if (string.IsNullOrEmpty(_projectIndexModel.ProjectPath))
         throw new ArgumentException("Project root path cannot be null or empty", nameof(_projectIndexModel.ProjectPath));
 
       if (!Directory.Exists(_projectIndexModel.ProjectPath))
