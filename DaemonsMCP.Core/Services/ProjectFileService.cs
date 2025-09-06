@@ -72,7 +72,7 @@ namespace DaemonsMCP.Core.Services {
       try {
         _validationService.ValidatePath(path);
         _validationService.ValidateContent(content);      
-        var context = _validationService.ValidateAndPrepare(projectName, path, false);
+        var context = _validationService.ValidateAndPrepare(projectName, path, false, true);
         var fullPath = context.FullPath;     
         _validationService.ValidatePrepToSave(path, fullPath, content, true);     
 
@@ -123,7 +123,7 @@ namespace DaemonsMCP.Core.Services {
         // Validate inputs
         _validationService.ValidatePath(path);
         _validationService.ValidateContent(content);
-        var context = _validationService.ValidateAndPrepare(projectName, path ?? "", false);
+        var context = _validationService.ValidateAndPrepare(projectName, path ?? "", false, false);
         var fullPath = context.FullPath;      
            
 
@@ -179,7 +179,7 @@ namespace DaemonsMCP.Core.Services {
           throw new ArgumentException("Deletion requires explicit confirmation. Set confirmDeletion=true to proceed.");
         }
         _validationService.ValidatePath(path);
-        var context = _validationService.ValidateAndPrepare(projectName, path ?? "", false);
+        var context = _validationService.ValidateAndPrepare(projectName, path ?? "", false, false);
         var fullPath = context.FullPath;     
 
         // Security validations - delete is most restrictive
