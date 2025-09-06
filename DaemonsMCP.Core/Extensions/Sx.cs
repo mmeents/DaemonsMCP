@@ -46,20 +46,14 @@ namespace DaemonsMCP.Core.Extensions {
       if (string.IsNullOrEmpty(filePath)) throw new ArgumentNullException(nameof(filePath));
 
       string resolvedFilePath = Path.GetFullPath(filePath);
+      
       if (!resolvedFilePath.StartsWith(project.Path, StringComparison.OrdinalIgnoreCase)) {
         throw new ArgumentException("File path is not within the project directory", nameof(filePath));
       }
 
-      string relativePath = Path.GetRelativePath(project.Path, resolvedFilePath);
-      string backupDir = Path.Combine(project.BackupPath, Path.GetDirectoryName(relativePath) ?? "");
-      Directory.CreateDirectory(backupDir);
-      string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-      string fileName = Path.GetFileName(resolvedFilePath);
-      string extension = Path.GetExtension(fileName);
-      string backupFileName = $"{fileName}.bakup{timestamp}.{extension}";
-      string backupFilePath = Path.Combine(backupDir, backupFileName);
-      File.Copy(resolvedFilePath, backupFilePath, true);
-      return backupFilePath;
+      var backupPath = filePath + $".backup.{DateTime.Now:yyyyMMdd_HHmmss}";      
+      File.Copy(resolvedFilePath, backupPath, true);
+      return backupPath;
     }
 
     #region File Size Parsing and Formatting
