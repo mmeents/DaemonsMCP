@@ -131,7 +131,7 @@ namespace DaemonsMCP.Tests.Services
                 .Callback<string, string, string, bool>((path, fullPath, content, overwrite) => { /* Pre-save validation logic */ });
 
             // Act
-            var result = await _fileService.CreateFileAsync(_testProjectName, testContent, fileName, true, false);
+            var result = await _fileService.CreateFileAsync(_testProjectName, fileName, testContent,  true, false);
 
             // Assert
             result.Should().NotBeNull();

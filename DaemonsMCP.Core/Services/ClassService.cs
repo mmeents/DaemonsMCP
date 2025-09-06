@@ -28,7 +28,7 @@ namespace DaemonsMCP.Core.Services {
         return opResult;
       } catch (Exception ex) {
         _logger.LogError(ex, "Error retrieving classes");
-        var opResult = OperationResult.CreateFailure(Cx.ListClassesCmd, $"Error: {ex.Message}",ex);
+        var opResult = OperationResult.CreateFailure(Cx.ListClassesCmd, Cx.ClassServiceErrorMsg(ex));
         return opResult;
       }
     }
@@ -38,13 +38,13 @@ namespace DaemonsMCP.Core.Services {
 
         var classes = await _indexRepository.GetClassContentAsync(projectName, classID).ConfigureAwait(false);
 
-        var opResult = OperationResult.CreateSuccess(Cx.ListClassesCmd, $"{Cx.ListClassesCmd} Success.", classes);
+        var opResult = OperationResult.CreateSuccess(Cx.GetClassCmd, $"{Cx.GetClassCmdDesc} Success.", classes);
         return opResult;
 
 
       } catch (Exception ex) {
-        _logger.LogError(ex, "Error retrieving classes");
-        var opResult = OperationResult.CreateFailure(Cx.ListClassesCmd, $"Error: {ex.Message}", ex);
+        _logger.LogError(ex, "Error retrieving class");
+        var opResult = OperationResult.CreateFailure(Cx.GetClassCmdDesc, Cx.ClassServiceErrorMsg(ex));
         return opResult;
       }
     }
@@ -61,7 +61,7 @@ namespace DaemonsMCP.Core.Services {
         }
       } catch (Exception ex) {
         _logger.LogError(ex, "Error adding/updating class");
-        return OperationResult.CreateFailure(Cx.AddUpdateClassCmd, $"Error: {ex.Message}", ex);
+        return OperationResult.CreateFailure(Cx.AddUpdateClassCmd, Cx.ClassServiceErrorMsg(ex));
       }
     }
 
@@ -73,7 +73,7 @@ namespace DaemonsMCP.Core.Services {
         return opResult;
       } catch (Exception ex) {
         _logger.LogError(ex, "Error retrieving methods");
-        var opResult = OperationResult.CreateFailure(Cx.ListMethodsCmd, $"Error: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.ListMethodsCmd, Cx.ClassServiceErrorMsg(ex));
         return opResult;
       }
     }
@@ -85,14 +85,13 @@ namespace DaemonsMCP.Core.Services {
         return opResult;
         } catch (Exception ex) {
         _logger.LogError(ex, "Error retrieving method");
-        var opResult = OperationResult.CreateFailure(Cx.GetClassMethodCmd, $"Error: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.GetClassMethodCmd, Cx.ClassServiceErrorMsg(ex));
         return opResult;
       }
     }
 
     public async Task<OperationResult> AddUpdateMethodAsync(string projectName, MethodContent methodContent) {
       try {
-        //_validationService.ValidateMethodContent(methodContent);
         var result = await _indexRepository.AddUpdateMethodAsync(projectName, methodContent).ConfigureAwait(false);
         if (result != null) {
           return OperationResult.CreateSuccess(Cx.AddUpdateMethodCmd, $"{Cx.AddUpdateMethodCmd} Success.", result);
@@ -101,7 +100,7 @@ namespace DaemonsMCP.Core.Services {
         }
       } catch (Exception ex) {
         _logger.LogError(ex, "Error adding/updating method");
-        return OperationResult.CreateFailure(Cx.AddUpdateMethodCmd, $"Error: {ex.Message}", ex);
+        return OperationResult.CreateFailure(Cx.AddUpdateMethodCmd, Cx.ClassServiceErrorMsg(ex));
       }
     }
 

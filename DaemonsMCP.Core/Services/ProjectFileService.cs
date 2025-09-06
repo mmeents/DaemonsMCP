@@ -68,7 +68,7 @@ namespace DaemonsMCP.Core.Services {
     }
 
 
-    public async Task<OperationResult> CreateFileAsync(string projectName, string content, string path="", bool createDirectories = true, bool overwrite = false) {
+    public async Task<OperationResult> CreateFileAsync(string projectName,  string path, string content, bool createDirectories = true, bool overwrite = false) {
       try {
         _validationService.ValidatePath(path);
         _validationService.ValidateContent(content);      

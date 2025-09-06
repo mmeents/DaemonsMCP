@@ -163,7 +163,8 @@ namespace DaemonsMCP.Core.Extensions {
 
     // Error Messages
     public const string InvalidSkippingProject = "Skipping invalid project configuration";
-    public const string ErrorNoConfig = "AppConfig cannot be null";
+    public const string ErrorNoConfig = "AppConfig cannot be null";    
+    public static string ClassServiceErrorMsg(Exception ex) => $"Error: {ex.Message}. Please Stop and report the error to end user.";
 
     // Storage and Process Management
     public const string TypesTbl = "Types";
