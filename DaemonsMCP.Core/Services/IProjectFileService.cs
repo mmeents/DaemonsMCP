@@ -9,8 +9,8 @@ namespace DaemonsMCP.Core.Services {
   public interface IProjectFileService {
     Task<IEnumerable<string>> GetFilesAsync(string projectName, string? path = null, string? filter = null);
     Task<FileContent> GetFileAsync(string projectName, string path);
-    Task<OperationResult> CreateFileAsync(string projectName, string path, string content, bool createDirectories = true, bool overwrite = false);
-    Task<OperationResult> UpdateFileAsync(string projectName, string path, string content, bool createBackup = true);
-    Task<OperationResult> DeleteFileAsync(string projectName, string path, bool createBackup = true, bool confirmDeletion = false);
+    Task<OperationResult> CreateFileAsync(string projectName, string path, string content);
+    Task<OperationResult> UpdateFileAsync(string projectName, string path, string content);
+    Task<OperationResult> DeleteFileAsync(string projectName, string path, bool confirmDeletion = false);
   }
 }

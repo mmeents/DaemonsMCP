@@ -131,10 +131,8 @@ namespace DaemonsMCP.Core {
     public async Task<object> CreateProjectFile(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FilePathParamDesc)] string path,
-        [Description(Cx.FileContentParamDesc)] string content,
-        [Description(Cx.CreateFolderOptionDesc)] bool createDirectories = true,
-        [Description(Cx.OverwriteFileOptionDesc)] bool overwrite = false) {
-      var result = await _projectFileService.CreateFileAsync(projectName, path, content, createDirectories, overwrite).ConfigureAwait(false);
+        [Description(Cx.FileContentParamDesc)] string content) {
+      var result = await _projectFileService.CreateFileAsync(projectName, path, content).ConfigureAwait(false);
 
       if (!result.Success)
         throw new InvalidOperationException(result.ErrorMessage, result.Exception);
@@ -146,10 +144,9 @@ namespace DaemonsMCP.Core {
     public async Task<object> UpdateProjectFile(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FilePathParamDesc)] string path,
-        [Description(Cx.FileContentParamDesc)] string content,
-        [Description(Cx.CreateFolderOptionDesc)] bool createBackup = true) {
+        [Description(Cx.FileContentParamDesc)] string content) {
       try { 
-        var result = await _projectFileService.UpdateFileAsync(projectName, path, content, createBackup).ConfigureAwait(false);
+        var result = await _projectFileService.UpdateFileAsync(projectName, path, content).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
         var opResult = OperationResult.CreateFailure(Cx.UpdateFileCmd, $"Failed: {ex.Message}", ex);

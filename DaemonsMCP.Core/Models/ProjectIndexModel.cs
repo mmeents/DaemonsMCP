@@ -733,7 +733,7 @@ namespace DaemonsMCP.Core.Models {
 
         _validationService.ValidatePath(filePathName);
         _validationService.ValidateContent(content);
-        var context = _validationService.ValidateAndPrepare(ProjectName, filePathName, false);
+        var context = _validationService.ValidateAndPrepare(ProjectName, filePathName, false, !existingClassFound);
         var fullPath = context.FullPath;
         _validationService.ValidatePrepToSave(ProjectPath, fullPath, content, true);
 
@@ -963,7 +963,7 @@ namespace DaemonsMCP.Core.Models {
 
         _validationService.ValidatePath(methodContent.FileNamePath); // validations throw errors on offenders
         _validationService.ValidateContent(methodContent.Content);
-        var context = _validationService.ValidateAndPrepare(ProjectName, methodContent.FileNamePath, false);
+        var context = _validationService.ValidateAndPrepare(ProjectName, methodContent.FileNamePath, false, true);
         var fullPath = context.FullPath;  // destination path from user validated rooted.
         _validationService.ValidatePrepToSave(ProjectPath, fullPath, methodContent.Content, true);
         

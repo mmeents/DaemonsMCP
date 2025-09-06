@@ -15,7 +15,7 @@ namespace DaemonsMCP.Core.Services {
       _securityService = securityService;
     }
 
-    public ValidationContext ValidateAndPrepare(string projectName, string path, bool ItemIsDir) { 
+    public ValidationContext ValidateAndPrepare(string projectName, string path, bool ItemIsDir, bool isNewFile = false) { 
       if (string.IsNullOrEmpty(projectName)) {
         throw new ArgumentException("Project name cannot be null or empty", nameof(projectName));
       }
@@ -26,7 +26,7 @@ namespace DaemonsMCP.Core.Services {
       if (string.IsNullOrEmpty(path)) {
         path = string.Empty; // Default to project root if no path is provided
       }
-      var fullPath = BuildAndValidatePath(project, path, ItemIsDir);
+      var fullPath = BuildAndValidatePath(project, path, ItemIsDir, isNewFile);
 
       ValidationContext validationContext = new ValidationContext() { 
         Project = project,
@@ -37,7 +37,7 @@ namespace DaemonsMCP.Core.Services {
       return validationContext;
     }
 
-    public string BuildAndValidatePath(ProjectModel project, string relativePath, bool isDirectory = false) {
+    public string BuildAndValidatePath(ProjectModel project, string relativePath, bool isDirectory = false, bool isNewFile = false) {
       try {
         var fullPath = string.IsNullOrEmpty(relativePath) ? project.Path : Path.Combine(project.Path, relativePath);
         fullPath = Path.GetFullPath(fullPath);
@@ -46,7 +46,7 @@ namespace DaemonsMCP.Core.Services {
         if (!fullPath.StartsWith(normalizedProjectPath, StringComparison.OrdinalIgnoreCase))
           throw new UnauthorizedAccessException("Path must be within project boundaries");
 
-        if (!isDirectory && !File.Exists(fullPath)) { 
+        if (!isNewFile && !File.Exists(fullPath)) { 
           throw new FileNotFoundException($"File not found: {fullPath}");
         }
         if (!isDirectory && !_securityService.IsFileAllowed(fullPath)) {

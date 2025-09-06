@@ -9,9 +9,9 @@ using ValidationContext = DaemonsMCP.Core.Models.ValidationContext;
 
 namespace DaemonsMCP.Core.Services {
   public interface IValidationService {
-    string BuildAndValidatePath(ProjectModel project, string relativePath, bool isDirectory = false);
+    string BuildAndValidatePath(ProjectModel project, string relativePath, bool isDirectory = false, bool isNewFile = false);
 
-    public ValidationContext ValidateAndPrepare(string projectName, string path, bool ItemIsDir = false);
+    public ValidationContext ValidateAndPrepare(string projectName, string path, bool ItemIsDir = false, bool isNewFile = false);
 
     public void ValidateProjectName(string projectName);
 

@@ -23,7 +23,7 @@ namespace DaemonsMCP.Core.Services {
 
     public Task<IEnumerable<string>> GetFilesAsync(string projectName, string? path = null, string? filter = null) {
       
-      var context = _validationService.ValidateAndPrepare(projectName, path ?? "", true);
+      var context = _validationService.ValidateAndPrepare(projectName, path ?? "", true, true);
       var fullPath = context.FullPath+ Path.DirectorySeparatorChar;
             
       var searchPattern = string.IsNullOrEmpty(filter) ? "*" : filter;
@@ -40,7 +40,7 @@ namespace DaemonsMCP.Core.Services {
 
       _validationService.ValidatePath(path);
 
-      var context = _validationService.ValidateAndPrepare(projectName, path ?? "", false );
+      var context = _validationService.ValidateAndPrepare(projectName, path ?? "", false, false );
       var fullPath = context.FullPath;
          
 
@@ -68,25 +68,21 @@ namespace DaemonsMCP.Core.Services {
     }
 
 
-    public async Task<OperationResult> CreateFileAsync(string projectName,  string path, string content, bool createDirectories = true, bool overwrite = false) {
+    public async Task<OperationResult> CreateFileAsync(string projectName,  string path, string content) {
       try {
         _validationService.ValidatePath(path);
         _validationService.ValidateContent(content);      
         var context = _validationService.ValidateAndPrepare(projectName, path, false);
         var fullPath = context.FullPath;     
-        _validationService.ValidatePrepToSave(path, fullPath, content, overwrite);     
+        _validationService.ValidatePrepToSave(path, fullPath, content, true);     
 
         // Create directory if needed
         var directory = Path.GetDirectoryName(fullPath);
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory)) {
-          if (createDirectories) {
-            Directory.CreateDirectory(directory);
-          } else {
-            throw new DirectoryNotFoundException($"Directory does not exist: {Path.GetDirectoryName(path)}");
-          }
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory)) {          
+          Directory.CreateDirectory(directory);          
         }
 
-        if (File.Exists(fullPath) && overwrite) {
+        if (File.Exists(fullPath)) {
           context.Project.CopyToBackup(fullPath);
           _logger.LogInformation("Backup created for file being overwritten: {FilePath}", fullPath);
         }
@@ -122,7 +118,7 @@ namespace DaemonsMCP.Core.Services {
       }
     }
 
-    public async Task<OperationResult> UpdateFileAsync(string projectName, string path, string content, bool createBackup = true) {
+    public async Task<OperationResult> UpdateFileAsync(string projectName, string path, string content) {
       try {     
         // Validate inputs
         _validationService.ValidatePath(path);
@@ -139,13 +135,10 @@ namespace DaemonsMCP.Core.Services {
         if (!_securityService.IsWriteContentSizeAllowed(Encoding.UTF8.GetByteCount(content))) {
           throw new ArgumentException("Content size exceeds maximum allowed for write operations");
         }
+                
+        string backupPath = context.Project.CopyToBackup(fullPath);
+        _logger.LogInformation("Backup created for file being overwritten: {FilePath}", fullPath);
 
-        string? backupPath = null;
-        // Create backup if requested
-        if (createBackup) {          
-          backupPath = fullPath + $".backup.{DateTime.Now:yyyyMMdd_HHmmss}";
-          File.Copy(fullPath, backupPath, true);
-        }
 
         // UpdateClassItem the file
         await File.WriteAllTextAsync(fullPath, content, Encoding.UTF8).ConfigureAwait(false);
@@ -163,7 +156,7 @@ namespace DaemonsMCP.Core.Services {
             path = relativePath,
             size = fileInfo.Length,
             modified = fileInfo.LastWriteTime,
-            backupCreated = createBackup,
+            backupCreated = true,
             backupPath = relativeBackupPath
           }
         );
@@ -179,7 +172,7 @@ namespace DaemonsMCP.Core.Services {
       }
     }
 
-    public Task<OperationResult> DeleteFileAsync(string projectName, string path, bool createBackup = true, bool confirmDeletion = false) {
+    public Task<OperationResult> DeleteFileAsync(string projectName, string path, bool confirmDeletion = false) {
       try {     
         // SAFETY: Require explicit confirmation
         if (!confirmDeletion) {
@@ -202,11 +195,8 @@ namespace DaemonsMCP.Core.Services {
 
 
         // Create backup if requested (before deletion)
-        if (createBackup) {
-          var backupSuffix = $".deleted.backup.{DateTime.Now:yyyyMMdd_HHmmss}";
-          backupPath = fullPath + backupSuffix;
-          File.Copy(fullPath, backupPath, true);
-        }
+        backupPath = context.Project.CopyToBackup(fullPath);
+        _logger.LogInformation("Backup created for file being overwritten: {FilePath}", fullPath);
 
         // DeleteClassItem the file
         File.Delete(fullPath);
@@ -223,18 +213,14 @@ namespace DaemonsMCP.Core.Services {
             path = relativePath,
             deletedSize = originalFileSize,
             deletedAt = DateTime.Now,
-            backupCreated = createBackup,
+            backupCreated = true,
             backupPath = relativeBackupPath
           }
         );
 
         return Task.FromResult( opResult);
-      } catch (Exception ex) when (!(ex is UnauthorizedAccessException || ex is ArgumentException || ex is FileNotFoundException)) {
-        var opResult = OperationResult.CreateFailure(
-         Cx.DeleteFileCmd,
-         $"Failed delete file: {path} {ex.Message}",
-         ex
-        );
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure( Cx.DeleteFileCmd, $"Failed delete file: {path} {ex.Message}");
         return Task.FromResult(opResult);
       }
     }

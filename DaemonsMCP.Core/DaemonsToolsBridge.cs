@@ -60,18 +60,15 @@ namespace DaemonsMCP.Core {
     public static async Task<object> CreateProjectFile(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FilePathParamDesc)] string path,
-        [Description(Cx.FileContentParamDesc)] string content,
-        [Description(Cx.CreateFolderOptionDesc)] bool createDirectories = true,
-        [Description(Cx.OverwriteFileOptionDesc)] bool overwrite = false)
-        => await GetTools().CreateProjectFile(projectName, path, content, createDirectories, overwrite).ConfigureAwait(false);
+        [Description(Cx.FileContentParamDesc)] string content)
+        => await GetTools().CreateProjectFile(projectName, path, content).ConfigureAwait(false);
 
     [McpTool(Cx.UpdateFileCmd, Cx.UpdateFileDesc)]
     public static async Task<object> UpdateProjectFile(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.FilePathParamDesc)] string path,
-        [Description(Cx.FileContentParamDesc)] string content,
-        [Description(Cx.CreateFolderOptionDesc)] bool createBackup = true)
-        => await GetTools().UpdateProjectFile(projectName, path, content, createBackup).ConfigureAwait(false);
+        [Description(Cx.FileContentParamDesc)] string content)
+        => await GetTools().UpdateProjectFile(projectName, path, content).ConfigureAwait(false);
 
     [McpTool(Cx.DeleteFileCmd, Cx.DeleteFileDesc)]
     public static async Task<object> DeleteProjectFile(

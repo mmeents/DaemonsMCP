@@ -36,7 +36,7 @@ namespace DaemonsMCP.Tests.Services
 
             // Setup common validation mock behavior
             _mockValidationService
-                .Setup(v => v.ValidateAndPrepare(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(v => v.ValidateAndPrepare(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .Returns((string projectName, string path, bool isDirectory) => new ValidationContext
                 {
                     Project = testProject,
@@ -131,7 +131,7 @@ namespace DaemonsMCP.Tests.Services
                 .Callback<string, string, string, bool>((path, fullPath, content, overwrite) => { /* Pre-save validation logic */ });
 
             // Act
-            var result = await _fileService.CreateFileAsync(_testProjectName, fileName, testContent,  true, false);
+            var result = await _fileService.CreateFileAsync(_testProjectName, fileName, testContent);
 
             // Assert
             result.Should().NotBeNull();
@@ -179,7 +179,7 @@ namespace DaemonsMCP.Tests.Services
                 .Callback<string>(content => { /* Content validation logic */ });
 
             // Act
-            var result = await _fileService.UpdateFileAsync(_testProjectName, fileName, updatedContent, true);
+            var result = await _fileService.UpdateFileAsync(_testProjectName, fileName, updatedContent);
 
             // Assert
             result.Should().NotBeNull();
