@@ -627,8 +627,9 @@ namespace DaemonsMCP.Core.Models {
 
               // Fix the combination logic
               bool shouldInclude = (!isNamespaceFilter && !isClassNameFilter) || // No filters = include all
-                                   (isNamespaceFilter && isNamespaceMatch) ||      // Namespace filter matches
-                                   (isClassNameFilter && isClassNameMatch);        // Class name filter matches
+                                   (!isClassNameFilter && isNamespaceFilter && isNamespaceMatch) ||      // Namespace only filter matches
+                                   (!isNamespaceFilter && isClassNameFilter && isClassNameMatch) ||
+                                   (isNamespaceFilter && isClassNameFilter && isClassNameMatch && isNamespaceMatch);        // Class name filter matches
 
               if (shouldInclude) {                
                 found++;
@@ -858,9 +859,13 @@ namespace DaemonsMCP.Core.Models {
             isNamespaceMatch = isNamespaceFilter && classItem.Namespace.Contains(namespaceFilter, StringComparison.OrdinalIgnoreCase);
 
             bool shouldInclude = (!isNamespaceFilter && !isClassNameFilter && !isMethodNameFilter) || // No filters = include all
-                     (isNamespaceFilter && isNamespaceMatch) ||      // Namespace filter matches
-                     (isClassNameFilter && isClassNameMatch) ||
-                     (isMethodNameFilter && isMethodNameMatch);        // Class name filter matches
+              ( !isClassNameFilter && !isMethodNameFilter && isNamespaceFilter && isNamespaceMatch) ||  // Namespace only filter matches
+              ( !isNamespaceFilter && !isMethodNameFilter && isClassNameFilter && isClassNameMatch) ||  // Class name only filter matches
+              ( !isNamespaceFilter && !isClassNameFilter && isMethodNameFilter && isMethodNameMatch) || // Method name only filter matches
+              ( !isMethodNameFilter && isNamespaceFilter && isClassNameFilter && isNamespaceMatch && isClassNameMatch) || // Namespace and Class name filters match
+              ( !isClassNameFilter && isNamespaceFilter && isMethodNameFilter && isNamespaceMatch && isMethodNameMatch) || // Namespace and Method name filters match
+              ( !isNamespaceFilter && isClassNameFilter && isMethodNameFilter && isClassNameMatch && isMethodNameMatch) || // Class name and Method name filters match
+              (isNamespaceFilter && isClassNameFilter && isMethodNameFilter && isClassNameMatch && isNamespaceMatch && isMethodNameMatch);  // Class name filter matches for all three            
 
             if (shouldInclude) { 
               found++;
