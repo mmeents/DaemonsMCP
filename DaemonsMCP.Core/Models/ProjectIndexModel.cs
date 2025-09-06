@@ -622,14 +622,22 @@ namespace DaemonsMCP.Core.Models {
             var fileItem = GetFileItemById(classItem.FileItemId);
             if (fileItem != null) {
 
-              isNamespaceMatch = (!string.IsNullOrEmpty(namespaceFilter)) && Classes.Current[Cx.ClassesNamespaceCol].ValueString.Contains(namespaceFilter, StringComparison.OrdinalIgnoreCase);
-              isClassNameMatch = (!string.IsNullOrEmpty(classNameFilter)) && Classes.Current[Cx.ClassesNameCol].ValueString.Contains(classNameFilter, StringComparison.OrdinalIgnoreCase);
+              isNamespaceMatch = (isNamespaceFilter && Classes.Current[Cx.ClassesNamespaceCol].ValueString.Contains(namespaceFilter, StringComparison.OrdinalIgnoreCase));
+              isClassNameMatch = (isClassNameFilter && Classes.Current[Cx.ClassesNameCol].ValueString.Contains(classNameFilter, StringComparison.OrdinalIgnoreCase));
 
-              // Fix the combination logic
-              bool shouldInclude = (!isNamespaceFilter && !isClassNameFilter) || // No filters = include all
-                                   (!isClassNameFilter && isNamespaceFilter && isNamespaceMatch) ||      // Namespace only filter matches
-                                   (!isNamespaceFilter && isClassNameFilter && isClassNameMatch) ||
-                                   (isNamespaceFilter && isClassNameFilter && isClassNameMatch && isNamespaceMatch);        // Class name filter matches
+              bool shouldInclude = false;              
+              if (!isNamespaceFilter && !isClassNameFilter) {
+                shouldInclude = true;  
+              }
+              else if (isNamespaceFilter && !isClassNameFilter && isNamespaceMatch) {
+                shouldInclude = true;  
+              }
+              else if (!isNamespaceFilter && isClassNameFilter && isClassNameMatch) {
+                shouldInclude = true;  
+              }
+              else if (isNamespaceFilter && isClassNameFilter && isClassNameMatch && isNamespaceMatch) {
+                shouldInclude = true;
+              }              
 
               if (shouldInclude) {                
                 found++;
@@ -858,14 +866,31 @@ namespace DaemonsMCP.Core.Models {
             isClassNameMatch = isClassNameFilter && classItem.Name.Contains(classNameFilter, StringComparison.OrdinalIgnoreCase);
             isNamespaceMatch = isNamespaceFilter && classItem.Namespace.Contains(namespaceFilter, StringComparison.OrdinalIgnoreCase);
 
-            bool shouldInclude = (!isNamespaceFilter && !isClassNameFilter && !isMethodNameFilter) || // No filters = include all
-              ( !isClassNameFilter && !isMethodNameFilter && isNamespaceFilter && isNamespaceMatch) ||  // Namespace only filter matches
-              ( !isNamespaceFilter && !isMethodNameFilter && isClassNameFilter && isClassNameMatch) ||  // Class name only filter matches
-              ( !isNamespaceFilter && !isClassNameFilter && isMethodNameFilter && isMethodNameMatch) || // Method name only filter matches
-              ( !isMethodNameFilter && isNamespaceFilter && isClassNameFilter && isNamespaceMatch && isClassNameMatch) || // Namespace and Class name filters match
-              ( !isClassNameFilter && isNamespaceFilter && isMethodNameFilter && isNamespaceMatch && isMethodNameMatch) || // Namespace and Method name filters match
-              ( !isNamespaceFilter && isClassNameFilter && isMethodNameFilter && isClassNameMatch && isMethodNameMatch) || // Class name and Method name filters match
-              (isNamespaceFilter && isClassNameFilter && isMethodNameFilter && isClassNameMatch && isNamespaceMatch && isMethodNameMatch);  // Class name filter matches for all three            
+            bool shouldInclude = false;
+            if (!isNamespaceFilter && !isClassNameFilter && !isMethodNameFilter) {
+              shouldInclude = true;  // No filters = include all
+            }
+            else if (isNamespaceFilter && !isClassNameFilter && !isMethodNameFilter && isNamespaceMatch) {
+              shouldInclude = true;
+            }
+            else if (!isNamespaceFilter && isClassNameFilter && !isMethodNameFilter && isClassNameMatch) {
+                shouldInclude = true;
+            }
+            else if (!isNamespaceFilter && !isClassNameFilter && isMethodNameFilter && isMethodNameMatch) {
+              shouldInclude = true;
+            }
+            else if (isNamespaceFilter && isClassNameFilter && !isMethodNameFilter && isNamespaceMatch && isClassNameMatch) {
+              shouldInclude = true;
+            }
+            else if (isNamespaceFilter && !isClassNameFilter && isMethodNameFilter && isNamespaceMatch && isMethodNameMatch) {
+              shouldInclude = true;
+            }
+            else if (!isNamespaceFilter && isClassNameFilter && isMethodNameFilter && isClassNameMatch && isMethodNameMatch) {
+              shouldInclude = true;
+            }
+            else if (isNamespaceFilter && isClassNameFilter && isMethodNameFilter && isClassNameMatch && isNamespaceMatch && isMethodNameMatch) {
+              shouldInclude = true;
+            }            
 
             if (shouldInclude) { 
               found++;
