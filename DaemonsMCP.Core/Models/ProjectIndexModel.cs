@@ -625,7 +625,12 @@ namespace DaemonsMCP.Core.Models {
               isNamespaceMatch = (!string.IsNullOrEmpty(namespaceFilter)) && Classes.Current[Cx.ClassesNamespaceCol].ValueString.Contains(namespaceFilter, StringComparison.OrdinalIgnoreCase);
               isClassNameMatch = (!string.IsNullOrEmpty(classNameFilter)) && Classes.Current[Cx.ClassesNameCol].ValueString.Contains(classNameFilter, StringComparison.OrdinalIgnoreCase);
 
-              if (isNamespaceMatch || isClassNameMatch || (!isNamespaceFilter && !isClassNameFilter)) {
+              // Fix the combination logic
+              bool shouldInclude = (!isNamespaceFilter && !isClassNameFilter) || // No filters = include all
+                                   (isNamespaceFilter && isNamespaceMatch) ||      // Namespace filter matches
+                                   (isClassNameFilter && isClassNameMatch);        // Class name filter matches
+
+              if (shouldInclude) {                
                 found++;
                 if (found > skipTo) {
                   var relativePath = fileItem.FilePathName.Replace(ProjectPath, "").TrimStart(System.IO.Path.DirectorySeparatorChar);
@@ -750,8 +755,7 @@ namespace DaemonsMCP.Core.Models {
         if (existingClassFound ) {
           
           var oldFileItem = GetFileItemById(existingClass.FileItemId);
-          if (oldFileItem != null) {
-            ClearClassIndex(oldFileItem); // Remove old class and related items                              
+          if (oldFileItem != null) {                                       
 
             var allLines = await File.ReadAllLinesAsync(existingClass.FileName).ConfigureAwait(false);
             var lines = new List<string>(allLines.Length);
@@ -852,9 +856,13 @@ namespace DaemonsMCP.Core.Models {
             isMethodNameMatch = isMethodNameFilter && Methods.Current[Cx.MethodsNameCol].ValueString.Contains(methodNameFilter, StringComparison.OrdinalIgnoreCase);
             isClassNameMatch = isClassNameFilter && classItem.Name.Contains(classNameFilter, StringComparison.OrdinalIgnoreCase);
             isNamespaceMatch = isNamespaceFilter && classItem.Namespace.Contains(namespaceFilter, StringComparison.OrdinalIgnoreCase);
-            if (isMethodNameMatch || isClassNameMatch || isNamespaceMatch 
-              || (!isMethodNameFilter && !isClassNameFilter && !isNamespaceMatch)) 
-            {
+
+            bool shouldInclude = (!isNamespaceFilter && !isClassNameFilter && !isMethodNameFilter) || // No filters = include all
+                     (isNamespaceFilter && isNamespaceMatch) ||      // Namespace filter matches
+                     (isClassNameFilter && isClassNameMatch) ||
+                     (isMethodNameFilter && isMethodNameMatch);        // Class name filter matches
+
+            if (shouldInclude) { 
               found++;
               if (found > skipTo) {
                 var relativePath = classItem.FileName.Replace(ProjectPath, "").TrimStart(System.IO.Path.DirectorySeparatorChar);
@@ -1007,7 +1015,6 @@ namespace DaemonsMCP.Core.Models {
 
           var oldFileItem = GetFileItemById(existingClass.FileItemId);
           if (oldFileItem != null) {
-            ClearClassIndex(oldFileItem); // Remove old class and related index items                              
 
             var allLines = await File.ReadAllLinesAsync(existingClass.FileName).ConfigureAwait(false);
 
@@ -1046,8 +1053,7 @@ namespace DaemonsMCP.Core.Models {
           // adding new method to existing class.
           var oldFileItem = GetFileItemById(existingClass.FileItemId);
           if (oldFileItem != null) {
-            ClearClassIndex(oldFileItem); // Remove old class and related index items                              
-    
+            
             var allLines = await File.ReadAllLinesAsync(existingClass.FileName).ConfigureAwait(false);
     
             var lines = new List<string>(allLines.Length);

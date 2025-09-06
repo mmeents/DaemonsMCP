@@ -247,7 +247,6 @@ namespace DaemonsMCP.Core.Services {
       }
 
       indexClassItemsByFile = aProjectIndexModel.GetAllClassItems(indexFileItem.Id);
-      //aProjectIndexModel.ClearClassIndex(indexFileItem); // Clear existing class index for this file
 
       // Parse the C# file to extract classes, methods, properties
       var fileContent = await File.ReadAllTextAsync(filePath, Encoding.UTF8).ConfigureAwait(false);

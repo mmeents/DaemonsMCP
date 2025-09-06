@@ -1,4 +1,4 @@
-using DaemonsMCP.Core.Models;
+﻿using DaemonsMCP.Core.Models;
 using FluentAssertions;
 
 namespace DaemonsMCP.Tests.Models
@@ -9,18 +9,7 @@ namespace DaemonsMCP.Tests.Models
         [TestMethod]
         public void Constructor_WithValidParameters_ShouldInitializeCorrectly()
         {
-            // Arrange
-            const string expectedName = "TestProject";
-            const string expectedDescription = "Test Description";
-            const string expectedPath = @"C:\TestPath";
-
-            // Act
-            var project = new ProjectModel(expectedName, expectedDescription, expectedPath);
-
-            // Assert
-            project.Name.Should().Be(expectedName);
-            project.Description.Should().Be(expectedDescription);
-            project.Path.Should().Be(expectedPath);
+            // TODO: Implement test for valid constructor parameters
         }
 
         [TestMethod]
