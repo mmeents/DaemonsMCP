@@ -254,7 +254,7 @@ namespace DaemonsMCP.Core {
         var result = await _classService.GetMethodContentAsync(projectName, methodId).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.GetClassMethodCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.GetMethodCmd, $"Failed: {ex.Message}", ex);
         return JsonSerializer.Serialize(opResult);
       }
     }

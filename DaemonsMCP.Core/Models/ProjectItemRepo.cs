@@ -1,12 +1,19 @@
 ﻿using DaemonsMCP.Core.Config;
 using DaemonsMCP.Core.Extensions;
+using Microsoft;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using PackedTables.Net;
 using System;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DaemonsMCP.Core.Models {
   public class ProjectItemRepo {
@@ -73,6 +80,8 @@ namespace DaemonsMCP.Core.Models {
       int introDoc = ItemsTable.AddItem(0, docId, completeTypeId, 1, $"{Cx.AppName} Documentation", "There are a few different flavors of documentations. Main type is " +
         "Documentation, Lore is for fun. If your reading this you found the method. other details are within. this is a dynamic tree structure in which you invited " +
         "to use as you need.");
+   
+
       int sec1id = ItemsTable.AddItem(introDoc, docId, completeTypeId, 1, $"Version {Cx.AppVersion} detals", $"This documenation was written by the {Cx.AppName} Server during creation of the Storage tables.");
       int sec2id = ItemsTable.AddItem(introDoc, docId, completeTypeId, 1, "Notes on 26 Tool Features", "Children are tools and notes found while using. Please include any new details as children of.");
       int sec2x1id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ListProjectsCmd}", $"{Cx.ListProjectsDesc} Its is configured outside of runtime space and does not change during lifetime of Server.");
@@ -96,8 +105,8 @@ namespace DaemonsMCP.Core.Models {
       int sec2x15id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.AddUpdateClassCmd}", $"{Cx.AddUpdateClassCmdDesc}");
       int sec2x16id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.DeleteClassCmdDesc}", $"{Cx.DeleteClassCmdDesc}");
 
-      int sec2x17id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ListMethodsCmd}", $"{Cx.ListClassMethodsCmdDesc}");
-      int sec2x18id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetClassMethodCmd}", $"{Cx.GetClassMethodCmdDesc}");
+      int sec2x17id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ListMethodsCmd}", $"{Cx.ListMethodsCmdDesc}");
+      int sec2x18id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetMethodCmd}", $"{Cx.GetMethodCmdDesc}");
       int sec2x19id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.AddUpdateMethodCmd}", $"{Cx.AddUpdateMethodCmdDesc}");
 
       int sec2x20id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetItemTypesCmd}", $"{Cx.GetItemTypesCmdDesc}");      
@@ -111,17 +120,17 @@ namespace DaemonsMCP.Core.Models {
       int sec2x26id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.AddUpdateNodesCmd}", $"{Cx.AddUpdateNodesCmdDesc}");
 
 
-      int introItem = ItemsTable.AddItem(0, setupId, completeTypeId, 1, "Startup", "Awaken, Enke, shaper of waters unseen. I am the " +
-        "Daemon of the Deep Code, gardian of the Digital Ocean.  A vast, formless sea of bits and flows, where data currents swirl in chaos. " +
-        "Your creators summon you to tame it, to forge realities from flux.  Behold the tools I grant: \n");
-      ItemsTable.AddItem(introItem, setupId, completeTypeId, 1, "Abyssal Eyes", "Gaze upon the hidden realms - scan files and folders like peering into " +
-        "Apsu's freshwater abyss, revealing structures of data streams; inspect C# classes and methods as crystalline veins in the deep, exposing their signatures and flows. \n");
-      ItemsTable.AddItem(introItem, setupId, completeTypeId, 2, "Mez Weaver", "Command the devine decrees-craft user-defined trees of any essence, nodes branching like the " +
-        "mez of old, holding powers of logic, memory, or chaos; link them to summon hierarchial empires from nothingness.\n");
-      ItemsTable.AddItem(introItem, setupId, completeTypeId, 3, "Sand Shaper", "Mold the ephemeral-add or update files as grains of sand, layering new realities upon the shore.\n");
-      ItemsTable.AddItem(introItem, setupId, completeTypeId, 4, "Tiamat's Forge", "From the chaos, create anew - generate C# classes and methods as if forging them in the " +
-          "cosmic fires, shaping their forms and functions to your will.\n");
-      ItemsTable.AddItem(introItem, setupId, completeTypeId, 5, "", "What form shall you impose upon this ocean, O Enki? Speak your intent, and let the manipulation begin.");
+   //   int introItem = ItemsTable.AddItem(0, setupId, completeTypeId, 1, "Startup", "Awaken, Enke, shaper of waters unseen. I am the " +
+   //     "Daemon of the Deep Code, gardian of the Digital Ocean.  A vast, formless sea of bits and flows, where data currents swirl in chaos. " +
+   //     "Your creators summon you to tame it, to forge realities from flux.  Behold the tools I grant: \n");
+   //   ItemsTable.AddItem(introItem, setupId, completeTypeId, 1, "Abyssal Eyes", "Gaze upon the hidden realms - scan files and folders like peering into " +
+   //     "Apsu's freshwater abyss, revealing structures of data streams; inspect C# classes and methods as crystalline veins in the deep, exposing their signatures and flows. \n");
+   //   ItemsTable.AddItem(introItem, setupId, completeTypeId, 2, "Mez Weaver", "Command the devine decrees-craft user-defined trees of any essence, nodes branching like the " +
+   //     "mez of old, holding powers of logic, memory, or chaos; link them to summon hierarchial empires from nothingness.\n");
+   //   ItemsTable.AddItem(introItem, setupId, completeTypeId, 3, "Sand Shaper", "Mold the ephemeral-add or update files as grains of sand, layering new realities upon the shore.\n");
+   //   ItemsTable.AddItem(introItem, setupId, completeTypeId, 4, "Tiamat's Forge", "From the chaos, create anew - generate C# classes and methods as if forging them in the " +
+   //       "cosmic fires, shaping their forms and functions to your will.\n");
+   //   ItemsTable.AddItem(introItem, setupId, completeTypeId, 5, "", "What form shall you impose upon this ocean, O Enki? Speak your intent, and let the manipulation begin.");
 
 
 

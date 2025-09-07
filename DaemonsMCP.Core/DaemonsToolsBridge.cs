@@ -124,7 +124,7 @@ namespace DaemonsMCP.Core {
 
     #region Method Operations
 
-    [McpTool(Cx.ListMethodsCmd, Cx.ListClassMethodsCmdDesc)]
+    [McpTool(Cx.ListMethodsCmd, Cx.ListMethodsCmdDesc)]
     public static async Task<object> GetMethodsAsync(
         [Description(Cx.ProjectNameParamDesc)] string projectName,
         [Description(Cx.PageNoParamDesc)] int pageNo = 1,
@@ -134,7 +134,7 @@ namespace DaemonsMCP.Core {
         [Description(Cx.MethodFilterParamDesc)] string? methodFilter = null)
       => await GetTools().GetMethodsAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classFilter, methodFilter).ConfigureAwait(false);
 
-    [McpTool(Cx.GetClassMethodCmd, Cx.GetClassMethodCmdDesc)]
+    [McpTool(Cx.GetMethodCmd, Cx.GetMethodCmdDesc)]
     public static async Task<object> GetMethodContentAsync(
       [Description(Cx.ProjectNameParamDesc)] string projectName,
       [Description(Cx.MethodIdParamDesc)] int methodId

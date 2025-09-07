@@ -130,7 +130,7 @@
       splitContainer1.Panel2.Controls.Add(_listFilesButton);
       splitContainer1.Panel2.Controls.Add(_getFileButton);
       splitContainer1.Size = new Size(1244, 664);
-      splitContainer1.SplitterDistance = 355;
+      splitContainer1.SplitterDistance = 267;
       splitContainer1.TabIndex = 10;
       // 
       // _outputTextBox
@@ -140,7 +140,7 @@
       _outputTextBox.Multiline = true;
       _outputTextBox.Name = "_outputTextBox";
       _outputTextBox.ScrollBars = ScrollBars.Both;
-      _outputTextBox.Size = new Size(1244, 355);
+      _outputTextBox.Size = new Size(1244, 267);
       _outputTextBox.TabIndex = 1;
       _outputTextBox.WordWrap = false;
       // 

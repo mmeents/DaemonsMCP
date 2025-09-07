@@ -31,6 +31,8 @@ namespace DaemonsMCP.Core.Services {
        _logger.LogDebug($"🚀 Project {_projectIndexModel.ProjectName} Index Watch Service started ");
        StartupScanToFillQueue();
        StartWatching();
+       _projectIndexModel.IndexService.StartTimer();
+
     }
 
     public void Dispose() {

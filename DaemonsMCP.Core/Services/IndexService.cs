@@ -29,7 +29,7 @@ namespace DaemonsMCP.Core.Services {
     private readonly List<IndexProjectItem> _projectIndexModels = new();
     private readonly ILogger<IndexService> _logger;
     private bool _isProcessing = false;
-    private bool _isEnabled = true;
+    private bool _isEnabled = false;
 
     public IndexService (
       ILoggerFactory loggerFactory,
@@ -55,8 +55,9 @@ namespace DaemonsMCP.Core.Services {
           if (project.ProjectIndex == null) {
             throw new InvalidOperationException($"Project index not found for project: {project.Name}");
           }
-          project.ProjectIndex.IndexService = this;          
+          project.ProjectIndex.IndexService = this;                    
         }
+        Enabled = true;
     }
 
     public async Task<IndexStatusResult> GetIndexStatus() {

@@ -81,11 +81,11 @@ namespace DaemonsMCP.Core.Services {
     public async Task<OperationResult> GetMethodContentAsync(string projectName, int methodID) {
       try {
         var method = await _indexRepository.GetMethodContentAsync(projectName, methodID).ConfigureAwait(false);
-        var opResult = OperationResult.CreateSuccess(Cx.GetClassMethodCmd, $"{Cx.GetClassMethodCmd} Success.", method);
+        var opResult = OperationResult.CreateSuccess(Cx.GetMethodCmd, $"{Cx.GetMethodCmd} Success.", method);
         return opResult;
         } catch (Exception ex) {
         _logger.LogError(ex, "Error retrieving method");
-        var opResult = OperationResult.CreateFailure(Cx.GetClassMethodCmd, Cx.ClassServiceErrorMsg(ex));
+        var opResult = OperationResult.CreateFailure(Cx.GetMethodCmd, Cx.ClassServiceErrorMsg(ex));
         return opResult;
       }
     }

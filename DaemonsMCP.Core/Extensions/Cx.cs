@@ -49,7 +49,7 @@ namespace DaemonsMCP.Core.Extensions {
     public const string AddUpdateClassCmd = "add-update-class";        
 
     public const string ListMethodsCmd = "list-class-methods";
-    public const string GetClassMethodCmd = "get-class-method";
+    public const string GetMethodCmd = "get-class-method";
     public const string AddUpdateMethodCmd = "add-update-method";
             
     public const string GetItemTypesCmd = "list-item-types";
@@ -69,8 +69,8 @@ namespace DaemonsMCP.Core.Extensions {
 
     // Tool descriptions
     public const string ListProjectsDesc = "Gets list of available projects. A project is the configured name and the root folder allowed to access.";
-    public const string ListFoldersDesc = "Lists the directories in the folder or root folder if a folder is not specified. Filter is c# SearchPattern empty defalut is *";
-    public const string ListFilesDesc = "Lists the files in the folder or root folder if a folder is not specified. Filter is c# SearchPattern empty defalut is *";
+    public const string ListFoldersDesc = "Lists the directories in the folder or root folder if a folder is not specified. Filter is c# Directory.GetDirectories SearchPattern parameter wiht an empty defalut is changed to *.";
+    public const string ListFilesDesc = "Lists the files in the folder or root folder if a folder is not specified. Filter is c# Directory.GetFiles SearchPattern parameter where empty defalut uses *.";
 
     public const string GetFileDesc = "Gets the File and it's contents.";
     public const string InsertFileDesc = "Creates a file. Use to make a new file at the location in path parameter. Path is a reletive to the root path.";
@@ -80,19 +80,19 @@ namespace DaemonsMCP.Core.Extensions {
     public const string CreateFolderDesc = "Creates a new directory folder at location in the path parameter, pass true to createDirectories to confirm creation.";
     public const string DeleteFolderDesc = "Deletes a directory folder at location in the path parameter. pass true to deleteDirectories to confirm removal.";
 
-    public const string ResyncIndexCmdDesc = "Resyncs the Index. The index will parse namespaces, classes, fields, events, and methods.  When a file changes watches should detect and reindex within 5 seconds after first change and will run 5 second intervals until queue is cleared, processing batch at a time.";
-    public const string StatusIndexCmdDesc = "Gets the status of the index service. Returns Currnet Counts and if it's Enabled or not.";
+    public const string ResyncIndexCmdDesc = "Resyncs the Index. The index will parse namespaces, classes and methods.  When a file changes file watchers detect and reindex within 5 seconds after first change and will run 5 second intervals until queue is cleared, processing batch at a time.";
+    public const string StatusIndexCmdDesc = "Gets the status of the index service. Returns Currnet Counts and if it's Enabled or not.  Queue result is a snapshot of current count of files being indexed.";
     public const string ChangeStatusIndexCmdDesc = "Used to change the status of the index service. Enabled parameter, pass true to endable false to disable.  Active by default.";
 
-    public const string ListClassesCmdDesc = "Lists namespaces, classes in the index service.";
-    public const string GetClassCmdDesc = "Gets the class and its contents from the file ";
+    public const string ListClassesCmdDesc = "Lists indexed namespaces, classes in the index service. Filters are StringColumn.Contains filter value if non null";
+    public const string GetClassCmdDesc = "Gets the class and its contents from the file. ";
     public const string AddUpdateClassCmdDesc = "Adds or Updates a class. Use Get to retreive ClassContent object, modifiy and return here. ";    
     public const string DeleteClassCmdDesc = "Deletes class and its content from the namespace.";
 
-    public const string ListClassMethodsCmdDesc = "Lists the methods for the specified class.";
-    public const string GetClassMethodCmdDesc = "Gets the methods contents for the specified class.";
+    public const string ListMethodsCmdDesc = "Lists the methods for the specified class.";
+    public const string GetMethodCmdDesc = "Gets the methods contents for the specified class.";
     public const string AddUpdateMethodCmdDesc = "Adds a method and it's contents to the specified class.";
-    public const string UpdateClassMethodCmdDesc = "Updates method by splicing new method over top of old one identified in the get.";
+    public const string UpdateMethodCmdDesc = "Updates method by splicing new method over top of old one identified in the get.";
     public const string DeleteMethodCmdDesc = "Deletes a method by name within the specified class.";
 
     public const string GetItemTypesCmdDesc = "Lists all the types available for Nodes object. Pass object into add-update-item-type to modify. ";
@@ -230,26 +230,36 @@ namespace DaemonsMCP.Core.Extensions {
     public const string EventsLineStartCol = "LineStart";
     public const string EventsLineEndCol = "LineEnd";
 
-    // what's the difference between field and property?  property has getter/setter methods, field is a variable
-    // public const string FieldsTbl = "Fields";
 
-    /*
-1. Fields(IFieldSymbol)	Variables declared directly in the class.
-2. Properties(IPropertySymbol)	Properties with getters/setters.
-3. Methods(IMethodSymbol)	Regular methods, constructors, destructors, operators, and static methods.
-4. Events(IEventSymbol)	Events declared in the class.
-5. Indexers(IPropertySymbol with IsIndexer == true)	Special properties that allow array-like access.
-6. Nested Types (INamedTypeSymbol)	Classes, structs, enums, interfaces, or delegates declared within the class.
-7. Type Parameters(ITypeParameterSymbol)	If the class is generic.
-8. Attributes(AttributeData)	Attributes applied to the class or its members.
-9. Base Types and Interfaces	The class’s base type and implemented interfaces.
+    ///  Critical: C# Property Casing Requirements  //  
+    public const string criticalStrr = @"⚠️ CRITICAL API REQUIREMENT: All C# model objects MUST use PascalCase property names, not camelCase.
 
-see GetLeadingTrivia() for comments above attributes example:
-var start = method.GetLeadingTrivia().FirstOrDefault()?.SpanStart ?? method.SpanStart;
-var end = method.Span.End;
-var textChunk = sourceText.ToString(TextSpan.FromBounds(start, end));
+🎯 CORRECT CASING FOR METHODCONTENT:
+✅ ClassId(not classId)
+✅ MethodId(not methodId)
+✅ ClassName(not className)
+✅ Namespace(not namespace)
+✅ MethodName(not methodName)
+✅ FileNamePath(not fileNamePath)
+✅ UsesClauseAdd(not usesClauseAdd)
+✅ Content(not content)
 
-    */
+🐛 SYMPTOMS OF WRONG CASING:
+- 'System.Reflection.MethodBase serialization not supported' error
+- Cryptic serialization failures
+- JSON deserialization issues
+
+💡 DEBUGGING STRATEGY:
+1. Always copy property names EXACTLY from get-class-method response
+2. Use get-class-method as template for add-update-method
+3. C# serialization follows PascalCase convention
+
+📋 VALIDATION CHECKLIST:
+- [ ] Compare request format to successful get-method response
+- [ ] Verify all properties use PascalCase
+- [ ] Test with minimal object first
+
+APPLIES TO: add-update-method, add-update-class, add-update-nodes, and likely ALL C# model operations.";
 
   }
 }

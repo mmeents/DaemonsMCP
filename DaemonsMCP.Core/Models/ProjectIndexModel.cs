@@ -66,6 +66,7 @@ namespace DaemonsMCP.Core.Models {
       Events = IndexTables[Cx.EventsTbl] ?? IndexTables.MakeEventsTable();
 
       _watchService = new ProjectIndexWatchService(loggerFactory, this, _securityService);
+
     }
 
     public void Dispose() {
