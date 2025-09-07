@@ -56,8 +56,8 @@ namespace DaemonsMCP.Core.Services {
             throw new InvalidOperationException($"Project index not found for project: {project.Name}");
           }
           project.ProjectIndex.IndexService = this;
-          StartTimer();
-      }
+          
+        }
         Enabled = true;
     }
 
@@ -109,7 +109,7 @@ namespace DaemonsMCP.Core.Services {
 
         _processTimer = new Timer(async _ => {
           await ProcessQueueWithTimerControl().ConfigureAwait(false);
-        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(Cx.IndexTimerIntervalSec));
+        }, null, TimeSpan.FromSeconds(Cx.IndexTimerIntervalSec), TimeSpan.FromSeconds(Cx.IndexTimerIntervalSec));
 
         _logger.LogDebug($"▶️ Queue processing timer started ({Cx.IndexTimerIntervalSec} second interval)");
       }
@@ -149,7 +149,7 @@ namespace DaemonsMCP.Core.Services {
       } finally {
         // Restart the timer after processing
         if (!_isDisposed) {
-          var shouldRestart = !wasError;
+          var shouldRestart = false;
           foreach (var project in _projectIndexModels) {
             if (project != null && project.ProjectIndex != null
               && project.ProjectIndex.ChangeQueue != null
@@ -157,7 +157,7 @@ namespace DaemonsMCP.Core.Services {
               shouldRestart = true; // If any project has changes, restart the timer
             }
           }
-          if (shouldRestart && _isEnabled) {
+          if (shouldRestart && _isEnabled && !wasError) {
             _logger.LogDebug("▶️ Restarting timer after queue processing");
             StartTimer();
           }
