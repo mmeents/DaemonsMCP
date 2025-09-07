@@ -97,13 +97,17 @@ namespace DaemonsMCP.Core.Models {
       Events = IndexTables.MakeEventsTable();
     }
 
+    private readonly object _fileLock = new object();
+
     public void WriteIndex() {
       if (IndexTables != null && IndexTables.TableCount > 0) {
-        try { 
-          IndexTables.SaveToFile(IndexFilePath);
-          LastModified = DateTime.Now;
-        } catch (Exception ex) {
-          _logger.LogError(ex, "Error writing index file {IndexFilePath}: {Message}", IndexFilePath, ex.Message);        
+        lock (_fileLock) { 
+          try {
+            IndexTables.SaveToFile(IndexFilePath);
+            LastModified = DateTime.Now;
+          } catch (Exception ex) {
+            _logger.LogError(ex, "Error writing index file {IndexFilePath}: {Message}", IndexFilePath, ex.Message);
+          }
         }
       } else {
         throw new InvalidOperationException("No tables to write to index file.");
