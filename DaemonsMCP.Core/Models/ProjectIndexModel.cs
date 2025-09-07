@@ -97,17 +97,13 @@ namespace DaemonsMCP.Core.Models {
       Events = IndexTables.MakeEventsTable();
     }
 
-    private readonly object _fileLock = new object();
-
-    public void WriteIndex() {
+    public async Task WriteIndexAsync() {  // Changed to async Task (not void!)
       if (IndexTables != null && IndexTables.TableCount > 0) {
-        lock (_fileLock) { 
-          try {
-            IndexTables.SaveToFile(IndexFilePath);
-            LastModified = DateTime.Now;
-          } catch (Exception ex) {
-            _logger.LogError(ex, "Error writing index file {IndexFilePath}: {Message}", IndexFilePath, ex.Message);
-          }
+        try {
+          await IndexTables.SaveToFileAsync(IndexFilePath).ConfigureAwait(false);  // Use async version
+          LastModified = DateTime.Now;
+        } catch (Exception ex) {
+          _logger.LogError(ex, "Error writing index file {IndexFilePath}: {Message}", IndexFilePath, ex.Message);
         }
       } else {
         throw new InvalidOperationException("No tables to write to index file.");

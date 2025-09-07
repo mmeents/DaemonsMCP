@@ -212,7 +212,7 @@ namespace DaemonsMCP.Core.Services {
           } catch (Exception ex) {
             _logger.LogError(ex, $"Error processing files for project {project.Name}: {ex.Message}");
           } finally {
-            projectIndex.WriteIndex();  // saves once per project
+            await projectIndex.WriteIndexAsync().ConfigureAwait(false);  // saves once per project
           }
           
         }
@@ -424,8 +424,7 @@ namespace DaemonsMCP.Core.Services {
       }
 
       // Save changes after processing batch
-      project.ProjectIndex.WriteIndex();
-      
+      await project.ProjectIndex.WriteIndexAsync().ConfigureAwait(false);      
      
     }
 

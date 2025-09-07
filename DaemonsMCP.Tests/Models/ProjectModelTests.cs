@@ -2,6 +2,7 @@ using DaemonsMCP.Core.Models;
 using FluentAssertions;
 
 namespace DaemonsMCP.Tests.Models {
+	
   [TestClass]
   public class ProjectModelTests {
     [TestMethod]
