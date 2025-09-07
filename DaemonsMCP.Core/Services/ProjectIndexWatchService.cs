@@ -30,9 +30,7 @@ namespace DaemonsMCP.Core.Services {
        ProjectRootPath = _projectIndexModel.ProjectPath ?? throw new ArgumentNullException(nameof(_projectIndexModel.ProjectPath), "Project root path cannot be null");
        _logger.LogDebug($"🚀 Project {_projectIndexModel.ProjectName} Index Watch Service started ");
        StartupScanToFillQueue();
-       StartWatching();
-       _projectIndexModel.IndexService.StartTimer();
-
+       StartWatching();       
     }
 
     public void Dispose() {

@@ -55,8 +55,9 @@ namespace DaemonsMCP.Core.Services {
           if (project.ProjectIndex == null) {
             throw new InvalidOperationException($"Project index not found for project: {project.Name}");
           }
-          project.ProjectIndex.IndexService = this;                    
-        }
+          project.ProjectIndex.IndexService = this;
+          StartTimer();
+      }
         Enabled = true;
     }
 
