@@ -97,18 +97,27 @@ namespace DaemonsMCP.Core.Models {
       Events = IndexTables.MakeEventsTable();
     }
 
-    public async Task WriteIndexAsync() {  // Changed to async Task (not void!)
+    private readonly SemaphoreSlim _writeSemaphore = new SemaphoreSlim(1, 1);
+
+    public async Task WriteIndexAsync() {
       if (IndexTables != null && IndexTables.TableCount > 0) {
+        await _writeSemaphore.WaitAsync().ConfigureAwait(false);
         try {
-          await IndexTables.SaveToFileAsync(IndexFilePath).ConfigureAwait(false);  // Use async version
+          _logger.LogDebug("WriteIndexAsync starting for {IndexFilePath}", IndexFilePath);
+          await IndexTables.SaveToFileAsync(IndexFilePath).ConfigureAwait(false);
+          _logger.LogDebug("WriteIndexAsync completed for {IndexFilePath}", IndexFilePath);
           LastModified = DateTime.Now;
         } catch (Exception ex) {
           _logger.LogError(ex, "Error writing index file {IndexFilePath}: {Message}", IndexFilePath, ex.Message);
+        } finally {
+          _writeSemaphore.Release();
         }
       } else {
         throw new InvalidOperationException("No tables to write to index file.");
       }
     }
+
+    
 
 
     #region IndexFileItem methods 
