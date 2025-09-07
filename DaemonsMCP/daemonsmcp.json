@@ -28,6 +28,12 @@
             "description": "Algos 1.0.5",
             "path": "C:\\GithubMM\\Algos",
             "enabled": true
+        },
+        {
+            "name": "Apiary",
+            "description": "Apiary variable rate example github api runner",
+            "path": "C:\\GithubMM\\Apiary",
+            "enabled": true
         }
 
     ],

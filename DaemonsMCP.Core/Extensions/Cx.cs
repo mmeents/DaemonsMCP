@@ -15,7 +15,10 @@ namespace DaemonsMCP.Core.Extensions {
     public const string AppVersion = "0.1.0";
     public const string CONFIG_FILE_NAME = "daemonsmcp.json";
     public const bool IsDebug = true;
+
     public const int IndexTimerIntervalSec = 10; // seconds
+    public const int IndexSchIntervalSec = 3; // seconds
+
     public const string DaemonsFolderName = ".daemons";
     public const string BackupFolderName = "backups";
 

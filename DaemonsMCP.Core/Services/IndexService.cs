@@ -24,8 +24,10 @@ namespace DaemonsMCP.Core.Services {
     private readonly IValidationService _validationService;
     private readonly ISecurityService _securityService;
     private readonly IIndexRepository _indexRepository;
-    private Timer? _processTimer;    
-    private readonly Lock _timerLock = new();
+    private Timer? _processTimer;   
+    private Timer? _scheduledCmdTimer;
+    private readonly Lock _processTimerLock = new();
+    private readonly Lock _scheduledCmdLock = new();
     private readonly List<IndexProjectItem> _projectIndexModels = new();
     private readonly ILogger<IndexService> _logger;
     private bool _isProcessing = false;
@@ -101,7 +103,7 @@ namespace DaemonsMCP.Core.Services {
         _logger.LogDebug("⚠️ Indexing is disabled, not starting timer");
         return;
       }
-      lock (_timerLock) {
+      lock (_processTimerLock) {
         if (_processTimer != null) {
           _logger.LogDebug("⚠️ Timer already running, skipping start");
           return;
@@ -116,7 +118,7 @@ namespace DaemonsMCP.Core.Services {
     }
 
     public void StopTimer() {
-      lock (_timerLock) {
+      lock (_processTimerLock) {
         if (_processTimer == null) {
           _logger.LogDebug("⚠️ Timer already stopped, skipping stop");
           return;
@@ -126,6 +128,79 @@ namespace DaemonsMCP.Core.Services {
         _processTimer = null;
         _logger.LogDebug("⏹️ Queue processing timer stopped");
       }
+    }
+
+    public void StartScheduleTimer() {
+      lock (_scheduledCmdLock) {
+        if (_scheduledCmdTimer != null) {
+          _logger.LogDebug("⚠️ Schedule timer already running, skipping start");
+          return;
+        }
+        _scheduledCmdTimer = new Timer(async _ => {
+          await ExecNextScheduledCmd().ConfigureAwait(false);
+        }, null, TimeSpan.FromSeconds(Cx.IndexSchIntervalSec), TimeSpan.FromSeconds(Cx.IndexSchIntervalSec));
+        _logger.LogDebug($"▶️ Schedule timer started");
+      }
+    }
+
+    public void StopScheduleTimer() {
+      lock (_scheduledCmdLock) {
+        if (_scheduledCmdTimer == null) {
+          _logger.LogDebug("⚠️ Save timer already stopped, skipping stop");
+          return;
+        }
+        _scheduledCmdTimer.Dispose();
+        _scheduledCmdTimer = null;
+        _logger.LogDebug("⏹️ Save timer stopped");
+      }
+    }
+
+    private async Task ExecNextScheduledCmd() {
+      if (_isDisposed) return;            
+      StopScheduleTimer();                   // Stop the timer before processing
+      try {
+        _logger.LogDebug("⏸️ Save timer paused - starting save all indexes");
+        var cmd = PopNextScheduledCmd();
+        if (cmd != null) {          
+          var project = cmd.Project;
+          if (project != null && project.ProjectIndex != null) {
+            if (cmd.OpType == IndexOpType.WriteIndex) {
+              await project.ProjectIndex.WriteIndexAsync().ConfigureAwait(false);
+              _logger.LogDebug($"✅ {cmd.Id} {cmd.OpType} {cmd.Project.Name}");
+            }            
+          } else { 
+            _logger.LogDebug("⚠️ No project or project index found for scheduled command");
+          }
+        }
+        
+      } catch (Exception ex) {
+        _logger.LogError(ex, "❌ Error ExecNextScheduledCmd: {Message}", ex.Message);
+        
+      } finally {
+        // Restart the timer after processing
+        if (!_isDisposed && (_schedule.Keys.Count > 0) ) {
+          _logger.LogDebug("▶️ Restarting ScheduledCmd timer");
+          StartScheduleTimer();
+        }
+      } // End of finally block
+    }
+
+    private long _scheduledCmdNo = 1;
+    private ConcurrentDictionary<long, IndexScheduledCmd> _schedule = new();
+    public void ScheduleWriteIndex(IndexProjectItem project) {
+      var op = new IndexScheduledCmd(_scheduledCmdNo, IndexOpType.WriteIndex, project);
+      Interlocked.Increment(ref _scheduledCmdNo);
+      _schedule[op.Id] = op;
+      StartScheduleTimer();
+    }
+
+    public IndexScheduledCmd? PopNextScheduledCmd() {
+      if (_schedule.Keys.Count > 0) {
+        var firstKey = _schedule.Keys.OrderBy(x => x).First();
+        _schedule.TryRemove(firstKey, out var op);
+        return op;
+      }
+      return null;
     }
 
     private async Task ProcessQueueWithTimerControl() {
@@ -211,8 +286,8 @@ namespace DaemonsMCP.Core.Services {
 
           } catch (Exception ex) {
             _logger.LogError(ex, $"Error processing files for project {project.Name}: {ex.Message}");
-          } finally {
-            await projectIndex.WriteIndexAsync().ConfigureAwait(false);  // saves once per project
+          } finally {            
+            ScheduleWriteIndex(project);
           }
           
         }
@@ -424,7 +499,7 @@ namespace DaemonsMCP.Core.Services {
       }
 
       // Save changes after processing batch
-      await project.ProjectIndex.WriteIndexAsync().ConfigureAwait(false);      
+      ScheduleWriteIndex(project);      
      
     }
 
