@@ -3,15 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DaemonsMCP.Core.Models {
   public class OperationResult {
+
+    [JsonPropertyName("success")]
     public bool Success { get; set; }
+
+    [JsonPropertyName("operation")]
     public string Operation { get; set; } = string.Empty;
+
+    [JsonPropertyName("message")]
     public string Message { get; set; } = string.Empty;
+
+    [JsonPropertyName("data")]
     public object? Data { get; set; }
+
+    [JsonPropertyName("errorMessage")]
     public string? ErrorMessage { get; set; }
+
+    [JsonPropertyName("exception")]
     public Exception? Exception { get; set; }
 
     public static OperationResult CreateSuccess(string operation, string message, object? data = null) { 
