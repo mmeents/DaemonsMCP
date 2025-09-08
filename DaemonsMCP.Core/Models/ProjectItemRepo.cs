@@ -79,7 +79,7 @@ namespace DaemonsMCP.Core.Models {
 
       int introDoc = ItemsTable.AddItem(0, docId, completeTypeId, 1, $"{Cx.AppName} Documentation", "There are a few different flavors of documentations. Main type is " +
         "Documentation, Lore is for fun. If your reading this you found the method. other details are within. this is a dynamic tree structure in which you invited " +
-        "to use as need.");
+        "to use as you need.");
    
 
       int sec1id = ItemsTable.AddItem(introDoc, docId, completeTypeId, 1, $"Version {Cx.AppVersion} detals", $"This documenation was written by the {Cx.AppName} Server during creation of the Storage tables.");
@@ -103,6 +103,7 @@ namespace DaemonsMCP.Core.Models {
       int sec2x13id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ListClassesCmd}", $"{Cx.ListClassesCmdDesc}");
       int sec2x14id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetClassCmd}", $"{Cx.GetClassCmdDesc}");
       int sec2x15id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.AddUpdateClassCmd}", $"{Cx.AddUpdateClassCmdDesc}");
+      int sec2x16id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.DeleteClassCmdDesc}", $"{Cx.DeleteClassCmdDesc}");
 
       int sec2x17id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ListMethodsCmd}", $"{Cx.ListMethodsCmdDesc}");
       int sec2x18id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetMethodCmd}", $"{Cx.GetMethodCmdDesc}");

@@ -5,14 +5,10 @@ using DaemonsMCP.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events; 
 using Serilog.Extensions.Hosting;
-using System.Text.Json;
 
 namespace DaemonsMCP
 {

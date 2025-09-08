@@ -1,12 +1,11 @@
-﻿using DaemonsMCP.Core.Config;
-using DaemonsMCP.Core.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.IO;
+using DaemonsMCP.Core.Config;
+using DaemonsMCP.Core.Extensions;
 
 namespace DaemonsMCP.Core.Models {
   public class ProjectModel {
@@ -17,18 +16,11 @@ namespace DaemonsMCP.Core.Models {
       this.Description = Description ?? throw new ArgumentNullException(nameof(Description));
       this.Path = FullPath ?? throw new ArgumentNullException(nameof(FullPath));
     }
-    [JsonPropertyName("name")]
     public string Name { get; set; } = "";
-
-    [JsonPropertyName("description")]
     public string Description { get; set; } = "";
-
-    [JsonPropertyName("path")]
     public string Path { get; set; } = "";
 
     private string _IndexPath = "";
-
-    [JsonPropertyName("indexPath")]
     public string IndexPath { 
       get {  
         if (!string.IsNullOrEmpty(_IndexPath)) return _IndexPath;
@@ -38,8 +30,6 @@ namespace DaemonsMCP.Core.Models {
     }
 
     private string _BackupPath = "";
-
-    [JsonPropertyName("backupPath")]
     public string BackupPath {
       get {
         if (!string.IsNullOrEmpty(_BackupPath)) return _BackupPath;
