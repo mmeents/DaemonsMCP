@@ -619,7 +619,10 @@ namespace DaemonsMCP.Core.Models {
 
     public Nodes MakeTodoList(string listName, string[] items) {
       var todoStatusId = TypesTable.TypesByName(Cx.StatusStart);
-      var todolistId = ItemsTable.GetTodoByName(listName, todoTypeId, todoStatusId, todoRootNodeId);
+      var todolistId = ItemsTable.GetTodoByName(listName, todoTypeId, todoStatusId);
+      if (todolistId == 0) {
+        todolistId = ItemsTable.AddItem(todoRootNodeId, todoTypeId, todoStatusId, 0, listName, "Todo item: " + listName, DateTime.Now, null);
+      }
       var todoList = GetNodesById(todolistId, maxDepth: 1);
       if (todoList == null) throw new InvalidOperationException("Failed to create or retrieve todo list node.");
       foreach (var itemName in items) {
@@ -637,63 +640,66 @@ namespace DaemonsMCP.Core.Models {
               Details = "",
               Created = DateTime.Now,
               Modified = DateTime.Now
-            };
-            AddUpdateNode(todoItem);
+            };            
             todoList.Subnodes.Add(todoItem);
           }
         }
-      }
-      return todoList;
+      }      
+      return AddUpdateNode(todoList);
     }
 
     public Nodes? GetNextTodoItem(string? listName = null, int maxDepth = 1) { // null = any list
       var todoStatusId = TypesTable.TypesByName(Cx.StatusStart);
       var todoStatusInProgressId = TypesTable.TypesByName(Cx.StatusInProgress);      
-      IEnumerable<int> todoItems;
-
-      if (listName == null) {         
-        todoItems = ItemsTable.Rows.Values
-            .Where(row => row[Cx.ItemTypeIdCol].Value.AsInt32() == todoTypeId &&
-                          row[Cx.ItemStatusCol].Value.AsInt32() == todoStatusId)
-            .OrderBy(row => row.Id)
-            .Select(row => row.Id)
-            .ToList();       
-      } else {        
-        var todolistId = ItemsTable.GetTodoByName(listName, todoTypeId, todoStatusId, todoRootNodeId);
+      IEnumerable<int>? todoItems = null;
+      string todoListName = listName ?? "";
+      if ( todoListName != "") {
+        var todolistId = ItemsTable.GetTodoByName(todoListName, todoTypeId, todoStatusId);
         if (todolistId == 0) {
-          throw new InvalidOperationException($"Todo list '{listName}' does not exist.");
-        }
-        todoItems = ItemsTable.Rows.Values
+          todoListName = "";
+        }else {
+          todoItems = ItemsTable.Rows.Values
             .Where(row => row[Cx.ItemParentCol].Value.AsInt32() == todolistId &&
                           row[Cx.ItemTypeIdCol].Value.AsInt32() == todoTypeId &&
                           row[Cx.ItemStatusCol].Value.AsInt32() == todoStatusId)
             .OrderBy(row => row.Id)
             .Select(row => row.Id)
             .ToList();
-        
+        }
       }
 
-      foreach (var itemId in todoItems) {
-        var todoItem = GetNodesById(itemId, Cx.TypeTodoMaxDepth, Cx.StatusStart, Cx.TypeTodo);
-        if (todoItem != null) {
-          Nodes? subItem = null;
-          if (todoItem.Subnodes.Any() && maxDepth > 0) {
-            foreach (var sub in todoItem.Subnodes) {            
-              subItem = GetNextTodoItem(sub.Name, maxDepth - 1);
-              if (subItem != null) break;
+      if (todoListName == "") {         
+        todoItems = ItemsTable.Rows.Values
+            .Where(row => row[Cx.ItemParentCol].Value.AsInt32() == todoRootNodeId &&
+                          row[Cx.ItemTypeIdCol].Value.AsInt32() == todoTypeId &&
+                          row[Cx.ItemStatusCol].Value.AsInt32() == todoStatusId)
+            .OrderBy(row => row.Id)
+            .Select(row => row.Id)
+            .ToList();       
+      } 
+      if (todoItems != null ) { 
+        foreach (var itemId in todoItems) {
+          var todoItem = GetNodesById(itemId, Cx.TypeTodoMaxDepth, Cx.StatusStart, Cx.TypeTodo);
+          if (todoItem != null) {
+            Nodes? subItem = null;
+            if (todoItem.Subnodes.Any() && maxDepth > 0) {
+              foreach (var sub in todoItem.Subnodes) {            
+                subItem = GetNextTodoItem(sub.Name, maxDepth - 1);
+                if (subItem != null) break;
+              }
             }
+            todoItem = subItem == null ? todoItem : subItem;
+            if (todoItem == null) continue;
+            // Mark as In Progress unless it was marked done in a subitem
+            if (subItem == null) { 
+              ItemsTable.FindFirst(Cx.ItemIdCol, todoItem.Id);
+              ItemsTable.Edit();
+              ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusInProgressId;
+              ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;
+              ItemsTable.Post();
+            }
+            return todoItem;
           }
-          todoItem = subItem == null ? todoItem : subItem;
-          if (todoItem == null) continue;
-          // Mark as In Progress unless it was marked done in a subitem
-          if (subItem == null) { 
-            ItemsTable.FindFirst(Cx.ItemIdCol, todoItem.Id);
-            ItemsTable.Edit();
-            ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusInProgressId;
-            ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;
-            ItemsTable.Post();
-          }
-          return todoItem;
         }
       }
       return null;

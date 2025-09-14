@@ -83,19 +83,18 @@ namespace DaemonsMCP.Core.Extensions {
       }
     }
 
-    public static int GetTodoByName(this TableModel ItemsTable, string todoName, int todoTypeId, int todoStatuId, int todoRootId) {
+    public static int GetTodoByName(this TableModel ItemsTable, string todoName, int todoTypeId, int todoStatuId) {
       if (ItemsTable == null) throw new ArgumentNullException(nameof(ItemsTable));
-      var rows = ItemsTable.Rows.Where(r =>  r.Value[Cx.ItemNameCol].ValueString == todoName 
-        && r.Value[Cx.ItemTypeIdCol].Value.AsInt32() == todoTypeId 
-        && r.Value[Cx.ItemStatusCol].Value.AsInt32() == todoStatuId
-      ).ToList();
+      var rows = ItemsTable.Rows.Values.Where(r =>  r[Cx.ItemNameCol].ValueString == todoName 
+        && r[Cx.ItemTypeIdCol].Value.AsInt32() == todoTypeId 
+        && r[Cx.ItemStatusCol].Value.AsInt32() == todoStatuId      
+      ).OrderByDescending(r => r.Id).ToList();
       if (rows.Count > 0) {
-        return rows[0].Value.Id;
-      } else { 
-        // create it.
-        return ItemsTable.AddItem(todoRootId, todoTypeId, todoStatuId, 0, todoName, "Todo item: " + todoName, DateTime.Now, null);
-      }
+        return rows[0].Id;
+      } 
+      return 0;      
     }
+
 
   }
 }
