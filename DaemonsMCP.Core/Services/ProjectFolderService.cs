@@ -19,7 +19,7 @@ namespace DaemonsMCP.Core.Services {
     private readonly ISecurityService _securityService = securityService;
 
     public Task<IEnumerable<string>> GetFoldersAsync(string projectName, string? path = null, string? filter = null) {
-      var context = _validationService.ValidateAndPrepare(projectName, path ?? "", true);
+      var context = _validationService.ValidateAndPrepare(projectName, path ?? "", true, true);
       var fullPath = context.FullPath;
 
       var searchPattern = string.IsNullOrEmpty(filter) ? "*" : filter;
@@ -34,7 +34,7 @@ namespace DaemonsMCP.Core.Services {
 
     public Task<OperationResult> CreateFolderAsync(string projectName, string path, bool createParents = true) {
       try {
-        var context = _validationService.ValidateAndPrepare(projectName, path, true);                       
+        var context = _validationService.ValidateAndPrepare(projectName, path, true, true);                       
         var fullDirPath = context.FullPath;
       
         // Check if path is write-protected
@@ -91,7 +91,7 @@ namespace DaemonsMCP.Core.Services {
           throw new ArgumentException("Directory deletion requires explicit confirmation. Set confirmDeletion=true to proceed.");
         }
 
-        var context = _validationService.ValidateAndPrepare(projectName, path, true);
+        var context = _validationService.ValidateAndPrepare(projectName, path, true, true);
         var fullDirPath = context.FullPath;
 
         // Check if directory exists
