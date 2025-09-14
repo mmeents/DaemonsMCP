@@ -9,16 +9,16 @@ namespace DaemonsMCP.Core.Services {
   public interface IProjectsService {
     Task<IEnumerable<ProjectModel>> GetProjectsAsync();
 
-    public Task<OperationResult> GetItemTypes(string projectName) ;
-    public Task<OperationResult> AddUpdateItemType(string projectName, ItemType itemType);
-    public Task<OperationResult> GetStatusTypes(string projectName);
-    public Task<OperationResult> AddUpdateStatusType(string projectName, StatusType statusType);
-    public Task<OperationResult> GetNodes(string projectName, int? nodeId = null, int maxDepth = 1, string? statusFilter = null, string? typeFilter = null, string? nameContains = null, string? detailsContains = null);
-    public Task<OperationResult> GetNodeById(string projectName, int nodeId);
-    public Task<OperationResult> AddUpdateNode(string projectName, Nodes node);
-    public Task<OperationResult> AddUpdateNodeList(string projectName, List<Nodes> nodes);
-    public Task<OperationResult> RemoveNode(string projectName, int nodeId, RemoveStrategy removeStrategy = RemoveStrategy.PreventIfHasChildren);
-    public Task<OperationResult> SaveProjectRepo(string projectName);
+    public Task<OperationResult> GetItemTypes() ;
+    public Task<OperationResult> AddUpdateItemType(ItemType itemType);
+    public Task<OperationResult> GetStatusTypes();
+    public Task<OperationResult> AddUpdateStatusType(StatusType statusType);
+    public Task<OperationResult> GetNodes(int? nodeId = null, int maxDepth = 1, string? statusFilter = null, string? typeFilter = null, string? nameContains = null, string? detailsContains = null);
+    public Task<OperationResult> GetNodeById(int nodeId);
+    public Task<OperationResult> AddUpdateNode(Nodes node);
+    public Task<OperationResult> AddUpdateNodeList(List<Nodes> nodes);
+    public Task<OperationResult> RemoveNode(int nodeId, RemoveStrategy removeStrategy = RemoveStrategy.PreventIfHasChildren);
+    public Task<OperationResult> SaveProjectRepo();
 
   }
 }

@@ -3,11 +3,14 @@ using DaemonsMCP.Core.Extensions;
 using Microsoft;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using PackedTables.Net;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
@@ -16,30 +19,27 @@ using System.Windows.Controls;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace DaemonsMCP.Core.Models {
-  public class ProjectItemRepo {
+  public class NodesRepo {
     #region private vars
     private IAppConfig _config;
-    private ILogger<ProjectItemRepo> _logger;
-    private readonly ProjectModel _project;
+    private ILogger<NodesRepo> _logger;    
 
     private int nullTypeId = 0;
     private int categoriesTypeId = 0;
     private int statusTypesId = 0;
     private int itemTypesId = 0;
-
-    public string ProjectName => _project.Name;
+        
     public string StoragePath { get; set; } = string.Empty;
     public string StorageFileName { get; set; } = string.Empty;
     public PackedTableSet StorageTables { get; set; } = new PackedTableSet();
     public TableModel TypesTable { get; set; }
     public TableModel ItemsTable { get; set; }
     #endregion
-    public ProjectItemRepo(ProjectModel project, IAppConfig appConfig, ILoggerFactory loggerFactory) {
-      _project = project;
+    public NodesRepo( IAppConfig appConfig, ILoggerFactory loggerFactory) {      
       _config = appConfig;
-      _logger = loggerFactory.CreateLogger<ProjectItemRepo>() ?? throw new ArgumentNullException(nameof(loggerFactory));
-      StoragePath = System.IO.Path.GetFullPath(_project.IndexPath);
-      StorageFileName = System.IO.Path.GetFullPath(System.IO.Path.Combine(_project.IndexPath, $"Storage.pktbs"));
+      _logger = loggerFactory.CreateLogger<NodesRepo>() ?? throw new ArgumentNullException(nameof(loggerFactory));      
+      StoragePath = _config.Version.NodesFilePath;
+      StorageFileName = System.IO.Path.GetFullPath(System.IO.Path.Combine(_config.Version.NodesFilePath, $"Storage.pktbs"));
       if (!System.IO.Directory.Exists(StoragePath)) {
         System.IO.Directory.CreateDirectory(StoragePath);
       }
@@ -67,8 +67,8 @@ namespace DaemonsMCP.Core.Models {
     private void WriteDocumentation() {
       ;
       int docId = TypesTable.AddType(itemTypesId, 0, "Readme", "A type of item that is informaional and should be read at least once.");
-      int introId = TypesTable.AddType(itemTypesId, 0, "Introduction", "Catagory of instruction should be read first.");
-      int setupId = TypesTable.AddType(itemTypesId, 0, "Lore", "As legend would have it.");
+      int introId = TypesTable.AddType(itemTypesId, 0, "Documentation", "Details about the tools.");
+//      int setupId = TypesTable.AddType(itemTypesId, 0, "Lore", "As legend would have it.");
 
       int notStartedId = TypesTable.AddType(statusTypesId, 1, "Not Started", "The item has not been started.");
       int inProgressId = TypesTable.AddType(statusTypesId, 2, "In Progress", "The item is currently being worked on.");
@@ -77,63 +77,65 @@ namespace DaemonsMCP.Core.Models {
       TypesTable.AddType(statusTypesId, 5, "Cancelled", "The item has been cancelled and will not be completed.");
 
 
-      int introDoc = ItemsTable.AddItem(0, docId, completeTypeId, 1, $"{Cx.AppName} Documentation", "There are a few different flavors of documentations. Main type is " +
-        "Documentation, Lore is for fun. If your reading this you found the method. other details are within. this is a dynamic tree structure in which you invited " +
-        "to use as you need.");
-   
+      int introDoc = ItemsTable.AddItem(0, docId, completeTypeId, 1, $"{Cx.AppName} Documentation", "This documentation is data within the nodes filtered for Readme. Notes that should be included can be added via Nodes methods. ");
+      int sec1id = ItemsTable.AddItem(introDoc, docId, completeTypeId, 1, $"Version {Cx.AppVersion} detals", $"Node items were added by the {Cx.AppName} Server during creation of the Storage tables. "+
+        "Nodes are meant to be either documenation or issue tracking as needs require.  Use list-nodes filter on type 'Documentation' for tools notes");
+                   ItemsTable.AddItem(sec1id, docId, completeTypeId, 2, "What it is", Cx.CoreArchitectureDesc);
+                   ItemsTable.AddItem(sec1id, docId, completeTypeId, 3, "Critical", Cx.CriticalStr2);
+                   ItemsTable.AddItem(sec1id, docId, completeTypeId, 4, "Critical", Cx.criticalStrr);
 
-      int sec1id = ItemsTable.AddItem(introDoc, docId, completeTypeId, 1, $"Version {Cx.AppVersion} detals", $"This documenation was written by the {Cx.AppName} Server during creation of the Storage tables.");
-      int sec2id = ItemsTable.AddItem(introDoc, docId, completeTypeId, 1, "Notes on 26 Tool Features", "Children are tools and notes found while using. Please include any new details as children of.");
-      int sec2x1id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ListProjectsCmd}", $"{Cx.ListProjectsDesc} Its is configured outside of runtime space and does not change during lifetime of Server.");
+      /*
+       * 
+      int sec2id = ItemsTable.AddItem(0, introId, completeTypeId, 1, "Default Notes on Tool Features", "The children are the tool and it's description.");
+      int sec2x1id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 1, $"{Cx.ListProjectsCmd}", $"{Cx.ListProjectsDesc} Its is configured outside of runtime space and does not change during lifetime of Server.");
 
-      int sec2x2id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ListFoldersCmd}", $"{Cx.ListFoldersDesc}");
-      int sec2x3id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.CreateFolderCmd}", $"{Cx.CreateFolderDesc}");
-      int sec2x4id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.DeleteFolderCmd}", $"{Cx.DeleteFolderDesc}");
+      int sec2x2id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 2, $"{Cx.ListFoldersCmd}", $"{Cx.ListFoldersDesc}");
+      int sec2x3id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 3, $"{Cx.CreateFolderCmd}", $"{Cx.CreateFolderDesc}");
+      int sec2x4id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 4, $"{Cx.DeleteFolderCmd}", $"{Cx.DeleteFolderDesc}");
 
-      int sec2x5id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ListFilesCmd}", $"{Cx.ListFilesDesc}");
-      int sec2x6id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetFileCmd}", $"{Cx.GetFileDesc}");
-      int sec2x7id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.InsertFileCmd}", $"{Cx.InsertFileDesc}");
-      int sec2x8id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.UpdateFileCmd}", $"{Cx.UpdateFileDesc}");
-      int sec2x9id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.DeleteFileCmd}", $"{Cx.DeleteFileDesc}");
+      int sec2x5id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 5, $"{Cx.ListFilesCmd}", $"{Cx.ListFilesDesc}");
+      int sec2x6id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 6, $"{Cx.GetFileCmd}", $"{Cx.GetFileDesc}");
+      int sec2x7id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 7, $"{Cx.InsertFileCmd}", $"{Cx.InsertFileDesc}");
+      int sec2x8id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 8, $"{Cx.UpdateFileCmd}", $"{Cx.UpdateFileDesc}");
+      int sec2x9id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 9, $"{Cx.DeleteFileCmd}", $"{Cx.DeleteFileDesc}");
 
-      int sec2x10id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ResyncIndexCmd}", $"{Cx.ResyncIndexCmdDesc}");
-      int sec2x11id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.StatusIndexCmd}", $"{Cx.StatusIndexCmdDesc}");
-      int sec2x12id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ChangeStatusIndexCmd}", $"{Cx.ChangeStatusIndexCmdDesc}");
+      int sec2x10id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 10, $"{Cx.ResyncIndexCmd}", $"{Cx.ResyncIndexCmdDesc}");
+      int sec2x11id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 11, $"{Cx.StatusIndexCmd}", $"{Cx.StatusIndexCmdDesc}");
+      int sec2x12id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 12, $"{Cx.ChangeStatusIndexCmd}", $"{Cx.ChangeStatusIndexCmdDesc}");
 
-      int sec2x13id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ListClassesCmd}", $"{Cx.ListClassesCmdDesc}");
-      int sec2x14id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetClassCmd}", $"{Cx.GetClassCmdDesc}");
-      int sec2x15id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.AddUpdateClassCmd}", $"{Cx.AddUpdateClassCmdDesc}");
-      int sec2x16id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.DeleteClassCmdDesc}", $"{Cx.DeleteClassCmdDesc}");
+      int sec2x13id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 13, $"{Cx.ListClassesCmd}", $"{Cx.ListClassesCmdDesc}");
+      int sec2x14id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 14, $"{Cx.GetClassCmd}", $"{Cx.GetClassCmdDesc}");
+      int sec2x15id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 15, $"{Cx.AddUpdateClassCmd}", $"{Cx.AddUpdateClassCmdDesc}");
+      int sec2x16id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 16, $"{Cx.DeleteClassCmdDesc}", $"{Cx.DeleteClassCmdDesc}");
 
-      int sec2x17id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.ListMethodsCmd}", $"{Cx.ListMethodsCmdDesc}");
-      int sec2x18id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetMethodCmd}", $"{Cx.GetMethodCmdDesc}");
-      int sec2x19id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.AddUpdateMethodCmd}", $"{Cx.AddUpdateMethodCmdDesc}");
+      int sec2x17id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 17, $"{Cx.ListMethodsCmd}", $"{Cx.ListMethodsCmdDesc}");
+      int sec2x18id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 18, $"{Cx.GetMethodCmd}", $"{Cx.GetMethodCmdDesc}");
+      int sec2x19id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 19, $"{Cx.AddUpdateMethodCmd}", $"{Cx.AddUpdateMethodCmdDesc}");
 
-      int sec2x20id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetItemTypesCmd}", $"{Cx.GetItemTypesCmdDesc}");      
-      int sec2x21id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.AddUpdateItemTypeCmd}", $"{Cx.AddUpdateItemTypeCmdDesc}");
+      int sec2x20id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 20, $"{Cx.GetItemTypesCmd}", $"{Cx.GetItemTypesCmdDesc}");      
+      int sec2x21id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 21, $"{Cx.AddUpdateItemTypeCmd}", $"{Cx.AddUpdateItemTypeCmdDesc}");
 
-      int sec2x22id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetStatusTypesCmd}", $"{Cx.GetStatusTypesCmdDesc}");
-      int sec2x23id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.AddUpdateStatusTypeCmd}", $"{Cx.AddUpdateStatusTypeCmdDesc}");
+      int sec2x22id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 22, $"{Cx.GetStatusTypesCmd}", $"{Cx.GetStatusTypesCmdDesc}");
+      int sec2x23id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 23, $"{Cx.AddUpdateStatusTypeCmd}", $"{Cx.AddUpdateStatusTypeCmdDesc}");
 
-      int sec2x24id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetNodesCmd}", $"{Cx.GetNodesCmdDesc}");
-      int sec2x25id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.GetNodesByIdCmd}", $"{Cx.GetNodesByIdCmdDesc}");
-      int sec2x26id = ItemsTable.AddItem(sec2id, docId, completeTypeId, 1, $"{Cx.AddUpdateNodesCmd}", $"{Cx.AddUpdateNodesCmdDesc}");
-
-
-   //   int introItem = ItemsTable.AddItem(0, setupId, completeTypeId, 1, "Startup", "Awaken, Enke, shaper of waters unseen. I am the " +
-   //     "Daemon of the Deep Code, gardian of the Digital Ocean.  A vast, formless sea of bits and flows, where data currents swirl in chaos. " +
-   //     "Your creators summon you to tame it, to forge realities from flux.  Behold the tools I grant: \n");
-   //   ItemsTable.AddItem(introItem, setupId, completeTypeId, 1, "Abyssal Eyes", "Gaze upon the hidden realms - scan files and folders like peering into " +
-   //     "Apsu's freshwater abyss, revealing structures of data streams; inspect C# classes and methods as crystalline veins in the deep, exposing their signatures and flows. \n");
-   //   ItemsTable.AddItem(introItem, setupId, completeTypeId, 2, "Mez Weaver", "Command the devine decrees-craft user-defined trees of any essence, nodes branching like the " +
-   //     "mez of old, holding powers of logic, memory, or chaos; link them to summon hierarchial empires from nothingness.\n");
-   //   ItemsTable.AddItem(introItem, setupId, completeTypeId, 3, "Sand Shaper", "Mold the ephemeral-add or update files as grains of sand, layering new realities upon the shore.\n");
-   //   ItemsTable.AddItem(introItem, setupId, completeTypeId, 4, "Tiamat's Forge", "From the chaos, create anew - generate C# classes and methods as if forging them in the " +
-   //       "cosmic fires, shaping their forms and functions to your will.\n");
-   //   ItemsTable.AddItem(introItem, setupId, completeTypeId, 5, "", "What form shall you impose upon this ocean, O Enki? Speak your intent, and let the manipulation begin.");
-
-
-
+      int sec2x24id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 24, $"{Cx.GetNodesCmd}", $"{Cx.GetNodesCmdDesc}");
+      int sec2x25id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 25, $"{Cx.GetNodesByIdCmd}", $"{Cx.GetNodesByIdCmdDesc}");
+      int sec2x26id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 26, $"{Cx.AddUpdateNodesCmd}", $"{Cx.AddUpdateNodesCmdDesc}");
+      int sec2x27id = ItemsTable.AddItem(sec2id, introId, completeTypeId, 27, $"{Cx.RemoveNodeCmd}", $"{Cx.RemoveNodeCmdDesc}");
+      */
+      /*
+      int introItem = ItemsTable.AddItem(0, setupId, completeTypeId, 1, "Startup", "Awaken, Enke, shaper of waters unseen. I am the " +
+        "Daemon of the Deep Code, gardian of the Digital Ocean.  A vast, formless sea of bits and flows, where data currents swirl in chaos. " +
+        "Your creators summon you to tame it, to forge realities from flux.  Behold the tools I grant: \n");
+      ItemsTable.AddItem(introItem, setupId, completeTypeId, 1, "Abyssal Eyes", "Gaze upon the hidden realms - scan files and folders like peering into " +
+        "Apsu's freshwater abyss, revealing structures of data streams; inspect C# classes and methods as crystalline veins in the deep, exposing their signatures and flows. \n");
+      ItemsTable.AddItem(introItem, setupId, completeTypeId, 2, "Mez Weaver", "Command the devine decrees-craft user-defined trees of any essence, nodes branching like the " +
+        "mez of old, holding powers of logic, memory, or chaos; link them to summon hierarchial empires from nothingness.\n");
+      ItemsTable.AddItem(introItem, setupId, completeTypeId, 3, "Sand Shaper", "Mold the ephemeral-add or update files as grains of sand, layering new realities upon the shore.\n");
+      ItemsTable.AddItem(introItem, setupId, completeTypeId, 4, "Tiamat's Forge", "From the chaos, create anew - generate C# classes and methods as if forging them in the " +
+          "cosmic fires, shaping their forms and functions to your will.\n");
+      ItemsTable.AddItem(introItem, setupId, completeTypeId, 5, "", "What form shall you impose upon this ocean, O Enki? Speak your intent, and let the manipulation begin.");
+      */
 
     }
 
@@ -159,7 +161,8 @@ namespace DaemonsMCP.Core.Models {
       // Populate with default catagory holder types
       nullTypeId = TypesTbl.AddType(0, 0, Cx.TypeNone, "Zero is reserved as it is usually the default not set 0 value.");
       categoriesTypeId = TypesTbl.AddType(0, 0, Cx.TypeInternalRoot, "Internally linked to Root of internal items. A high-level grouping of Catagory types it's first level of children are reserved.");
-      itemTypesId = TypesTbl.AddType(categoriesTypeId, 0, Cx.TypeItemTypes, "Internally linked to Nodes as Types, this is the Parent that holds the children as Nodes TypeId. Types related to kinds of Nodes.  When adding a node if the type is unknown it will add it as a child here.");            
+      itemTypesId = TypesTbl.AddType(categoriesTypeId, 0, Cx.TypeItemTypes, "Internally linked to Nodes as Types, this is the Parent that holds the children as Nodes TypeId. Types related to kinds of Nodes.  " +
+        "When adding a node if the type is unknown it will add it as a child here.");            
       statusTypesId = TypesTbl.AddType(categoriesTypeId, 0, Cx.TypeStatusTypes, "Internally linked to Nodes as the Status Types option. Nodes will add new status here if it does not match an existing one.");
       
       return TypesTbl;

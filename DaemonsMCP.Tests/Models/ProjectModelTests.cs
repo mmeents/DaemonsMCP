@@ -69,12 +69,34 @@ namespace DaemonsMCP.Tests.Models {
 
     [TestMethod]
     public void Constructor_WithNullPath_ShouldThrowArgumentException() {
-      // TODO: Implement test for null path parameter
+      // Arrange
+      const string validName = "TestProject";
+      const string validDescription = "Test Description";
+      const string nullPath = null;
+
+      // Act & Assert
+      Action act = () => new ProjectModel(validName, validDescription, nullPath);
+
+      // Assert
+      act.Should().Throw<ArgumentException>()
+          .WithParameterName("FullPath")
+          .WithMessage("Value cannot be null. (Parameter 'FullPath')");
     }
 
     [TestMethod]
     public void Constructor_WithEmptyPath_ShouldThrowArgumentException() {
-      // TODO: Implement test for empty path parameter
+      // Arrange
+      const string validName = "TestProject";
+      const string validDescription = "Test Description";
+      const string emptyPath = "";
+
+      // Act & Assert
+      Action act = () => new ProjectModel(validName, validDescription, emptyPath);
+
+      // Assert
+      act.Should().Throw<ArgumentException>()
+          .WithParameterName("FullPath")
+          .WithMessage("Value cannot be null. (Parameter 'FullPath')");
     }
 
     [TestMethod]
@@ -130,6 +152,23 @@ namespace DaemonsMCP.Tests.Models {
     [TestMethod]
     public void Equals_WithNull_ShouldReturnFalse() {
       // TODO: Implement test for null comparison
+    }
+
+    [TestMethod]
+    public void ProjectModel_WithLongPath_ShouldHandleCorrectly() {
+      // Arrange
+      const string validName = "TestProject";
+      const string validDescription = "Test Description";
+      const string longPath = @"C:\Very\Long\Path\That\Goes\Deep\Into\Many\Subdirectories\And\Tests\The\System\Ability\To\Handle\Extended\Paths\TestFile";
+
+      // Act
+      var project = new ProjectModel(validName, validDescription, longPath);
+
+      // Assert
+      project.Name.Should().Be(validName);
+      project.Description.Should().Be(validDescription);
+      project.Path.Should().Be(longPath);
+      project.Path.Length.Should().BeGreaterThan(100);
     }
 
   }

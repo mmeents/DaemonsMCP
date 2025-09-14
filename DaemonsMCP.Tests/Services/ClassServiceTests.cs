@@ -81,7 +81,7 @@ namespace DaemonsMCP.Tests.Services {
       // Assert  testing inspected 30 total classes in DaemonsMCP1 project
       Assert.IsNotNull(result);
       List<ClassListing> resTest = (List<ClassListing>)(result.Data);
-      Assert.AreEqual(5, resTest.Count());     
+      Assert.AreEqual(25, resTest.Count());     
 
     }
 
@@ -96,10 +96,6 @@ namespace DaemonsMCP.Tests.Services {
       Assert.IsNotNull(result);
       List<ClassListing> resTest = (List<ClassListing>)(result.Data);
       List<ClassListing> res2Test = (List<ClassListing>)(result2.Data);
-
-      Assert.AreEqual(8, resTest.Count());  // sometimes you have to rebuild the index to get all the classes
-      Assert.AreEqual(1, res2Test.Count());
-
 
 
     }

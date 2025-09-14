@@ -15,6 +15,7 @@ namespace DaemonsMCP.Core.Config
   public class AppConfig : IAppConfig {
     private readonly ILogger<AppConfig> _logger;
     public AppConfig(ILoggerFactory loggerFactory, string? configPath = null) {
+      if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
       _logger = loggerFactory.CreateLogger<AppConfig>();
       if (Cx.IsDebug) { 
         _logger.LogDebug($"{Cx.Dd0} Initializing AppConfig with config path: {configPath ?? "default"}");

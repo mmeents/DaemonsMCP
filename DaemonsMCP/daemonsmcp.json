@@ -1,8 +1,8 @@
-﻿{
-    "version": "1.0",
+﻿{    
     "daemon": {
         "name": "DaemonMCP",
-        "version": "1.1.0"
+        "version": "1.1.1",
+        "nodesFilePath": "C:\\MCPSandbox"
     },
     "projects": [
         {
@@ -72,7 +72,7 @@
             ".xml",
             ".pas"
         ],
-        "maxFileSize": "10MB",
+        "maxFileSize": "25KB",
         "allowWrite": true,
         "writeProtectedPaths": [
             ".git",

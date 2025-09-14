@@ -21,7 +21,7 @@ namespace DaemonsMCP.Core.Services {
         _logger = loggerFactory.CreateLogger<ClassService>() ?? throw new ArgumentNullException(nameof(loggerFactory));
     }
 
-    public async Task<OperationResult> GetClassesAsync(string projectName, int pageNo, int itemsPerPage, string? namespaceFilter = null, string? classNameFilter = null) {
+    public async Task<OperationResult> GetClassesAsync(string projectName, int pageNo=1, int itemsPerPage=20, string? namespaceFilter = null, string? classNameFilter = null) {
       try {
         var classes = await _indexRepository.GetClassListingsAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classNameFilter).ConfigureAwait(false);
         var opResult = OperationResult.CreateSuccess(Cx.ListClassesCmd, $"{Cx.ListClassesCmd} Success.", classes);
@@ -66,7 +66,7 @@ namespace DaemonsMCP.Core.Services {
     }
 
 
-    public async Task<OperationResult> GetMethodsAsync(string projectName, int pageNo, int itemsPerPage, string? namespaceFilter = null, string? classNameFilter = null, string? methodNameFilter = null) {
+    public async Task<OperationResult> GetMethodsAsync(string projectName, int pageNo=1, int itemsPerPage=20, string? namespaceFilter = null, string? classNameFilter = null, string? methodNameFilter = null) {
       try {
         var methods = await _indexRepository.GetMethodListingsAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classNameFilter, methodNameFilter).ConfigureAwait(false);
         var opResult = OperationResult.CreateSuccess(Cx.ListMethodsCmd, $"{Cx.ListMethodsCmd} Success.", methods);

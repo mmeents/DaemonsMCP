@@ -144,6 +144,26 @@ namespace DaemonsMCP.Core.Extensions {
         AllowTrailingCommas = true
       };
 
+    public static string CommonAppPath {
+      get {
+        string commonPath = Path.Combine( Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), Cx.AppName).ResolvePath();       
+        if (!Directory.Exists(commonPath)) {
+          Directory.CreateDirectory(commonPath);
+        }
+        return commonPath;
+      }
+    }
+
+    public static string LogsAppPath {
+      get {
+        string logsPath = Path.Combine(CommonAppPath, "logs").ResolvePath();
+        if (!Directory.Exists(logsPath)) {
+          Directory.CreateDirectory(logsPath);
+        }
+        return logsPath;
+      }
+    }
+
     #endregion
   }
 }

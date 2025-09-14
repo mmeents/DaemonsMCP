@@ -12,6 +12,7 @@ namespace DaemonsMCP.Core.Models {
     public ProjectModel() { }
     public ProjectModel(string Name, string Description, string FullPath) {
       if (string.IsNullOrEmpty(Name)) throw new ArgumentNullException(nameof(Name));
+      if (string.IsNullOrEmpty(FullPath)) throw new ArgumentNullException(nameof(FullPath));
       this.Name = Name ?? throw new ArgumentNullException(nameof(Name));
       this.Description = Description ?? throw new ArgumentNullException(nameof(Description));
       this.Path = FullPath ?? throw new ArgumentNullException(nameof(FullPath));

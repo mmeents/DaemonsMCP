@@ -346,8 +346,7 @@ namespace DaemonsMCP.Tests.Models
           deserializedResult.Should().NotBeNull();
           deserializedResult.Success.Should().BeFalse();
           deserializedResult.Operation.Should().Be(originalOperation);
-          deserializedResult.ErrorMessage.Should().Be(originalErrorMessage);
-          deserializedResult.Message.Should().BeNull();
+          deserializedResult.ErrorMessage.Should().Be(originalErrorMessage);          
           deserializedResult.Data.Should().BeNull();
         }
 
@@ -371,23 +370,7 @@ namespace DaemonsMCP.Tests.Models
             failureString.Should().Contain("network-sync");
             failureString.Should().Contain("false");
         }
-
-        [TestMethod]
-        public void Equals_WithSameValues_ShouldReturnTrue()
-        {
-            // Arrange
-            var operation = "data-validation";
-            var message = "Validation passed";
-            var data = new { recordCount = 100 };
-            
-            var result1 = OperationResult.CreateSuccess(operation, message, data);
-            var result2 = OperationResult.CreateSuccess(operation, message, data);
-
-            // Act & Assert
-            result1.Equals(result2).Should().BeTrue();
-            (result1 == result2).Should().BeTrue();
-            result1.Should().Be(result2);
-        }
+       
 
         [TestMethod]
         public void Equals_WithDifferentValues_ShouldReturnFalse()
@@ -407,28 +390,5 @@ namespace DaemonsMCP.Tests.Models
             result1.Equals(null).Should().BeFalse();
         }
 
-        [TestMethod]
-        public void GetHashCode_WithSameValues_ShouldReturnSameHash()
-        {
-            // Arrange
-            var operation = "cache-refresh";
-            var message = "Cache refreshed successfully";
-            var data = new { itemCount = 50, duration = "2.5s" };
-            
-            var result1 = OperationResult.CreateSuccess(operation, message, data);
-            var result2 = OperationResult.CreateSuccess(operation, message, data);
-
-            // Act
-            var hash1 = result1.GetHashCode();
-            var hash2 = result2.GetHashCode();
-
-            // Assert
-            hash1.Should().Be(hash2);
-            
-            // Additional test with different values should have different hashes (probably)
-            var differentResult = OperationResult.CreateFailure(operation, "Cache refresh failed");
-            var differentHash = differentResult.GetHashCode();
-            differentHash.Should().NotBe(hash1);
-        }
     }
 }

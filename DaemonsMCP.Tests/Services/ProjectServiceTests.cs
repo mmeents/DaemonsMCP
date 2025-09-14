@@ -7,6 +7,7 @@ using Moq;
 using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using Serilog;
+using DaemonsMCP.Core.Extensions;
 
 namespace DaemonsMCP.Tests.Services
 {
@@ -30,8 +31,7 @@ namespace DaemonsMCP.Tests.Services
           //var testLogsPath = Path.Combine(Path.GetTempPath(), "DaemonsMCP-Tests", "logs");
           //Directory.CreateDirectory(testLogsPath);
 
-          var logsPath = Path.Combine(AppContext.BaseDirectory, "logs");
-          Directory.CreateDirectory(logsPath);
+          var logsPath = Sx.LogsAppPath;          
 
           Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Warning() // Adjust as needed
@@ -188,7 +188,7 @@ namespace DaemonsMCP.Tests.Services
           foreach (var project in projects) {
 
 
-            var results3 = await _service.GetNodes(project.Name, nodeId:null, maxDepth:2).ConfigureAwait(false);
+            var results3 = await _service.GetNodes(nodeId:null, maxDepth:2).ConfigureAwait(false);
             results3.Should().NotBeNull();
 
 

@@ -85,20 +85,7 @@ namespace DaemonsMCP.Tests.Config
            config.Projects.Count.Should().Be(0);
 
         }
-
-        [TestMethod]
-        public void Constructor_WithNullConfigPath_ShouldSearchDefaultPaths()
-        {
-            // TODO: Implement test for constructor with null config path
-            var config = new AppConfig(null);
-    
-            config.Should().NotBeNull();
-            config.IsConfigured.Should().BeTrue();
-            config.Projects.Should().NotBeNull();
-            config.Projects.Count.Should().BeGreaterThan(0);
-
-
-    }
+            
 
         [TestMethod]
         public void LoadConfiguration_WithValidJsonFile_ShouldReturnConfiguration()

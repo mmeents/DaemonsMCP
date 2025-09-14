@@ -60,6 +60,7 @@ namespace DaemonsMCP.Core.Extensions {
     public const string AddUpdateItemTypeCmd = "add-update-item-type";
     public const string AddUpdateStatusTypeCmd = "add-update-status-type";
         
+    public const string GetReadMeCmd = "readme";    
     public const string GetNodesCmd = "list-nodes";
     public const string GetNodesByIdCmd = "get-nodes-by-id";
     public const string AddUpdateNodesCmd = "add-update-nodes";
@@ -72,7 +73,7 @@ namespace DaemonsMCP.Core.Extensions {
 
     // Tool descriptions
     public const string ListProjectsDesc = "Gets list of available projects. A project is the configured name and the root folder allowed to access.";
-    public const string ListFoldersDesc = "Lists the directories in the folder or root folder if a folder is not specified. Filter is c# Directory.GetDirectories SearchPattern parameter wiht an empty defalut is changed to *.";
+    public const string ListFoldersDesc = "Lists the directories in the folder or root folder if a folder is not specified. Filter is c# Directory.GetDirectories SearchPattern parameter where an empty default is *.";
     public const string ListFilesDesc = "Lists the files in the folder or root folder if a folder is not specified. Filter is c# Directory.GetFiles SearchPattern parameter where empty defalut uses *.";
 
     public const string GetFileDesc = "Gets the File and it's contents.";
@@ -103,6 +104,7 @@ namespace DaemonsMCP.Core.Extensions {
     public const string AddUpdateItemTypeCmdDesc = "Add update item type, use to update types listed by list-item-type. use id=0 to add new.";
     public const string AddUpdateStatusTypeCmdDesc = "Add update status type, use to update status types listed by list-status-types. use id=0 to add new.";
 
+    public const string GetReadMeCmdDesc = "Critical: Gets living documentation for the DaemonsMCP tool. Please invoke and read ASAP.";
     public const string GetNodesCmdDesc = "List nodes command searches for item nodes recursively maxDepth deep. Item nodes are hierarchical trees with configurable types and status. Use add-update-nodes to add or update the tree nodes. Supports filtering by status, type, name contains, and details contains.";
     public const string GetNodesByIdCmdDesc = "Get nodes by id, allows you to grab 1 tree recursiv by id maxLevels deep.";
     public const string AddUpdateNodesCmdDesc = "Add update nodes command adds or updates depending on tree passed in.  if it has id non zero it tries to update otherwise it tries to add. Recursive adds updates all nodes passed in. ";
@@ -130,8 +132,8 @@ namespace DaemonsMCP.Core.Extensions {
 
     public const string ClassFilterParamDesc = "Filter classes by name uses string.Contains in filter";
     public const string MethodFilterParamDesc = "Filter methods by name uses string.Comtains in filter ";
-    public const string PageNoParamDesc ="The page number to take results from default is 1.";
-    public const string ItemsPerPageParamDesc = "The max number of items to take in this call.";
+    public const string PageNoParamDesc ="REQUIRED: The page number to take results from default is 1.";
+    public const string ItemsPerPageParamDesc = "REQUIRED: The max number of items to take in this call.";
     public const string NamespaceFilterParamDesc = "Filter namespaces by name uses string.Contains as filter";
 
     public const string ClassIdParamDesc = "The int Id of the IndexClassItem or ClassId in ClassListing.";
@@ -233,6 +235,28 @@ namespace DaemonsMCP.Core.Extensions {
     public const string EventsLineStartCol = "LineStart";
     public const string EventsLineEndCol = "LineEnd";
 
+    public const string CoreArchitectureDesc = @"CORE ARCHITECTURE:
+- Built on PackedTables.NET for file-based database storage
+- Microsoft.CodeAnalysis for C# parsing and indexing
+- Dependency injection with singleton IndexService
+- MCPSharp for MCP protocol implementation
+
+DATA FLOW:
+1. IndexService scans .cs files using Microsoft.CodeAnalysis (On startup or Directory Watcher detected change.)
+2. ProcessFileAsync extracts classes/methods with line boundaries
+3. FindClassStartCutLine method backs up to find XML docs
+4. Data stored in .daemons/*.pktbs files
+5. ProjectIndexModel manages queries and updates
+
+KEY FILES TO UNDERSTAND:
+- IndexService.cs: Core indexing logic
+- ProjectIndexModel.cs: Database operations and queries  
+- ProjectItemRepo.cs: Nodes tree management
+- DaemonsTools.cs: 26 MCP tool implementations
+
+FILTER FIXES:
+- Changed IsNullOrWhiteSpace to IsNullOrEmpty throughout
+- Fixed namespace filtering completely";
 
     ///  Critical: C# Property Casing Requirements  //  
     public const string criticalStrr = @"⚠️ CRITICAL API REQUIREMENT: All C# model objects MUST use PascalCase property names, not camelCase.
@@ -263,6 +287,36 @@ namespace DaemonsMCP.Core.Extensions {
 - [ ] Test with minimal object first
 
 APPLIES TO: add-update-method, add-update-class, add-update-nodes, and likely ALL C# model operations.";
+
+    public const string CriticalStr2 = @"CRITICAL BUG: list-classes and list-methods fail when pagination parameters are not explicitly provided.
+
+🐛 SYMPTOMS:
+- list-classes returns empty results when no itemsPerPage/pageNo specified
+- list-class-methods returns empty results when pagination omitted
+- Both work correctly when explicit pagination provided (itemsPerPage= 20, pageNo= 1)
+
+🔍 ROOT CAUSE:
+Inconsistent default value handling leaves itemsPerPage vulnerable to null or 0 when empty, breaking query logic.
+
+✅ WORKAROUND:
+Always specify explicit pagination parameters:
+- itemsPerPage: 20 (or desired count)
+- pageNo: 1 (or desired page)
+- projectName: ""ProjectName""
+
+🛠️ FIX NEEDED:
+Correct default value handling in GetClassListingsAsync and GetMethodListingsAsync to ensure proper defaults when pagination parameters are null/empty.
+
+📊 IMPACT:
+- Breaks class discovery workflow
+- Prevents method-level operations
+- Critical for DaemonsMCP testing approach
+
+🧪 TEST CASE:
+- list-classes without pagination = empty results ❌
+- list-classes with pagination = correct results ✅
+- Same pattern for list-class-methods ";
+       
 
   }
 }

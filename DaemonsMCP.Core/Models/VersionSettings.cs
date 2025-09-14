@@ -17,5 +17,9 @@ namespace DaemonsMCP.Core.Models {
 
     [JsonPropertyName("logLevel")]
     public string LogLevel { get; set; } = "Information";
+
+    [JsonPropertyName("nodesFilePath")]
+    public string NodesFilePath { get; set; } = Sx.CommonAppPath;
+
   }
 }

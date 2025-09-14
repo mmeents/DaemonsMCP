@@ -1,5 +1,6 @@
 ﻿using DaemonsMCP.Core;
 using DaemonsMCP.Core.Config;
+using DaemonsMCP.Core.Extensions;
 using DaemonsMCP.Core.Repositories;
 using DaemonsMCP.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,8 +57,7 @@ namespace DaemonsMCP
 
     private static void ConfigureSerilog() {
       // Ensure logs directory exists
-      var logsPath = Path.Combine("C:\\MCPSandbox", "logs");
-      Directory.CreateDirectory(logsPath);
+      var logsPath = Sx.LogsAppPath;
 
       Log.Logger = new LoggerConfiguration()
           .MinimumLevel.Debug()
