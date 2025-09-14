@@ -25,5 +25,14 @@ namespace DaemonsMCP.Core.Repositories {
 
     public Task<bool> RemoveNode(int nodeId, RemoveStrategy removeStrategy = RemoveStrategy.PreventIfHasChildren);
 
+
+    public Task<Nodes> MakeTodoList(string listName, string[] items);
+    
+    public Task<Nodes?> GetNextTodoItem(string? listName = null);
+
+    public Task<Nodes> MarkTodoDone(int itemId);
+
+    public Task<Nodes> RestoreAsTodo(int itemId);
+
   }
 }

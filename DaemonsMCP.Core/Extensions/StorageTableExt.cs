@@ -72,5 +72,30 @@ namespace DaemonsMCP.Core.Extensions {
       return id;
     }
 
+    public static int GetTodoRootId(this TableModel ItemsTable, int todoTypeId) {
+      if (ItemsTable == null) throw new ArgumentNullException(nameof(ItemsTable));
+      var rows = ItemsTable.Rows.Where(r => r.Value[Cx.ItemParentCol].Value.AsInt32() == 0 && r.Value[Cx.ItemNameCol].ValueString == "Todo Root" && r.Value[Cx.ItemTypeIdCol].Value.AsInt32() == todoTypeId ).ToList();
+      if (rows.Count > 0) {
+        return rows[0].Value.Id;
+      } else { 
+        // create it.
+        return ItemsTable.AddItem(0, todoTypeId, 0, 0, "Todo Root", "Root item for all todo items", DateTime.Now, null);
+      }
+    }
+
+    public static int GetTodoByName(this TableModel ItemsTable, string todoName, int todoTypeId, int todoStatuId, int todoRootId) {
+      if (ItemsTable == null) throw new ArgumentNullException(nameof(ItemsTable));
+      var rows = ItemsTable.Rows.Where(r =>  r.Value[Cx.ItemNameCol].ValueString == todoName 
+        && r.Value[Cx.ItemTypeIdCol].Value.AsInt32() == todoTypeId 
+        && r.Value[Cx.ItemStatusCol].Value.AsInt32() == todoStatuId
+      ).ToList();
+      if (rows.Count > 0) {
+        return rows[0].Value.Id;
+      } else { 
+        // create it.
+        return ItemsTable.AddItem(todoRootId, todoTypeId, todoStatuId, 0, todoName, "Todo item: " + todoName, DateTime.Now, null);
+      }
+    }
+
   }
 }

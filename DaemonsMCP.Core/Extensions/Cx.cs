@@ -67,7 +67,12 @@ namespace DaemonsMCP.Core.Extensions {
     public const string AddUpdateNodesListCmd = "add-update-nodes-list";
 
     public const string RemoveNodeCmd = "remove-node";
-    
+
+    public const string MakeTodoListCmd = "make-todo-list";
+    public const string GetNextTodoItemCmd = "get-next-todo";
+    public const string MarkTodoDoneCmd = "mark-todo-done";
+    public const string RestoreAsTodoCmd = "restore-todo";
+
     public const string SaveProjectRepoCmd = "save-project-repo";
 
 
@@ -114,6 +119,11 @@ namespace DaemonsMCP.Core.Extensions {
 
     public const string SaveProjectRepoCmdDesc = "Save project repo command writes Items and Types tables to disk. Should be needed as any update inherently calls save.";
 
+    public const string MakeTodoListCmdDesc = "Makes a todo list. Will match on Nodes Typed with Todo by listName becomes its Name. If found adds items as sub Nodes. Otherwise it adds todo list to the 'Todo Root'.";
+    public const string GetNextTodoItemCmdDesc = "Gets the next todo item by recursivly walking the tree and finding it.  Marks status as In Progress once found.  If listName is null it will search all lists in Todo Root.";
+    public const string MarkTodoDoneCmdDesc = "Marks todo as done. To be used with get-next-todo to mark success status when completed. That is it sets Nodes Status to Complete, and Markes the completed date.";
+    public const string RestoreAsTodoCmdDesc = "Restore todo status as Not Started. to be used with get-next-todo to abort the todo.";
+
 
     // Tool parameter descriptions
     public const string ProjectNameParamDesc = $"The configured project name to work in.";
@@ -155,11 +165,22 @@ namespace DaemonsMCP.Core.Extensions {
     public const string NodesListTreeParamDesc = "The List<Nodes> tree objects to add or update.";
     public const string RemoveStrategyParamDesc = "How to handle child nodes: PreventIfHasChildren, DeleteCascade, OrphanChildren, or ReparentToGrandparent";
 
+    public const string ListNameParamDesc = "Requires. The name of the todo list, corresponds to Nodes.Name of a Nodes with Type 'Todo'.";
+    public const string ItemsParamDesc = "The list of items to add to the todo list as child Nodes of the list.";
+    public const string ItemIdParamDesc = $"The int Id of the todo item node to mark done or restore. Additionally you could use this Id with {Cx.GetNodesByIdCmd}. ";
+
     // Nodes Status and Type defaults
     public const string TypeNone = "None";
     public const string TypeInternalRoot = "Internal Categories";
     public const string TypeStatusTypes = "Status Types";
     public const string TypeItemTypes = "Item Types";
+    public const string TypeTodo = "Todo";
+
+    public const int TypeTodoMaxDepth = 3;
+
+    public const string StatusStart = "Not Started";
+    public const string StatusInProgress = "In Progress";
+    public const string StatusComplete = "Completed";
 
     // Debugging prefixes
     public const string Dd0 = "[DaemonsMCP][Debug]";

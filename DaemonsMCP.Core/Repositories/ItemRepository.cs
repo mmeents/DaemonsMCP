@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
+using System.Security.RightsManagement;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -102,8 +103,40 @@ namespace DaemonsMCP.Core.Repositories {
     }
 
     #endregion
+
+    #region Todos interface methods
+
+    public async Task<Nodes> MakeTodoList(string listName, string[] items) { 
+        return await Task.Run(() => {        
+            var todoList = _nodesRepo.MakeTodoList(listName, items);
+            _nodesRepo.WriteStorage();
+            return todoList;
+        }).ConfigureAwait(false);
+    }
+    public async Task<Nodes?> GetNextTodoItem(string? listName = null) { // null = any list
+        return await Task.Run(() => {        
+            var todoItem = _nodesRepo.GetNextTodoItem(listName, 27);
+            return todoItem;
+        }).ConfigureAwait(false);
+    }
+    public async Task<Nodes> MarkTodoDone(int itemId) { 
+        return await Task.Run(() => {        
+            var todoItem = _nodesRepo.MarkTodoDone(itemId);
+            _nodesRepo.WriteStorage();
+            return todoItem;
+        }).ConfigureAwait(false);
+    }
+    public async Task<Nodes> RestoreAsTodo(int itemId) { 
+        return await Task.Run(() => {        
+            var todoItem = _nodesRepo.RestoreAsTodo(itemId);
+            _nodesRepo.WriteStorage();
+            return todoItem;
+        }).ConfigureAwait(false);
+    }
+
+    #endregion
   }
 
 
-  
+
 }

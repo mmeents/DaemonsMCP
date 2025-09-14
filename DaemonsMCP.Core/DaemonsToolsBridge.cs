@@ -211,7 +211,30 @@ namespace DaemonsMCP.Core {
     public static async Task<object> SaveProjectRepo()
       => await GetTools().SaveProjectRepo().ConfigureAwait(false);
 
-    
+    #endregion
+
+    #region Todo Operations
+
+    [McpTool(Cx.MakeTodoListCmd, Cx.MakeTodoListCmdDesc)]
+    public static async Task<object> MakeTodoList(      
+      [Description(Cx.ListNameParamDesc)] string listName,
+      [Description(Cx.ItemsParamDesc)] string[] items
+    ) => await GetTools().MakeTodoList(listName, items).ConfigureAwait(false);
+
+    [McpTool(Cx.GetNextTodoItemCmd, Cx.GetNextTodoItemCmdDesc)]
+    public static async Task<object> GetNextTodoItem(      
+      [Description(Cx.ListNameParamDesc)] string? listName = null
+    ) => await GetTools().GetNextTodoItem(listName).ConfigureAwait(false);
+
+    [McpTool(Cx.MarkTodoDoneCmd, Cx.MarkTodoDoneCmdDesc)]
+    public static async Task<object> MarkTodoDone(      
+      [Description(Cx.ItemIdParamDesc)] int itemId
+    ) => await GetTools().MarkTodoDone(itemId).ConfigureAwait(false);
+
+    [McpTool(Cx.RestoreAsTodoCmd, Cx.RestoreAsTodoCmdDesc)]
+    public static async Task<object> RestoreAsTodo(      
+      [Description(Cx.ItemIdParamDesc)] int itemId
+    ) => await GetTools().RestoreAsTodo(itemId).ConfigureAwait(false);
 
     #endregion
   }

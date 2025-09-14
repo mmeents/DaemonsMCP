@@ -380,6 +380,50 @@ namespace DaemonsMCP.Core {
     }
 
     #endregion
+    #region Todo Operations
+
+    public async Task<object> MakeTodoList(string listName, string[] items) {
+      try { 
+        var result = await _projectsService.MakeTodoList(listName, items).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("MakeTodoList", $"Failed: {ex.Message}", null);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> GetNextTodoItem(string? listName = null) {
+      try { 
+        var result = await _projectsService.GetNextTodoItem(listName).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("GetNextTodoItem", $"Failed: {ex.Message}", null);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> MarkTodoDone(int itemId) {
+      try { 
+        var result = await _projectsService.MarkTodoDone(itemId).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("MarkTodoDone", $"Failed: {ex.Message}", null);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> RestoreAsTodo(int itemId) {
+      try { 
+        var result = await _projectsService.RestoreAsTodo(itemId).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("RestoreAsTodo", $"Failed: {ex.Message}", null);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+
+    #endregion
 
   }
 }

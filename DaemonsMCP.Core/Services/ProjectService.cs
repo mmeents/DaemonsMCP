@@ -104,6 +104,41 @@ namespace DaemonsMCP.Core.Services {
       }
     }
 
+    public async Task<OperationResult> MakeTodoList(string listName, string[] items){
+      Nodes result = await _itemRepository.MakeTodoList( listName, items).ConfigureAwait(false);
+      if (result != null) {
+          return OperationResult.CreateSuccess("MakeTodoList", "Make Todo List returned successfully.", result);
+      } else {
+          return OperationResult.CreateFailure("MakeTodoList", $"Make Todo List failed");
+      }
+    }
+
+    public async Task<OperationResult> GetNextTodoItem(string? listName = null) { 
+      Nodes? result = await _itemRepository.GetNextTodoItem( listName).ConfigureAwait(false);
+      if (result != null) {
+          return OperationResult.CreateSuccess("GetNextTodoItem", "Get Next Todo Item returned successfully.", result);
+      } else {
+          return OperationResult.CreateFailure("GetNextTodoItem", $"Get Next Todo Item failed");
+      }
+    }
+
+    public async Task<OperationResult> MarkTodoDone(int itemId) { 
+      Nodes result = await _itemRepository.MarkTodoDone( itemId).ConfigureAwait(false);
+      if (result != null) {
+          return OperationResult.CreateSuccess("MarkTodoDone", "Mark Todo Done returned successfully.", result);
+      } else {
+          return OperationResult.CreateFailure("MarkTodoDone", $"Mark Todo Done failed");
+      }
+    }
+
+    public async Task<OperationResult> RestoreAsTodo(int itemId) { 
+      Nodes result = await _itemRepository.RestoreAsTodo( itemId).ConfigureAwait(false);
+      if (result != null) {
+          return OperationResult.CreateSuccess("RestoreAsTodo", "Restore As Todo returned successfully.", result);
+      } else {
+          return OperationResult.CreateFailure("RestoreAsTodo", $"Restore As Todo failed");
+      }
+    }
 
     public async Task<OperationResult> SaveProjectRepo() { 
       await _itemRepository.SaveProjectRepo().ConfigureAwait(false);
