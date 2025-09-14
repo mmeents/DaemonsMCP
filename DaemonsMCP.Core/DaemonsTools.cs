@@ -45,7 +45,7 @@ namespace DaemonsMCP.Core {
         var projects = await _projectsService.GetProjectsAsync().ConfigureAwait(false);
         return JsonSerializer.Serialize(new { projects = projects.ToArray() });
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.ListProjectsCmd,$"Failed: {ex.Message}",ex);
+        var opResult = OperationResult.CreateFailure(Cx.ListProjectsCmd,$"Failed: {ex.Message}",null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -60,10 +60,10 @@ namespace DaemonsMCP.Core {
         [Description(Cx.FolderFilterParamDesc)] string? filter = null) {
       try { 
         var directories = await _projectFolderService.GetFoldersAsync(projectName, path, filter).ConfigureAwait(false);
-        var opResult = OperationResult.CreateSuccess(Cx.ListFoldersCmd, $"{Cx.ListFoldersCmd} Success.", directories);
+        var opResult = OperationResult.CreateSuccess(Cx.ListFoldersCmd, $"{Cx.ListFoldersCmd} Success.", directories.ToArray<string>());
         return JsonSerializer.Serialize(opResult);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.ListFoldersCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.ListFoldersCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -78,7 +78,7 @@ namespace DaemonsMCP.Core {
 
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.CreateFolderCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.CreateFolderCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -93,7 +93,7 @@ namespace DaemonsMCP.Core {
         return JsonSerializer.Serialize(result);
 
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.DeleteFolderCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.DeleteFolderCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -108,10 +108,10 @@ namespace DaemonsMCP.Core {
         [Description(Cx.FileFilterParamDesc)] string? filter = null) {
       try {      
         var files = await _projectFileService.GetFilesAsync(projectName, path, filter).ConfigureAwait(false);
-        var opResult = OperationResult.CreateSuccess(Cx.ListFilesCmd, $"{Cx.ListFilesCmd} Success.", files);
+        var opResult = OperationResult.CreateSuccess(Cx.ListFilesCmd, $"{Cx.ListFilesCmd} Success.", files.ToArray<string>());
         return JsonSerializer.Serialize(opResult);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.ListFilesCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.ListFilesCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -124,7 +124,7 @@ namespace DaemonsMCP.Core {
         var fileContent = await _projectFileService.GetFileAsync(projectName, path).ConfigureAwait(false);
         return JsonSerializer.Serialize(fileContent); 
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.GetFileCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.GetFileCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -139,7 +139,7 @@ namespace DaemonsMCP.Core {
         var result = await _projectFileService.CreateFileAsync(projectName, path, content).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.InsertFileCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.InsertFileCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
 
@@ -155,7 +155,7 @@ namespace DaemonsMCP.Core {
         var result = await _projectFileService.UpdateFileAsync(projectName, path, content).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.UpdateFileCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.UpdateFileCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -168,7 +168,7 @@ namespace DaemonsMCP.Core {
         var result = await _projectFileService.DeleteFileAsync(projectName, path).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.DeleteFileCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.DeleteFileCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -181,7 +181,7 @@ namespace DaemonsMCP.Core {
         var result = await _indexService.RebuildIndexAsync(forceRebuild).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.ResyncIndexCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.ResyncIndexCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -191,7 +191,7 @@ namespace DaemonsMCP.Core {
         var status = await _indexService.GetIndexStatus().ConfigureAwait(false);
         return JsonSerializer.Serialize(status);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.StatusIndexCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.StatusIndexCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -202,7 +202,7 @@ namespace DaemonsMCP.Core {
         var status = await _indexService.GetIndexStatus().ConfigureAwait(false);
         return JsonSerializer.Serialize(status);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.ChangeStatusIndexCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.ChangeStatusIndexCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -216,7 +216,7 @@ namespace DaemonsMCP.Core {
         var result = await _classService.GetClassesAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classNameFilter).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.ListClassesCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.ListClassesCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -226,7 +226,7 @@ namespace DaemonsMCP.Core {
         var result = await _classService.GetClassContentAsync(projectName, classId).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.GetClassCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.GetClassCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -236,7 +236,7 @@ namespace DaemonsMCP.Core {
         var result = await _classService.AddUpdateClassContentAsync(projectName, content).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.AddUpdateClassCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.AddUpdateClassCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -250,7 +250,7 @@ namespace DaemonsMCP.Core {
         var result = await _classService.GetMethodsAsync(projectName, pageNo, itemsPerPage, namespaceFilter, classNameFilter, methodNameFilter).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.ListMethodsCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.ListMethodsCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -260,7 +260,7 @@ namespace DaemonsMCP.Core {
         var result = await _classService.GetMethodContentAsync(projectName, methodId).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.GetMethodCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.GetMethodCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -270,7 +270,7 @@ namespace DaemonsMCP.Core {
         var result = await _classService.AddUpdateMethodAsync(projectName, content).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure(Cx.AddUpdateMethodCmd, $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure(Cx.AddUpdateMethodCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -284,7 +284,7 @@ namespace DaemonsMCP.Core {
         var itemTypes = await _projectsService.GetItemTypes().ConfigureAwait(false);
         return JsonSerializer.Serialize(itemTypes);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure("GetItemTypes", $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure("GetItemTypes", $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -294,7 +294,7 @@ namespace DaemonsMCP.Core {
         var result = await _projectsService.AddUpdateItemType(itemType);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure("AddUpdateItemType", $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure("AddUpdateItemType", $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -304,7 +304,7 @@ namespace DaemonsMCP.Core {
         var statusTypes = await _projectsService.GetStatusTypes().ConfigureAwait(false);
         return JsonSerializer.Serialize(statusTypes);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure("GetStatusTypes", $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure("GetStatusTypes", $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -314,7 +314,7 @@ namespace DaemonsMCP.Core {
         var result = await _projectsService.AddUpdateStatusType(statusType).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure("AddUpdateStatusType", $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure("AddUpdateStatusType", $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -324,7 +324,7 @@ namespace DaemonsMCP.Core {
         var nodes = await _projectsService.GetNodes( nodeId, maxDepth, statusFilter, typeFilter, nameContains, detailsContains).ConfigureAwait(false);
         return JsonSerializer.Serialize(nodes);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure("GetNodes", $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure("GetNodes", $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -334,7 +334,7 @@ namespace DaemonsMCP.Core {
         var node = await _projectsService.GetNodeById(nodeId).ConfigureAwait(false);
         return JsonSerializer.Serialize(node);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure("GetNodeById", $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure("GetNodeById", $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -344,7 +344,7 @@ namespace DaemonsMCP.Core {
         var result = await _projectsService.AddUpdateNode( node).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure("AddUpdateNode", $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure("AddUpdateNode", $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -354,7 +354,7 @@ namespace DaemonsMCP.Core {
         var result = await _projectsService.AddUpdateNodeList( nodes).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure("AddUpdateNodeList", $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure("AddUpdateNodeList", $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -364,7 +364,7 @@ namespace DaemonsMCP.Core {
         var result = await _projectsService.RemoveNode( nodeId, removeStrategy).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
-        var opResult = OperationResult.CreateFailure("RemoveNode", $"Failed: {ex.Message}", ex);
+        var opResult = OperationResult.CreateFailure("RemoveNode", $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
@@ -374,7 +374,7 @@ namespace DaemonsMCP.Core {
         var opResult = await _projectsService.SaveProjectRepo().ConfigureAwait(false);
         return JsonSerializer.Serialize(opResult);
       } catch (Exception ex) { 
-        var opResult = OperationResult.CreateFailure(Cx.SaveProjectRepoCmd, "failed", ex);
+        var opResult = OperationResult.CreateFailure(Cx.SaveProjectRepoCmd, "failed", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
