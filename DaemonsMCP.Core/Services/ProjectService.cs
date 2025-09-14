@@ -118,7 +118,7 @@ namespace DaemonsMCP.Core.Services {
       if (result != null) {
           return OperationResult.CreateSuccess("GetNextTodoItem", "Get Next Todo Item returned successfully.", result);
       } else {
-          return OperationResult.CreateFailure("GetNextTodoItem", $"Get Next Todo Item failed");
+          return OperationResult.CreateSuccess("GetNextTodoItem", $"Get Next Todo Item returned Empty, all Done.");
       }
     }
 

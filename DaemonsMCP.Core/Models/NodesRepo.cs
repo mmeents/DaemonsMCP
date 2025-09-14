@@ -81,7 +81,7 @@ namespace DaemonsMCP.Core.Models {
       int inProgressId = TypesTable.AddType(statusTypesId, 2, Cx.StatusInProgress, "The item is currently being worked on.");      
       int completeTypeId = TypesTable.AddType(statusTypesId, 3, Cx.StatusComplete, "The item is finished.");
       TypesTable.AddType(statusTypesId, 4, "On Hold", "The item is paused or waiting on something.");
-      TypesTable.AddType(statusTypesId, 5, "Cancelled", "The item has been cancelled and will not be completed.");
+      TypesTable.AddType(statusTypesId, 5, Cx.StatusCancelled, "The item has been cancelled and will not be completed.");
 
 
       int introDoc = ItemsTable.AddItem(0, docId, completeTypeId, 1, $"{Cx.AppName} Documentation", "This documentation is data within the nodes filtered for Readme. Notes that should be included can be added via Nodes methods. ");
@@ -483,6 +483,8 @@ namespace DaemonsMCP.Core.Models {
     }
 
     public Nodes AddUpdateNode(Nodes node) {
+
+      _logger.LogDebug($"AddUpdateNode: {node.Name} (Id: {node.Id})");
       if (node == null) {
         throw new ArgumentException("Node cannot be null");
       }
@@ -517,9 +519,11 @@ namespace DaemonsMCP.Core.Models {
         node.Created = DateTime.Now;
         node.Modified = DateTime.Now;
         InsertItem(node);
+        _logger.LogDebug($"Inserted node: {node.Name} (Id: {node.Id})");
       } else {
         node.Modified = DateTime.Now;
         UpdateItem(node);
+        _logger.LogDebug($"Updated node: {node.Name} (Id: {node.Id})");
       }
       foreach (var subnode in node.Subnodes) {
         if (subnode != null) {
@@ -621,7 +625,10 @@ namespace DaemonsMCP.Core.Models {
       var todoStatusId = TypesTable.TypesByName(Cx.StatusStart);
       var todolistId = ItemsTable.GetTodoByName(listName, todoTypeId, todoStatusId);
       if (todolistId == 0) {
+        _logger.LogInformation($"Creating new todo list '{listName}'");
         todolistId = ItemsTable.AddItem(todoRootNodeId, todoTypeId, todoStatusId, 0, listName, "Todo item: " + listName, DateTime.Now, null);
+      } else { 
+        _logger.LogInformation($"Using existing todo list '{listName}' (Id: {todolistId})");
       }
       var todoList = GetNodesById(todolistId, maxDepth: 1);
       if (todoList == null) throw new InvalidOperationException("Failed to create or retrieve todo list node.");
@@ -649,15 +656,18 @@ namespace DaemonsMCP.Core.Models {
     }
 
     public Nodes? GetNextTodoItem(string? listName = null, int maxDepth = 1) { // null = any list
+      _logger.LogDebug($"GetNextTodoItem: listName='{listName}', maxDepth={maxDepth}");
       var todoStatusId = TypesTable.TypesByName(Cx.StatusStart);
       var todoStatusInProgressId = TypesTable.TypesByName(Cx.StatusInProgress);      
       IEnumerable<int>? todoItems = null;
       string todoListName = listName ?? "";
+      int todolistId = 0;
       if ( todoListName != "") {
-        var todolistId = ItemsTable.GetTodoByName(todoListName, todoTypeId, todoStatusId);
+        todolistId = ItemsTable.GetTodoByName(todoListName, todoTypeId, todoStatusId);
         if (todolistId == 0) {
           todoListName = "";
-        }else {
+          _logger.LogWarning($"Todo list '{listName}' not found, defaulting to any list.");
+        } else {
           todoItems = ItemsTable.Rows.Values
             .Where(row => row[Cx.ItemParentCol].Value.AsInt32() == todolistId &&
                           row[Cx.ItemTypeIdCol].Value.AsInt32() == todoTypeId &&
@@ -665,6 +675,7 @@ namespace DaemonsMCP.Core.Models {
             .OrderBy(row => row.Id)
             .Select(row => row.Id)
             .ToList();
+          _logger.LogDebug($"Found {todoItems.Count()} todo items in list '{todoListName}'.");
         }
       }
 
@@ -676,6 +687,7 @@ namespace DaemonsMCP.Core.Models {
             .OrderBy(row => row.Id)
             .Select(row => row.Id)
             .ToList();       
+        _logger.LogDebug($"Found {todoItems.Count()} todo lists under root.");
       } 
       if (todoItems != null ) { 
         foreach (var itemId in todoItems) {
@@ -684,7 +696,7 @@ namespace DaemonsMCP.Core.Models {
             Nodes? subItem = null;
             if (todoItem.Subnodes.Any() && maxDepth > 0) {
               foreach (var sub in todoItem.Subnodes) {            
-                subItem = GetNextTodoItem(sub.Name, maxDepth - 1);
+                subItem = GetNextTodoItem(sub.Name, maxDepth - 1);  // recursive search in sublist
                 if (subItem != null) break;
               }
             }
@@ -692,46 +704,64 @@ namespace DaemonsMCP.Core.Models {
             if (todoItem == null) continue;
             // Mark as In Progress unless it was marked done in a subitem
             if (subItem == null) { 
-              ItemsTable.FindFirst(Cx.ItemIdCol, todoItem.Id);
-              ItemsTable.Edit();
-              ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusInProgressId;
-              ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;
-              ItemsTable.Post();
+              if (ItemsTable.FindFirst(Cx.ItemIdCol, todoItem.Id)) { 
+                ItemsTable.Edit();
+                ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusInProgressId;
+                ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;
+                ItemsTable.Post();
+                return GetNodesById(todoItem.Id, maxDepth: 1, Cx.StatusStart, Cx.TypeTodo);
+              }
             }
-            return todoItem;
+            return todoItem;  // latest was recursive set in subItem.
           }
         }
       }
+
+      if (todoItems == null && todolistId >0 ) {  // all sub items complete need to return the list        
+        if (ItemsTable.FindFirst(Cx.ItemIdCol, todolistId)) {
+          ItemsTable.Edit();
+          ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusInProgressId;
+          ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;
+          ItemsTable.Post();
+          return GetNodesById(todolistId, maxDepth: 1, Cx.StatusStart, Cx.TypeTodo);
+        }
+      }
+
       return null;
     }
 
     public Nodes MarkTodoDone(int itemId) { 
-        var todoStatusCompleteId = TypesTable.TypesByName(Cx.StatusComplete);
-        var todoItem = GetNodesById(itemId, 0, Cx.StatusInProgress, Cx.TypeTodo);
-        if (todoItem == null) {
-            throw new InvalidOperationException($"Todo item with id {itemId} does not exist or is not in progress.");
+        var todoStatusCompleteId = TypesTable.TypesByName(Cx.StatusComplete);        
+        if (ItemsTable.FindFirst(Cx.ItemIdCol, itemId)) {
+          ItemsTable.Edit();
+          ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusCompleteId;
+          ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;
+          ItemsTable.Current[Cx.ItemCompletedCol].ValueString = DateTime.Now.AsString();
+          ItemsTable.Post();          
         }
-        ItemsTable.FindFirst(Cx.ItemIdCol, todoItem.Id);
-        ItemsTable.Edit();
-        ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusCompleteId;
-        ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;
-        ItemsTable.Current[Cx.ItemCompletedCol].ValueString = DateTime.Now.AsString();
-        ItemsTable.Post();
-        return todoItem;
+        return GetNodesById(itemId, maxDepth: 1, Cx.StatusStart, Cx.TypeTodo);
     }
 
     public Nodes RestoreAsTodo(int itemId) {
-      var todoStatusStartId = TypesTable.TypesByName(Cx.StatusStart);
-      var todoItem = GetNodesById(itemId, 0, Cx.StatusInProgress, Cx.TypeTodo);
-      if (todoItem == null) {
-        throw new InvalidOperationException($"Todo item with id {itemId} does not exist or is not in progress.");
+      var todoStatusStartId = TypesTable.TypesByName(Cx.StatusStart);      
+      if (ItemsTable.FindFirst(Cx.ItemIdCol, itemId)) {
+        ItemsTable.Edit();
+        ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusStartId;
+        ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;      
+        ItemsTable.Post();
       }
-      ItemsTable.FindFirst(Cx.ItemIdCol, todoItem.Id);
-      ItemsTable.Edit();
-      ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusStartId;
-      ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;      
-      ItemsTable.Post();
-      return todoItem;
+      return GetNodesById(itemId, maxDepth: 1, Cx.StatusStart, Cx.TypeTodo);
+    }
+
+    public Nodes MarkTodoCancel(int itemId) {
+      var todoStatusCancelId = TypesTable.TypesByName(Cx.StatusCancelled);
+      if (ItemsTable.FindFirst(Cx.ItemIdCol, itemId)) {
+        ItemsTable.Edit();
+        ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusCancelId;
+        ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;
+        ItemsTable.Post();
+      }
+      return GetNodesById(itemId, maxDepth: 1, Cx.StatusStart, Cx.TypeTodo);
     }
 
     #endregion

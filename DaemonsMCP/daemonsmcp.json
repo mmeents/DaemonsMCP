@@ -72,7 +72,7 @@
             ".xml",
             ".pas"
         ],
-        "maxFileSize": "25KB",
+        "maxFileSize": "50KB",
         "allowWrite": true,
         "writeProtectedPaths": [
             ".git",

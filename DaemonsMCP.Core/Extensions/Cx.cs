@@ -181,6 +181,7 @@ namespace DaemonsMCP.Core.Extensions {
     public const string StatusStart = "Not Started";
     public const string StatusInProgress = "In Progress";
     public const string StatusComplete = "Completed";
+    public const string StatusCancelled = "Cancelled";
 
     // Debugging prefixes
     public const string Dd0 = "[DaemonsMCP][Debug]";
