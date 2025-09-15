@@ -359,7 +359,7 @@ cp daemonsmcp.json daemonsmcp.backup.json
 
 ## Security Best Practices
 
-1. **maxFileSize** it's imortant to guard your token usage. let more in as needed, 50KB is current max.
+1. **maxFileSize** it's important to guard your token usage. let more in as needed, 50KB is current max.
 2. **Use Repository** and tools like Visual Studio to manage code changes
 3. **Regularly review** allowed extensions and paths. Obj hits too often.
 4. **Monitor logs** for problems, code is new and edges are many. 2 locations your clients logs and DaemonsMCP app folder (ex: c:\ProgramData\DaemonsMCP on Windows)

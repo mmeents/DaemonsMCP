@@ -50,7 +50,7 @@ Deep dive into the technical architecture, design patterns, and implementation d
 
 **Integration Point:**
 ```csharp
-[McpTool(\"list-projects\")]
+[McpTool("list-projects")]
 public async Task<ProjectListResponse> ListProjectsAsync()
 {
     return await _projectService.GetProjectsAsync();
@@ -369,9 +369,9 @@ public class IndexService : IIndexService
 
 ## Error Handling Architecture
 
-### Structured Error Responses
+### Structured Responses
 
-**Error Response Format:**
+**Response Format:** supports both success and error states. is Serialized to JSON and returned as a string.
 ```csharp
 public class OperationResult<T>
 {
@@ -432,10 +432,10 @@ public async Task<FileResponse> GetFileAsync(string projectName, string path)
 
 **1. Define Tool Method:**
 ```csharp
-[McpTool(\"daemonsmcp:my-new-tool\")]
+[McpTool("my-new-tool")]
 public async Task<MyResponse> MyNewToolAsync(
-    [McpToolParam(\"projectName\")] string projectName,
-    [McpToolParam(\"customParam\")] string customParam)
+    [McpToolParam("projectName")] string projectName,
+    [McpToolParam("customParam")] string customParam)
 {
     // Implementation
 }
@@ -458,35 +458,6 @@ public class MyNewService : IMyNewService
 }
 ```
 
-### Adding New Security Policies
-
-**Custom Security Service:**
-```csharp
-public class CustomSecurityService : SecurityService
-{
-    public override bool ValidateCustomRule(string input)
-    {
-        // Custom validation logic
-        return base.ValidateCustomRule(input) && MyCustomCheck(input);
-    }
-}
-```
-
-### Adding New Storage Providers
-
-**Storage Abstraction:**
-```csharp
-public interface IStorageProvider
-{
-    Task<T> GetAsync<T>(string key);
-    Task SetAsync<T>(string key, T value);
-    Task DeleteAsync(string key);
-}
-
-// Implement for different storage backends
-public class PackedTablesStorageProvider : IStorageProvider { }
-public class SqliteStorageProvider : IStorageProvider { }
-```
 
 ## Testing Architecture
 
@@ -500,13 +471,13 @@ public async Task GetFileAsync_ValidInput_ReturnsContent()
     // Arrange
     var mockValidation = new Mock<IValidationService>();
     var mockSecurity = new Mock<ISecurityService>();
-    mockValidation.Setup(x => x.ValidateProjectName(\"test\")).Returns(true);
-    mockSecurity.Setup(x => x.IsFileExtensionAllowed(\".txt\")).Returns(true);
+    mockValidation.Setup(x => x.ValidateProjectName("test")).Returns(true);
+    mockSecurity.Setup(x => x.IsFileExtensionAllowed(".txt")).Returns(true);
     
     var service = new ProjectFileService(mockValidation.Object, mockSecurity.Object);
     
     // Act
-    var result = await service.GetFileAsync(\"test\", \"file.txt\");
+    var result = await service.GetFileAsync("test", "file.txt");
     
     // Assert
     Assert.IsTrue(result.Success);
@@ -554,18 +525,13 @@ dotnet publish --configuration Release --self-contained --runtime win-x64
 ```
 DaemonsMCP/
 ├── daemonsmcp.json              # Default configuration
-├── daemonsmcp.development.json  # Development overrides
-├── daemonsmcp.production.json   # Production overrides
-└── appsettings.json            # .NET configuration
 ```
 
 **Configuration Loading:**
 ```csharp
 // Support multiple config files
 var configBuilder = new ConfigurationBuilder()
-    .AddJsonFile(\"daemonsmcp.json\", optional: false)
-    .AddJsonFile($\"daemonsmcp.{environment}.json\", optional: true)
-    .AddEnvironmentVariables(\"DAEMONSMCP_\");
+    .AddJsonFile("daemonsmcp.json", optional: false)
 ```
 
 ## Monitoring and Observability
@@ -573,35 +539,7 @@ var configBuilder = new ConfigurationBuilder()
 ### Logging Strategy
 
 **Structured Logging:**
-```csharp
-public class ProjectFileService
-{
-    private readonly ILogger<ProjectFileService> _logger;
-    
-    public async Task<FileResponse> GetFileAsync(string projectName, string path)
-    {
-        using var scope = _logger.BeginScope(new Dictionary<string, object>
-        {
-            [\"ProjectName\"] = projectName,
-            [\"FilePath\"] = path,
-            [\"Operation\"] = \"GetFile\"
-        });
-        
-        _logger.LogInformation(\"Starting file read operation\");
-        
-        try
-        {
-            // Operation logic
-            _logger.LogInformation(\"File read completed successfully\");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, \"File read operation failed\");
-            throw;
-        }
-    }
-}
-```
+
 
 ### Performance Metrics
 

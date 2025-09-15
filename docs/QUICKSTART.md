@@ -192,6 +192,7 @@ Show me the project documentation nodes with 2 levels of depth
 
 ### Basic File Operations
 ```
+0. "Read the Readme file to get context on the DaemonsMCP project"
 1. "What projects do you have access to?"
 2. "List all .cs files in the DaemonsMCP/DaemonsMCP.Core directory"
 3. "Show me the ProjectService.cs file"
@@ -201,9 +202,9 @@ Show me the project documentation nodes with 2 levels of depth
 ### Code Intelligence Workflow
 ```
 1. "Index all C# code in the DaemonsMCP project"
-2. "List the first 20 classes, page 1"
-3. "Show me the ProjectService class implementation"
-4. "List methods in the ProjectService class, page 1, 20 results"
+2. "Use DaemonsMCP toos to find and review Anyfile."
+3. "find bug in the ProjectService class "
+4. "make a todo list to review and then add entry foreach methods in the Project namespace"
 5. "Add a new validation method to the ProjectService class"
 ```
 
@@ -213,6 +214,7 @@ Show me the project documentation nodes with 2 levels of depth
 2. "Create a todo list called 'Bug Fixes' with items for null reference handling and error logging"
 3. "Get the next task from the Bug Fixes todo list"
 4. "Mark todo item 15 as completed"
+5. "Get next todo item, do it and mark as completed or Restore if unable to complete."
 ```
 
 ## Next Steps
