@@ -173,7 +173,7 @@ namespace DaemonsMCP.Core.Models {
       itemTypesId = TypesTbl.AddType(categoriesTypeId, 0, Cx.TypeItemTypes, "Internally linked to Nodes as Types, this is the Parent that holds the children as Nodes TypeId. Types related to kinds of Nodes.  " +
         "When adding a node if the type is unknown it will add it as a child here.");            
       statusTypesId = TypesTbl.AddType(categoriesTypeId, 0, Cx.TypeStatusTypes, "Internally linked to Nodes as the Status Types option. Nodes will add new status here if it does not match an existing one.");
-      todoTypeId = TypesTable.AddType(itemTypesId, 0, Cx.TypeTodo, "The Todo type, A task that is set to be done. candidate for GetNextTodoItem ");
+      todoTypeId = TypesTbl.AddType(itemTypesId, 0, Cx.TypeTodo, "The Todo type, A task that is set to be done. candidate for GetNextTodoItem ");
 
       return TypesTbl;
     }
