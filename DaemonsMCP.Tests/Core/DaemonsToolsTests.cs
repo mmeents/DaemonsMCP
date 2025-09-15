@@ -5,6 +5,7 @@ using DaemonsMCP.Core.Models;
 using FluentAssertions;
 using Moq;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace DaemonsMCP.Tests.Core
 {
@@ -17,6 +18,8 @@ namespace DaemonsMCP.Tests.Core
         private Mock<IProjectFileService> _mockProjectFileService = new();
         private Mock<IIndexService> _mockIndexService = new();        
         private Mock<IClassService> _mockClassService = new();
+        private Mock<ILoggerFactory> _mockLoggerFactory = new();
+
         private DaemonsTools _daemonsTools;
 
         public DaemonsToolsTests()
@@ -27,7 +30,8 @@ namespace DaemonsMCP.Tests.Core
                 _mockProjectFolderService.Object,
                 _mockProjectFileService.Object,
                 _mockIndexService.Object,
-                _mockClassService.Object
+                _mockClassService.Object,
+                _mockLoggerFactory.Object
             );
         }
 
