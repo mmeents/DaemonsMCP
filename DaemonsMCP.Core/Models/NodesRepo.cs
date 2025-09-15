@@ -655,18 +655,20 @@ namespace DaemonsMCP.Core.Models {
       return AddUpdateNode(todoList);
     }
 
-    public Nodes? GetNextTodoItem(string? listName = null, int maxDepth = 1) { // null = any list
+    public Nodes? GetNextTodoItem(string listName, int maxDepth = 1) { 
+
       _logger.LogDebug($"GetNextTodoItem: listName='{listName}', maxDepth={maxDepth}");
+
       var todoStatusId = TypesTable.TypesByName(Cx.StatusStart);
       var todoStatusInProgressId = TypesTable.TypesByName(Cx.StatusInProgress);      
+
       IEnumerable<int>? todoItems = null;
-      string todoListName = listName ?? "";
+      string todoListName = listName;
       int todolistId = 0;
       if ( todoListName != "") {
         todolistId = ItemsTable.GetTodoByName(todoListName, todoTypeId, todoStatusId);
         if (todolistId == 0) {
-          todoListName = "";
-          _logger.LogWarning($"Todo list '{listName}' not found, defaulting to any list.");
+          return null;  // no such list
         } else {
           todoItems = ItemsTable.Rows.Values
             .Where(row => row[Cx.ItemParentCol].Value.AsInt32() == todolistId &&
@@ -678,17 +680,7 @@ namespace DaemonsMCP.Core.Models {
           _logger.LogDebug($"Found {todoItems.Count()} todo items in list '{todoListName}'.");
         }
       }
-
-      if (todoListName == "") {         
-        todoItems = ItemsTable.Rows.Values
-            .Where(row => row[Cx.ItemParentCol].Value.AsInt32() == todoRootNodeId &&
-                          row[Cx.ItemTypeIdCol].Value.AsInt32() == todoTypeId &&
-                          row[Cx.ItemStatusCol].Value.AsInt32() == todoStatusId)
-            .OrderBy(row => row.Id)
-            .Select(row => row.Id)
-            .ToList();       
-        _logger.LogDebug($"Found {todoItems.Count()} todo lists under root.");
-      } 
+     
       if (todoItems != null && todoItems.Count() > 0 ) { 
         foreach (var itemId in todoItems) {
           var todoItem = GetNodesById(itemId, Cx.TypeTodoMaxDepth, Cx.StatusStart, Cx.TypeTodo);
@@ -759,6 +751,7 @@ namespace DaemonsMCP.Core.Models {
         ItemsTable.Edit();
         ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusCancelId;
         ItemsTable.Current[Cx.ItemModifiedCol].Value = DateTime.Now;
+        ItemsTable.Current[Cx.ItemCompletedCol].ValueString = DateTime.Now.AsString();
         ItemsTable.Post();
       }
       return GetNodesById(itemId, maxDepth: 1, Cx.StatusStart, Cx.TypeTodo);

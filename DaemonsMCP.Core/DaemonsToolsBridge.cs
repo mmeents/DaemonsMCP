@@ -223,7 +223,7 @@ namespace DaemonsMCP.Core {
 
     [McpTool(Cx.GetNextTodoItemCmd, Cx.GetNextTodoItemCmdDesc)]
     public static async Task<object> GetNextTodoItem(      
-      [Description(Cx.ListNameParamDesc)] string? listName = null
+      [Description(Cx.ListNameParamDesc)] string listName
     ) => await GetTools().GetNextTodoItem(listName).ConfigureAwait(false);
 
     [McpTool(Cx.MarkTodoDoneCmd, Cx.MarkTodoDoneCmdDesc)]
@@ -235,6 +235,11 @@ namespace DaemonsMCP.Core {
     public static async Task<object> RestoreAsTodo(      
       [Description(Cx.ItemIdParamDesc)] int itemId
     ) => await GetTools().RestoreAsTodo(itemId).ConfigureAwait(false);
+
+    [McpTool(Cx.MarkTodoCancelCmd, Cx.MarkTodoCancelCmdDesc)]
+    public static async Task<object> MarkTodoCancel(      
+      [Description(Cx.ItemIdParamDesc)] int itemId
+    ) => await GetTools().MarkTodoCancel(itemId).ConfigureAwait(false);
 
     #endregion
   }

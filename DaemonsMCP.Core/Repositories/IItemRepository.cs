@@ -28,11 +28,13 @@ namespace DaemonsMCP.Core.Repositories {
 
     public Task<Nodes> MakeTodoList(string listName, string[] items);
     
-    public Task<Nodes?> GetNextTodoItem(string? listName = null);
+    public Task<Nodes?> GetNextTodoItem(string listName);
 
     public Task<Nodes> MarkTodoDone(int itemId);
 
     public Task<Nodes> RestoreAsTodo(int itemId);
+
+    public Task<Nodes> MarkTodoCancel(int itemId);
 
   }
 }

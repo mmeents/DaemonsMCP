@@ -72,6 +72,7 @@ namespace DaemonsMCP.Core.Extensions {
     public const string GetNextTodoItemCmd = "get-next-todo";
     public const string MarkTodoDoneCmd = "mark-todo-done";
     public const string RestoreAsTodoCmd = "restore-todo";
+    public const string MarkTodoCancelCmd = "mark-todo-cancel";
 
     public const string SaveProjectRepoCmd = "save-project-repo";
 
@@ -123,7 +124,7 @@ namespace DaemonsMCP.Core.Extensions {
     public const string GetNextTodoItemCmdDesc = "Gets the next todo item by recursivly walking the tree and finding it.  Marks status as In Progress once found.  If listName is null it will search all lists in Todo Root.";
     public const string MarkTodoDoneCmdDesc = "Marks todo as done. To be used with get-next-todo to mark success status when completed. That is it sets Nodes Status to Complete, and Markes the completed date.";
     public const string RestoreAsTodoCmdDesc = "Restore todo status as Not Started. to be used with get-next-todo to abort the todo.";
-
+    public const string MarkTodoCancelCmdDesc = "Marks todo as cancelled. To be used with get-next-todo to mark cancelled status when task is abandoned. That is it sets Nodes Status to Cancelled, and Markes the completed date.";
 
     // Tool parameter descriptions
     public const string ProjectNameParamDesc = $"The configured project name to work in.";

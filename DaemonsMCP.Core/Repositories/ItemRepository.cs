@@ -113,7 +113,7 @@ namespace DaemonsMCP.Core.Repositories {
             return todoList;
         }).ConfigureAwait(false);
     }
-    public async Task<Nodes?> GetNextTodoItem(string? listName = null) { // null = any list
+    public async Task<Nodes?> GetNextTodoItem(string listName) { 
         return await Task.Run(() => {        
             var todoItem = _nodesRepo.GetNextTodoItem(listName, 27);
             return todoItem;
@@ -129,6 +129,14 @@ namespace DaemonsMCP.Core.Repositories {
     public async Task<Nodes> RestoreAsTodo(int itemId) { 
         return await Task.Run(() => {        
             var todoItem = _nodesRepo.RestoreAsTodo(itemId);
+            _nodesRepo.WriteStorage();
+            return todoItem;
+        }).ConfigureAwait(false);
+    }
+
+    public async Task<Nodes> MarkTodoCancel(int itemId) { 
+        return await Task.Run(() => {        
+            var todoItem = _nodesRepo.MarkTodoCancel(itemId);
             _nodesRepo.WriteStorage();
             return todoItem;
         }).ConfigureAwait(false);

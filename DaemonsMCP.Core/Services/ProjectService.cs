@@ -113,7 +113,7 @@ namespace DaemonsMCP.Core.Services {
       }
     }
 
-    public async Task<OperationResult> GetNextTodoItem(string? listName = null) { 
+    public async Task<OperationResult> GetNextTodoItem(string listName) { 
       Nodes? result = await _itemRepository.GetNextTodoItem( listName).ConfigureAwait(false);
       if (result != null) {
           return OperationResult.CreateSuccess("GetNextTodoItem", "Get Next Todo Item returned successfully.", result);
@@ -137,6 +137,15 @@ namespace DaemonsMCP.Core.Services {
           return OperationResult.CreateSuccess("RestoreAsTodo", "Restore As Todo returned successfully.", result);
       } else {
           return OperationResult.CreateFailure("RestoreAsTodo", $"Restore As Todo failed");
+      }
+    }
+
+    public async Task<OperationResult> MarkTodoCancel(int itemId) { 
+      Nodes result = await _itemRepository.MarkTodoCancel( itemId).ConfigureAwait(false);
+      if (result != null) {
+          return OperationResult.CreateSuccess("MarkTodoCancel", "Mark Todo Cancel returned successfully.", result);
+      } else {
+          return OperationResult.CreateFailure("MarkTodoCancel", $"Mark Todo Cancel failed");
       }
     }
 

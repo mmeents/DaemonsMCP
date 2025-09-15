@@ -392,7 +392,7 @@ namespace DaemonsMCP.Core {
       }
     }
 
-    public async Task<object> GetNextTodoItem(string? listName = null) {
+    public async Task<object> GetNextTodoItem(string listName) {
       try { 
         var result = await _projectsService.GetNextTodoItem(listName).ConfigureAwait(false);
         return JsonSerializer.Serialize(result);
@@ -418,6 +418,16 @@ namespace DaemonsMCP.Core {
         return JsonSerializer.Serialize(result);
       } catch (Exception ex) {
         var opResult = OperationResult.CreateFailure("RestoreAsTodo", $"Failed: {ex.Message}", null);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
+    public async Task<object> MarkTodoCancel(int itemId) {
+      try { 
+        var result = await _projectsService.MarkTodoCancel(itemId).ConfigureAwait(false);
+        return JsonSerializer.Serialize(result);
+      } catch (Exception ex) {
+        var opResult = OperationResult.CreateFailure("MarkTodoCancel", $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }
