@@ -1,0 +1,67 @@
+﻿{
+    "version": "1.0",
+    "daemon": {
+        "name": "DaemonMCP",
+        "version": "1.1.0",
+        "logLevel": "Information",
+        "nodesFilePath": "C:\\MCPSandbox"
+    },
+    "projects": [
+        {
+            "name": "DaemonsMCP",
+            "description": "DaemonsMCP V2 Di based version",
+            "path": "C:\\MCPSandbox\\DaemonsMCPDev",
+            "enabled": true
+        },
+        {
+            "name": "PackedTables.NET",
+            "description": "PackedTables.NET 1.1.6",
+            "path": "C:\\GithubMM\\PackedTables.NET",
+            "enabled": true
+        }
+    ],
+    "security": {
+        "blockedExtensions": [
+            ".exe",
+            ".dll",
+            ".bat",
+            ".cmd",
+            ".sh",
+            ".key",
+            ".pem",
+            ".p12",
+            ".pfx",
+            ".crt",
+            ".cer",
+            ".db",
+            ".sqlite",
+            ".sqlite3"            
+        ],
+        "allowedExtensions": [
+            ".sln",
+            ".csproj",
+            ".cs",
+            ".sql",
+            ".html",
+            ".htm",
+            ".js",
+            ".py",
+            ".md",
+            ".txt",
+            ".json",
+            ".resx",
+            ".log"
+        ],
+        "maxFileSize": "10MB",
+        "allowWrite": true,
+        "writeProtectedPaths": [
+            ".git",
+            ".vs",
+            "bin",
+            "obj",
+            "node_modules",
+            ".ssh"
+        ],
+        "maxFileWriteSize": "5MB"
+    }
+}

@@ -1,16 +1,41 @@
-﻿{
-    "version": "1.0",
+﻿{    
     "daemon": {
         "name": "DaemonMCP",
-        "version": "1.0.0"
+        "version": "1.1.1",
+        "nodesFilePath": "C:\\MCPSandbox"
     },
     "projects": [
         {
             "name": "DaemonsMCP",
-            "description": "DaemonsMCP in a sandbox",
-            "path": "C:\\MCPSandbox\\DaemonsMCP",
+            "description": "DaemonsMCP V2 Di based version, ",
+            "path": "C:\\MCPSandbox\\DaemonsMCPDev",
+            "enabled": true
+        },
+        {
+            "name": "PackedTables.NET",
+            "description": "PackedTables.NET 1.1.6",
+            "path": "C:\\GithubMM\\PackedTables.NET",
+            "enabled": true
+        },
+        {
+            "name": "PackedTables.Tabs",
+            "description": "PackedTables.Tabs 0.0.2",
+            "path": "C:\\GithubMM\\PackedTables.Tabs",
+            "enabled": true
+        },
+        {
+            "name": "Algos",
+            "description": "Algos 1.0.5",
+            "path": "C:\\GithubMM\\Algos",
+            "enabled": true
+        },
+        {
+            "name": "Apiary",
+            "description": "Apiary variable rate example github api runner",
+            "path": "C:\\GithubMM\\Apiary",
             "enabled": true
         }
+
     ],
     "security": {
         "blockedExtensions": [
@@ -27,7 +52,7 @@
             ".cer",
             ".db",
             ".sqlite",
-            ".sqlite3"            
+            ".sqlite3"
         ],
         "allowedExtensions": [
             ".sln",
@@ -42,9 +67,12 @@
             ".txt",
             ".json",
             ".resx",
-            ".log"
+            ".log",
+            ".pktbs",
+            ".xml",
+            ".pas"
         ],
-        "maxFileSize": "10MB",
+        "maxFileSize": "50KB",
         "allowWrite": true,
         "writeProtectedPaths": [
             ".git",

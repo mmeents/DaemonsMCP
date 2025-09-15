@@ -102,7 +102,7 @@
       _getFileButton.Name = "_getFileButton";
       _getFileButton.Size = new Size(92, 43);
       _getFileButton.TabIndex = 9;
-      _getFileButton.Text = "Get File";
+      _getFileButton.Text = "GetFileItemById File";
       _getFileButton.Click += GetFileButton_Click;
       // 
       // splitContainer1
@@ -130,7 +130,7 @@
       splitContainer1.Panel2.Controls.Add(_listFilesButton);
       splitContainer1.Panel2.Controls.Add(_getFileButton);
       splitContainer1.Size = new Size(1244, 664);
-      splitContainer1.SplitterDistance = 355;
+      splitContainer1.SplitterDistance = 267;
       splitContainer1.TabIndex = 10;
       // 
       // _outputTextBox
@@ -140,7 +140,7 @@
       _outputTextBox.Multiline = true;
       _outputTextBox.Name = "_outputTextBox";
       _outputTextBox.ScrollBars = ScrollBars.Both;
-      _outputTextBox.Size = new Size(1244, 355);
+      _outputTextBox.Size = new Size(1244, 267);
       _outputTextBox.TabIndex = 1;
       _outputTextBox.WordWrap = false;
       // 
