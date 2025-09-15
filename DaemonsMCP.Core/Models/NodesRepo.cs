@@ -689,7 +689,7 @@ namespace DaemonsMCP.Core.Models {
             .ToList();       
         _logger.LogDebug($"Found {todoItems.Count()} todo lists under root.");
       } 
-      if (todoItems != null ) { 
+      if (todoItems != null && todoItems.Count() > 0 ) { 
         foreach (var itemId in todoItems) {
           var todoItem = GetNodesById(itemId, Cx.TypeTodoMaxDepth, Cx.StatusStart, Cx.TypeTodo);
           if (todoItem != null) {
@@ -716,8 +716,8 @@ namespace DaemonsMCP.Core.Models {
           }
         }
       }
-
-      if (todoItems == null && todolistId >0 ) {  // all sub items complete need to return the list        
+      int todoCount = todoItems?.Count() ?? 0;
+      if ((todoItems == null || todoCount == 0) && todolistId > 0 ) {  // all sub items complete need to return the list        
         if (ItemsTable.FindFirst(Cx.ItemIdCol, todolistId)) {
           ItemsTable.Edit();
           ItemsTable.Current[Cx.ItemStatusCol].Value = todoStatusInProgressId;
