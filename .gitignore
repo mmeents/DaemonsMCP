@@ -417,4 +417,7 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
+# DaemonsMCP stuff
+.daemons/
 *.pktbs
+
