@@ -80,6 +80,7 @@ DaemonsMCP is a comprehensive C# MCP (Model Context Protocol) service that provi
 
 ### Project Management
 Nodes functions are recursive and support hierarchical structures.
+- `daemonsmcp:readme` - returns important usage details or context about the tool or a project. Returns All Trees of Nodes with type `Readme` 
 - `daemonsmcp:list-nodes` - Browse hierarchical project structure
 - `daemonsmcp:get-nodes-by-id` - Get specific nodes
 - `daemonsmcp:add-update-nodes` - Create/update project nodes
