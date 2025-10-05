@@ -517,9 +517,9 @@ namespace DaemonsConfigViewer {
     private TreeNode? _lookoutFoundSelectedNode = null;
     private void LoadNodes() {
 
-      if (tvNodes.SelectedNode != null) {
-        _lookoutForNodeId = (tvNodes.SelectedNode.Tag as Nodes).Id;
-      }
+      if (tvNodes.SelectedNode?.Tag is Nodes selectedNode) {
+        _lookoutForNodeId = selectedNode.Id;
+      }      
       tvNodes.Nodes.Clear();
 
       var nodes = _nodesRepo.GetNodes(nodeId: null, 20);

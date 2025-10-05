@@ -16,7 +16,7 @@ namespace DaemonsMCP.Core.Extensions {
       return ImChildNo < item.Parent.Nodes.Count - 1;
     }
 
-    public static TreeNode GetSwitchDownItem(this TreeNode item) {
+    public static TreeNode? GetSwitchDownItem(this TreeNode item) {
       if (item.Parent == null) return null;
       var ImChildNo = item.Parent.Nodes.IndexOf(item);
       if (ImChildNo < 0) return null;
@@ -47,7 +47,7 @@ namespace DaemonsMCP.Core.Extensions {
       return item.Parent.Nodes.IndexOf(item) >= 1;
     }
 
-    public static TreeNode GetSwitchUpItem(this TreeNode item) {
+    public static TreeNode? GetSwitchUpItem(this TreeNode item) {
       if (item.Parent == null) return null;
       var ImChildNo = item.Parent.Nodes.IndexOf(item);
       if (ImChildNo < 1) return null;
@@ -64,7 +64,7 @@ namespace DaemonsMCP.Core.Extensions {
       var rank = itemNode.Rank;
       itemNode.Rank = switchSibling.Rank;
       switchSibling.Rank = rank;
-      return false;
+      return true;
     }  
 
 

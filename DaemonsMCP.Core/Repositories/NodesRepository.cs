@@ -465,7 +465,7 @@ namespace DaemonsMCP.Core.Repositories {
               statusFilter != null && status2.Contains(statusFilter, StringComparison.OrdinalIgnoreCase) ||
               nameContains != null && name.Contains(nameContains, StringComparison.OrdinalIgnoreCase) ||
               detailsContains != null && details.Contains(detailsContains, StringComparison.OrdinalIgnoreCase) ||
-              typeFilter == null && statusFilter == null && nameContains == null && detailsContains == null
+              (typeFilter == null && statusFilter == null && nameContains == null && detailsContains == null)
               ) {
             var NodesC = GetNodesById(row.Id, maxDepth - 1, statusFilter, typeFilter, nameContains, detailsContains);
             if (NodesC != null) {
@@ -499,7 +499,7 @@ namespace DaemonsMCP.Core.Repositories {
               statusFilter != null && status.Contains(statusFilter, StringComparison.OrdinalIgnoreCase) ||
               nameContains != null && name.Contains(nameContains, StringComparison.OrdinalIgnoreCase) ||
               detailsContains != null && details.Contains(detailsContains, StringComparison.OrdinalIgnoreCase) ||
-              typeFilter == null && statusFilter == null && nameContains == null && detailsContains == null
+              (typeFilter == null && statusFilter == null && nameContains == null && detailsContains == null)
               ) {
             var node = GetNodesById(row.Id, maxDepth, statusFilter, typeFilter, nameContains, detailsContains);
             if (node != null) {

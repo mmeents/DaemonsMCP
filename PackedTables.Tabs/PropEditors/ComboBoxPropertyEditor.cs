@@ -196,7 +196,7 @@ namespace PackedTableTabs.PropEditors {
       if (Field == null) return;
       if (Modified) {
         ComboBoxItem? selectedItem = comboBox1.SelectedItem as ComboBoxItem;
-        Field.Value = selectedItem.Value;
+        Field.Value = selectedItem?.Value ?? "";
         Modified = false;
       }
     }
