@@ -34,19 +34,8 @@ namespace DaemonsMCP
             .UseSerilog() 
             .ConfigureServices((context, services) => {
               // Configuration
-              services.AddSingleton<IAppConfig, AppConfig>();
-              services.AddSingleton<ISecurityService, SecurityService>();
-              services.AddSingleton<IValidationService, ValidationService>();              
-              services.AddSingleton<IIndexRepository, IndexRepository>();
-              services.AddSingleton<IItemRepository, ItemRepository>();
-              services.AddSingleton<IIndexService, IndexService>();
+              services.ConfigureDaemonsCore();
 
-              // Core services
-              services.AddScoped<IProjectsService, ProjectService>();
-              services.AddScoped<IProjectFolderService, ProjectFolderService>();
-              services.AddScoped<IProjectFileService, ProjectFileService>();              
-              
-              services.AddScoped<IClassService, ClassService>();
 
               // MCP Tools (injected with dependencies)
               services.AddScoped<DaemonsTools>();
@@ -65,13 +54,13 @@ namespace DaemonsMCP
           .MinimumLevel.Override("System", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning))
           .Enrich.FromLogContext()
           .WriteTo.File(
-              path: Path.Combine(logsPath, "daemons-.log"),
+              path: Path.Combine(logsPath, "DaemonsMCP-.log"),
               rollingInterval: RollingInterval.Day,
               retainedFileCountLimit: 7,
               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"
           )
           .WriteTo.File(
-              path: Path.Combine(logsPath, "daemons-errors-.log"),
+              path: Path.Combine(logsPath, "DaemonsMCP-errors-.log"),
               rollingInterval: RollingInterval.Day,
               retainedFileCountLimit: 30,
               restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning, // Only warnings and errors

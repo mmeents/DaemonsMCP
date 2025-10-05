@@ -18,21 +18,7 @@ namespace DaemonsMCP.Core.Services {
       _config = config ?? throw new ArgumentNullException(nameof(config));
       _settings = _config.Security ?? throw new ArgumentNullException(nameof(_config.Security));
     }
-    private static readonly HashSet<string> BlockedDirectories = new(StringComparer.OrdinalIgnoreCase) {
-      ".git", ".vs", "bin", "obj", "node_modules",".ssh"
-    };
-    private static readonly HashSet<string> BlockedFiles = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".env", ".env.local", ".env.production", ".env.development", "appsettings.json", 
-        "appsettings.Development.json", "appsettings.Production.json","web.config", 
-        "app.config","secrets.json", "user-secrets.json",".gitignore", 
-        "id_rsa", "id_ed25519", ".pem", ".key", ".p12", ".pfx",
-        "database.db", ".sqlite", ".db"
-    };
-    private static readonly HashSet<string> BlockedExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-            ".key", ".pem", ".p12", ".pfx", ".crt", ".cer",".db", ".sqlite", ".sqlite3"
-        };
+
     private long _maxFileSizeBytes = -1;
     private long _maxFileWriteSize = -1;
   
@@ -83,6 +69,7 @@ namespace DaemonsMCP.Core.Services {
 
       var fileName = Path.GetFileName(filePath);
       var extension = Path.GetExtension(filePath);
+      var directory = Path.GetDirectoryName(filePath);
 
       // Additional restrictions for delete operations
       var criticalFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {        
@@ -102,8 +89,7 @@ namespace DaemonsMCP.Core.Services {
       var criticalDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
       { ".git", ".vs", "Properties"
       };
-
-      var directory = Path.GetDirectoryName(filePath);
+      
       if (directory != null && criticalDirectories.Any(critical =>
           directory.Contains(critical, StringComparison.OrdinalIgnoreCase))) {
         return false;
@@ -121,68 +107,57 @@ namespace DaemonsMCP.Core.Services {
       if (!IsFileSizeAllowed(filePath)) {
         return false;
       }
+           
+      var security = _config.Security;
 
-
-      if (_config.IsConfigured) {
-        var security = _config.Security;
-
-        // Check blocked extensions first (takes precedence)
-        if (security.BlockedExtensions.Any() && security.BlockedExtensions.Contains(extension)) {
-          return false;
-        }
-
-        // If no allowed list specified, allow anything not blocked
-        if (!security.AllowedExtensions.Any()) {
-          return true;
-        }
-
-        // Check allowed list
-        return security.AllowedExtensions.Contains(extension);
+      // Check blocked extensions first (takes precedence)
+      if (security.BlockedExtensions.Any() && security.BlockedExtensions.Contains(extension)) {
+        return false;
       }
 
-      // Check blocked files
-      if (BlockedFiles.Contains(fileName)) return false;
-
-      // Check blocked extensions
-      if (BlockedExtensions.Contains(extension)) return false;
+      if (security.BlockedFileNames.Any() && security.BlockedFileNames.Contains(fileName)) { 
+        return false;
+      }
 
       // Check if path contains blocked directories
-      if (directory != null && BlockedDirectories.Any(blocked =>
+      if (directory != null && security.WriteProtectedPaths.Any(blocked =>
           directory.Contains(blocked, StringComparison.OrdinalIgnoreCase))) return false;
 
-      return true;
-    }
-
-    public bool IsPathWriteProtected(string filePath) {
-      if (!_config.IsConfigured) {
-        // Use default protected paths when no config
-        return BlockedDirectories.Any(blocked =>
-            filePath.Contains(blocked, StringComparison.OrdinalIgnoreCase));
+      // If no allowed list specified, allow anything not blocked
+      if (!security.AllowedExtensions.Any()) {
+        return true;
       }
 
-      var security = _config.Security;
+      // Check allowed list
+      return security.AllowedExtensions.Contains(extension);
+      
+    }
+
+    public bool IsPathWriteProtected(string filePath) {      
+
+      var security = _config.Security;      
       var normalizedPath = Path.GetFullPath(filePath);
+      var directory = Path.GetDirectoryName(filePath);
+      if (directory == null) directory = normalizedPath;
 
       return security.WriteProtectedPaths.Any(protectedPath => {
-        var normalizedProtected = protectedPath;
-
         // Check if the file path contains the protected path
-        return normalizedPath.Contains(normalizedProtected, StringComparison.OrdinalIgnoreCase) ||
+        return directory.Contains(protectedPath, StringComparison.OrdinalIgnoreCase) ||
                // Check if it's a direct match for directory protection
-               normalizedPath.StartsWith(normalizedProtected.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
+               directory.StartsWith(protectedPath.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase);
       });
     }
 
     public bool IsWriteAllowed(string filePath) {
       // First check if writes are globally enabled
-      if (_config.IsConfigured && !_settings.AllowWrite) {
-        if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd2} Setting AllowWrite says no");
+      if (!_settings.AllowWrite) {
+        _logger.LogDebug($"{Cx.Dd2} Setting AllowWrite says no");
         return false;
       }
 
       // Check if the path is write-protected
       if (IsPathWriteProtected(filePath)) {
-        if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd2} Setting IsPathWriteProtected true {filePath}");
+        _logger.LogDebug($"{Cx.Dd2} Setting IsPathWriteProtected true {filePath}");
         return false;
       }
 

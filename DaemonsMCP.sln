@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Tests", "Daemons
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Core", "DaemonsMCP.Core\DaemonsMCP.Core.csproj", "{C3CA51FE-7D5D-404D-4F1F-72230DE5F972}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsConfigViewer", "DaemonsConfigViewer\DaemonsConfigViewer.csproj", "{E8352EB8-5539-41CB-A213-52419FAC0F44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackedTableTabs", "PackedTables.Tabs\PackedTableTabs.csproj", "{09E46C93-7E8D-7891-D0BE-31C18318B96C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{C3CA51FE-7D5D-404D-4F1F-72230DE5F972}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3CA51FE-7D5D-404D-4F1F-72230DE5F972}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3CA51FE-7D5D-404D-4F1F-72230DE5F972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8352EB8-5539-41CB-A213-52419FAC0F44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8352EB8-5539-41CB-A213-52419FAC0F44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8352EB8-5539-41CB-A213-52419FAC0F44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8352EB8-5539-41CB-A213-52419FAC0F44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09E46C93-7E8D-7891-D0BE-31C18318B96C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09E46C93-7E8D-7891-D0BE-31C18318B96C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09E46C93-7E8D-7891-D0BE-31C18318B96C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09E46C93-7E8D-7891-D0BE-31C18318B96C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

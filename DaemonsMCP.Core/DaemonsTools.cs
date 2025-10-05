@@ -1,6 +1,7 @@
 ﻿using DaemonsMCP.Core.Config;
 using DaemonsMCP.Core.Extensions;
 using DaemonsMCP.Core.Models;
+using DaemonsMCP.Core.Repositories;
 using DaemonsMCP.Core.Services;
 using MCPSharp;
 using Microsoft.Extensions.Logging;

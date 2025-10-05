@@ -17,6 +17,7 @@ namespace DaemonsMCP.Core.Models {
       this.Description = Description ?? throw new ArgumentNullException(nameof(Description));
       this.Path = FullPath ?? throw new ArgumentNullException(nameof(FullPath));
     }
+    public int Id { get; set; } = 0;
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
     public string Path { get; set; } = "";
@@ -25,19 +26,10 @@ namespace DaemonsMCP.Core.Models {
     public string IndexPath { 
       get {  
         if (!string.IsNullOrEmpty(_IndexPath)) return _IndexPath;
-        _IndexPath = System.IO.Path.GetFullPath( System.IO.Path.Combine(this.Path.ResolvePath(), Cx.DaemonsFolderName));
+        _IndexPath = Sx.CommonAppPath;
         return _IndexPath;
       }
     }
-
-    private string _BackupPath = "";
-    public string BackupPath {
-      get {
-        if (!string.IsNullOrEmpty(_BackupPath)) return _BackupPath;
-        _BackupPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(this.IndexPath, Cx.BackupFolderName));
-        return _BackupPath;
-      }
-
-    }
+    
   }
 }

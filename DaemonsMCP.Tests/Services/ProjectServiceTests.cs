@@ -24,9 +24,12 @@ namespace DaemonsMCP.Tests.Services
         private ProjectService _service;
         private readonly IValidationService _validationService;
         private readonly ISecurityService _securityService;
+        private readonly IProjectRepository _serviceProjectRepository;
+        private readonly ISettingsRepository _serviceSettingsRepository;
+        private readonly INodesRepository _nodesRepository;
 
 
-        public ProjectServiceTests()
+    public ProjectServiceTests()
         {
           //var testLogsPath = Path.Combine(Path.GetTempPath(), "DaemonsMCP-Tests", "logs");
           //Directory.CreateDirectory(testLogsPath);
@@ -54,10 +57,13 @@ namespace DaemonsMCP.Tests.Services
             .CreateLogger();
 
           _loggerFactory = LoggerFactory.Create(builder => builder.AddSerilog(Log.Logger));      // Constructor logic if needed
-            _config = new AppConfig(_loggerFactory);
+            _serviceProjectRepository = new ProjectRepository(_loggerFactory);
+            _serviceSettingsRepository = new SettingsRepository(_loggerFactory);
+            _config = new App2Config(_loggerFactory, _serviceProjectRepository, _serviceSettingsRepository);
             _securityService = new SecurityService(_loggerFactory, _config);
             _validationService = new ValidationService(_config, _securityService);
-            _itemRepository =  new ItemRepository( _config, _loggerFactory);
+            _nodesRepository = new NodesRepository(_config, _loggerFactory);
+            _itemRepository =  new ItemRepository( _config, _nodesRepository, _loggerFactory);
             _service = new ProjectService(_config, _itemRepository);
 
             _testProjects = new Dictionary<string, ProjectModel> {

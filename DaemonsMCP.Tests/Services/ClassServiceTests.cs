@@ -20,6 +20,8 @@ namespace DaemonsMCP.Tests.Services {
     private readonly IClassService? _classService;    
     private readonly Mock<ILoggerFactory>? _mockLoggerFactory = new();
     private readonly Mock<IIndexRepository>? _mockIndexRepository = new();
+    private readonly Mock<IProjectRepository>? _mockProjectRepository = new();
+    private readonly Mock<ISettingsRepository>? _mockSettingsRepository = new();
 
     private readonly IClassService? _classService2;
     private readonly IIndexRepository? _indexRepository;
@@ -32,7 +34,7 @@ namespace DaemonsMCP.Tests.Services {
       _mockLoggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>())).Returns(_appConfigLogger.Object);
       
       _classService = new ClassService( _mockLoggerFactory.Object, _mockIndexRepository.Object, _mockValidationService.Object );
-      var appConfig = new AppConfig( _mockLoggerFactory.Object );
+      var appConfig = new App2Config( _mockLoggerFactory.Object, _mockProjectRepository.Object, _mockSettingsRepository.Object );
       _securityService = new SecurityService(_mockLoggerFactory.Object, appConfig);
       _indexRepository = new IndexRepository(_mockLoggerFactory.Object, appConfig, _mockValidationService.Object, _securityService);
       _validationService = new ValidationService(appConfig, _securityService);

@@ -17,12 +17,11 @@ using System.Xml.Linq;
 
 namespace DaemonsMCP.Core.Repositories {
   public class ItemRepository : IItemRepository {
-    private IAppConfig _config;
-    private readonly ConcurrentDictionary<string, NodesRepo> _projectItemRepos = new ConcurrentDictionary<string, NodesRepo>();
-    private readonly NodesRepo _nodesRepo = null!;
-    public ItemRepository(IAppConfig appConfig, ILoggerFactory loggerFactory) { 
+    private IAppConfig _config;    
+    private readonly INodesRepository _nodesRepo = null!;
+    public ItemRepository(IAppConfig appConfig, INodesRepository nodesRepo, ILoggerFactory loggerFactory) { 
         _config = appConfig;
-        _nodesRepo = new NodesRepo(_config, loggerFactory);      
+        _nodesRepo = nodesRepo;      
     }
     
 

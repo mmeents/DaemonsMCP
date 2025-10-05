@@ -14,19 +14,50 @@ using PackedTables.Net;
 namespace DaemonsMCP.Core.Repositories {
   public class IndexRepository : IIndexRepository {
     private readonly IAppConfig _appConfig;
+    private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<IndexRepository> _logger;
     private readonly IValidationService _validationService;
+    private readonly ISecurityService _securityService;
     private readonly ConcurrentDictionary<string, ProjectIndexModel> _projectIndexs = new ConcurrentDictionary<string, ProjectIndexModel>();
     public IndexRepository(ILoggerFactory loggerFactory, IAppConfig appConfig, IValidationService validationService, ISecurityService securityService) {
       _appConfig = appConfig;
+      _loggerFactory = loggerFactory;
+      _appConfig.OnProjectsLoadedEvent += ProjectsReloaded;
       _logger = loggerFactory.CreateLogger<IndexRepository>() ?? throw new ArgumentNullException(nameof(loggerFactory));
       _validationService = validationService;
+      _securityService = securityService;
       foreach (var project in _appConfig.Projects) {
-        _projectIndexs[project.Key] = new ProjectIndexModel(loggerFactory, project.Value, _validationService, securityService);
+        _projectIndexs[project.Key] = new ProjectIndexModel(_loggerFactory, project.Value, _validationService, _securityService);
       }
       
     }
 
+    private void ProjectsReloaded() {
+      
+      foreach (var key in _projectIndexs.Keys) {
+        if (!_appConfig.Projects.ContainsKey(key)) {
+          if ( _projectIndexs.TryRemove(key, out var leavingProject)) { 
+            _logger.LogInformation($"🗑️ Project '{key}' removed from index.");
+            leavingProject.Dispose();
+          }
+        }
+      }
+
+      foreach (var project in _appConfig.Projects) {
+        if (!_projectIndexs.ContainsKey(project.Key)) { 
+          _projectIndexs[project.Key] = new ProjectIndexModel(_loggerFactory, project.Value, _validationService, _securityService);
+        }
+      }
+      DoOnProjectsReLoadedEvent();
+    }
+
+    public event Action OnProjectsReLoadedEvent = delegate { };
+
+    private void DoOnProjectsReLoadedEvent() {
+      if (OnProjectsReLoadedEvent != null) {
+        OnProjectsReLoadedEvent();
+      }
+    }
     public ProjectIndexModel? GetProjectIndex(string projectName) {
       if (_projectIndexs.TryGetValue(projectName, out var projectIndex)) {
         return projectIndex;

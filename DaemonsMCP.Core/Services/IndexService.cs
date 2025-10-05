@@ -24,14 +24,16 @@ namespace DaemonsMCP.Core.Services {
     private readonly IValidationService _validationService;
     private readonly ISecurityService _securityService;
     private readonly IIndexRepository _indexRepository;
-    private Timer? _processTimer;   
-    private Timer? _scheduledCmdTimer;
+    private readonly ILoggerFactory _loggerFactory;
+    private System.Threading.Timer? _processTimer;   
+    private System.Threading.Timer? _scheduledCmdTimer;
     private readonly Lock _processTimerLock = new();
     private readonly Lock _scheduledCmdLock = new();
-    private readonly List<IndexProjectItem> _projectIndexModels = new();
+    private List<IndexProjectItem> _projectIndexModels = new();
     private readonly ILogger<IndexService> _logger;
     private bool _isProcessing = false;
     private bool _isEnabled = false;
+    
 
     public IndexService (
       ILoggerFactory loggerFactory,
@@ -39,11 +41,13 @@ namespace DaemonsMCP.Core.Services {
       IValidationService validationService, 
       ISecurityService securityService,
       IIndexRepository indexRepository) {
+        _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory), "LoggerFactory cannot be null");
         _logger = loggerFactory?.CreateLogger<IndexService>() ?? throw new ArgumentNullException(nameof(loggerFactory), "LoggerFactory cannot be null");
         _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig), "AppConfig cannot be null");
         _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService), "ValidationService cannot be null");
         _securityService = securityService;
         _indexRepository = indexRepository ?? throw new ArgumentNullException(nameof(indexRepository), "IndexRepository cannot be null");
+        _indexRepository.OnProjectsReLoadedEvent += ProjectsReloaded;
 
         if (_appConfig.Projects == null || !_appConfig.Projects.Any()) {
           throw new InvalidOperationException("No projects configured in AppConfig");
@@ -51,7 +55,7 @@ namespace DaemonsMCP.Core.Services {
         _projectIndexModels = _appConfig.Projects.Select(p => new IndexProjectItem() { 
             Name = p.Value.Name,
             Path = p.Value.Path,
-            ProjectIndex = _indexRepository.GetProjectIndex(p.Value.Name) ?? new ProjectIndexModel(loggerFactory, p.Value, _validationService, securityService)
+            ProjectIndex = _indexRepository.GetProjectIndex(p.Value.Name) ?? new ProjectIndexModel(_loggerFactory, p.Value, _validationService, _securityService)
         }).ToList();
         foreach (var project in _projectIndexModels) {
           if (project.ProjectIndex == null) {
@@ -61,6 +65,25 @@ namespace DaemonsMCP.Core.Services {
           
         }
         Enabled = true;
+    }
+
+    private void ProjectsReloaded() {
+      if (_appConfig.Projects == null || !_appConfig.Projects.Any()) {
+        throw new InvalidOperationException("No projects configured in AppConfig");
+      }
+      _projectIndexModels = _appConfig.Projects.Select(p => new IndexProjectItem() {
+        Name = p.Value.Name,
+        Path = p.Value.Path,
+        ProjectIndex = _indexRepository.GetProjectIndex(p.Value.Name) ?? new ProjectIndexModel(_loggerFactory, p.Value, _validationService, _securityService)
+      }).ToList();
+      foreach (var project in _projectIndexModels) {
+        if (project.ProjectIndex == null) {
+          throw new InvalidOperationException($"Project index not found for project: {project.Name}");
+        }
+        project.ProjectIndex.IndexService = this;
+      }
+      Enabled = true;
+
     }
 
     public async Task<IndexStatusResult> GetIndexStatus() {
@@ -109,7 +132,7 @@ namespace DaemonsMCP.Core.Services {
           return;
         }
 
-        _processTimer = new Timer(async _ => {
+        _processTimer = new System.Threading.Timer(async _ => {
           await ProcessQueueWithTimerControl().ConfigureAwait(false);
         }, null, TimeSpan.FromSeconds(Cx.IndexTimerIntervalSec), TimeSpan.FromSeconds(Cx.IndexTimerIntervalSec));
 
@@ -136,7 +159,7 @@ namespace DaemonsMCP.Core.Services {
           _logger.LogDebug("⚠️ Schedule timer already running, skipping start");
           return;
         }
-        _scheduledCmdTimer = new Timer(async _ => {
+        _scheduledCmdTimer = new System.Threading.Timer(async _ => {
           await ExecNextScheduledCmd().ConfigureAwait(false);
         }, null, TimeSpan.FromSeconds(Cx.IndexSchIntervalSec), TimeSpan.FromSeconds(Cx.IndexSchIntervalSec));
         _logger.LogDebug($"▶️ Schedule timer started");
