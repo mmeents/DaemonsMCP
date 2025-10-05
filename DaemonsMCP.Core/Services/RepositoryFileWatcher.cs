@@ -60,9 +60,7 @@ namespace DaemonsMCP.Core.Services {
     public void StartDebounceTimer(int milliseconds) {
       if (_isDisposed) return;
       lock (_debounceLock) {
-        if (_debounceTimer != null) {
-          _debounceTimer.Change(milliseconds, Timeout.Infinite);
-        } else {
+        if (_debounceTimer == null) {          
           _debounceTimer = new System.Threading.Timer(DebounceTimerElapsed, null, milliseconds, Timeout.Infinite);
         }
       }

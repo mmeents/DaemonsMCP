@@ -84,6 +84,7 @@ namespace DaemonsMCP.Core.Repositories {
     }
 
     public void Load() {
+      SettingsTableSet = new PackedTableSet();
       SettingsTableSet.LoadFromFile(SettingsFilePathName);
       SettingsTbl = SettingsTableSet[Cx.SettingsTbl] ?? MakeSettingsTable();
       DoOnSettingsLoadedEvent();

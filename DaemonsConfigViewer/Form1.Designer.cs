@@ -78,6 +78,7 @@
       tabControl4 = new TabControl();
       panel2 = new Panel();
       tabControl3 = new TabControl();
+      btnModifiedReload = new Button();
       ((System.ComponentModel.ISupportInitialize)ScRoot).BeginInit();
       ScRoot.Panel1.SuspendLayout();
       ScRoot.Panel2.SuspendLayout();
@@ -98,6 +99,7 @@
       splitContainer2.Panel1.SuspendLayout();
       splitContainer2.Panel2.SuspendLayout();
       splitContainer2.SuspendLayout();
+      panel2.SuspendLayout();
       SuspendLayout();
       // 
       // ScRoot
@@ -582,6 +584,7 @@
       // 
       // panel2
       // 
+      panel2.Controls.Add(btnModifiedReload);
       panel2.Dock = DockStyle.Top;
       panel2.Location = new Point(3, 3);
       panel2.Name = "panel2";
@@ -597,6 +600,16 @@
       tabControl3.SelectedIndex = 0;
       tabControl3.Size = new Size(706, 120);
       tabControl3.TabIndex = 0;
+      // 
+      // btnModifiedReload
+      // 
+      btnModifiedReload.Location = new Point(5, 22);
+      btnModifiedReload.Name = "btnModifiedReload";
+      btnModifiedReload.Size = new Size(109, 23);
+      btnModifiedReload.TabIndex = 0;
+      btnModifiedReload.Text = "Modified Reload";
+      btnModifiedReload.UseVisualStyleBackColor = true;
+      btnModifiedReload.Click += btnModifiedReload_Click;
       // 
       // Form1
       // 
@@ -631,6 +644,7 @@
       splitContainer2.Panel2.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)splitContainer2).EndInit();
       splitContainer2.ResumeLayout(false);
+      panel2.ResumeLayout(false);
       ResumeLayout(false);
     }
 
@@ -683,5 +697,6 @@
     private Label lbIndexLine2;
     private Label lbIndexLine1;
     private LinkLabel lbProjectFolder;
+    private Button btnModifiedReload;
   }
 }

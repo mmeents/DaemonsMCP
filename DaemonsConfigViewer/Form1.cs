@@ -26,6 +26,7 @@ namespace DaemonsConfigViewer {
 
   public partial class Form1 : Form {
     private MessageLogTab textTabPage;
+    private bool _nodesChangedNeedsReload = false;
 
     private ILoggerFactory _loggerFactory;
     private IProjectRepository _projectRepository;
@@ -45,20 +46,20 @@ namespace DaemonsConfigViewer {
 
     public Form1(ServiceProvider _serviceProvider) {
       InitializeComponent();
- //     LoadLogger();
+      //     LoadLogger();
       label1.Text = $"{Cx.AppName} select project below";
       lbProjectFolder.Text = $"Project Folder: {Sx.CommonAppPath}";
-      
+
       _loggerFactory = _serviceProvider.GetRequiredService<ILoggerFactory>();
       _projectRepository = _serviceProvider.GetRequiredService<IProjectRepository>();
       _settingsRepository = _serviceProvider.GetRequiredService<ISettingsRepository>();
 
-      _appConfig = _serviceProvider.GetRequiredService<IAppConfig>();      
+      _appConfig = _serviceProvider.GetRequiredService<IAppConfig>();
       _appConfig.OnProjectsLoadedEvent += ProjectsReloaded;
 
       _nodesRepo = _serviceProvider.GetRequiredService<INodesRepository>();
       _nodesRepo.OnNodesLoadedEvent += NodesChangedNeedsReload;
-      
+
       _statusProvider = _serviceProvider.GetRequiredService<IStatusProvider>();
       _typeProvider = _serviceProvider.GetRequiredService<ITypeProvider>();
       _parentItemProvider = _serviceProvider.GetRequiredService<IParentItemProvider>();
@@ -89,16 +90,24 @@ namespace DaemonsConfigViewer {
 
     delegate void RepoReloadedCallback();
 
+    private bool NodesChangedNeedsReloadFlag {
+      get { return _nodesChangedNeedsReload; }
+      set {
+        _nodesChangedNeedsReload = value;
+        btnModifiedReload.Enabled = value;
+      }
+    }
+
     private void NodesChangedNeedsReload() {
       if (this.tvNodes.InvokeRequired) {
         var d = new RepoReloadedCallback(NodesChangedNeedsReload);
         this.Invoke(d, new object[] { });
       } else {
-        LoadNodes();
+        _nodesChangedNeedsReload = true;
       }
     }
 
-   
+
     private void ProjectsReloaded() {
       if (this.tvMain.InvokeRequired) {
         var d = new RepoReloadedCallback(ProjectsReloaded);
@@ -506,7 +515,7 @@ namespace DaemonsConfigViewer {
     private void tabControl1_SelectedIndexChanged(object sender, EventArgs e) {
       TabPage currentTab = tabControl1.SelectedTab;
       if (currentTab != null && currentTab.Name == "TpNodes") {
-        LoadNodes();
+        LoadNodes();        
       } else if (currentTab != null && currentTab.Name == "TpConfig") {
         tabControl2_SelectedIndexChanged(sender, e);
       }
@@ -516,10 +525,10 @@ namespace DaemonsConfigViewer {
     private int _lookoutForNodeId = -1;
     private TreeNode? _lookoutFoundSelectedNode = null;
     private void LoadNodes() {
-
+      
       if (tvNodes.SelectedNode?.Tag is Nodes selectedNode) {
         _lookoutForNodeId = selectedNode.Id;
-      }      
+      }
       tvNodes.Nodes.Clear();
 
       var nodes = _nodesRepo.GetNodes(nodeId: null, 20);
@@ -529,6 +538,7 @@ namespace DaemonsConfigViewer {
       tvNodes.ExpandAll();
       tvNodes.SelectedNode = _lookoutFoundSelectedNode;
       tvNodes.Focus();
+      NodesChangedNeedsReloadFlag = false;
     }
 
     private void LoadNodeRecursive(TreeNode? parent, Nodes nodeParam) {
@@ -555,7 +565,7 @@ namespace DaemonsConfigViewer {
     private void NodesRepoTab_OnPostEvent() {
       if (_nodesRepo.StorageTables.Modified) {
         _nodesRepo.WriteStorage();
-        LoadNodes();
+        NodesChangedNeedsReloadFlag = true;
       }
     }
 
@@ -602,7 +612,7 @@ namespace DaemonsConfigViewer {
             dragNodes.ParentId = 0;
             _nodesRepo.AddUpdateNode(dragNodes);
             _nodesRepo.WriteStorage();
-            LoadNodes();
+            NodesChangedNeedsReloadFlag = true;
           }
           return;
         }
@@ -615,7 +625,7 @@ namespace DaemonsConfigViewer {
           dragNodes.ParentId = targetNode?.Id ?? 0;
           _nodesRepo.AddUpdateNode(dragNodes);
           _nodesRepo.WriteStorage();
-          LoadNodes();
+          NodesChangedNeedsReloadFlag = true;
           return;
         }
 
@@ -728,7 +738,7 @@ namespace DaemonsConfigViewer {
       if (selectedNode != null && selectedNode.Tag != null && selectedNode.Tag is Nodes node) {
         selectedNode.SwitchRankUp();
         _nodesRepo.WriteStorage();
-        LoadNodes();
+        NodesChangedNeedsReloadFlag = true;
       }
     }
 
@@ -746,6 +756,7 @@ namespace DaemonsConfigViewer {
         tvNodes.SelectedNode = parent;
         _nodesRepo.RemoveNode(node.Id, RemoveStrategy.DeleteCascade);
         _nodesRepo.WriteStorage();
+        NodesChangedNeedsReloadFlag = false;
       }
     }
 
@@ -774,7 +785,7 @@ namespace DaemonsConfigViewer {
         try {
           // Read old config
           var jsonContent = File.ReadAllText(openFileDialog.FileName);
-          var oldConfig = JsonSerializer.Deserialize<DaemonsMcpConfiguration>(jsonContent, Sx.DefaultJsonOptions);          
+          var oldConfig = JsonSerializer.Deserialize<DaemonsMcpConfiguration>(jsonContent, Sx.DefaultJsonOptions);
 
           // Import projects
           foreach (var project in oldConfig.Projects.Where(p => p.Enabled)) {
@@ -793,6 +804,8 @@ namespace DaemonsConfigViewer {
       }
     }
 
-
+    private void btnModifiedReload_Click(object sender, EventArgs e) {
+      LoadNodes();
+    }
   }
 }

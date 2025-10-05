@@ -54,6 +54,7 @@ namespace DaemonsMCP.Core.Repositories {
     }
 
     public void Load() {
+      ProjectsTableSet = new PackedTableSet();
       ProjectsTableSet.LoadFromFile(ProjectsFilePathName);
       Projects = ProjectsTableSet["Projects"] ?? MakeProjectsTable();
       DoOnProjectsLoadedEvent();

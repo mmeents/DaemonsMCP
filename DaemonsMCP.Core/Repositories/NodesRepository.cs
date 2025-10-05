@@ -51,6 +51,7 @@ namespace DaemonsMCP.Core.Repositories {
         Directory.CreateDirectory(StoragePath);
       }
       Load();
+
       _watcher = new RepositoryFileWatcher(
         StorageFileName,
         () => Load(),
@@ -151,13 +152,14 @@ namespace DaemonsMCP.Core.Repositories {
     }
 
     public void Load() {
-
+      nullTypeId = 0;
+      StorageTables = new PackedTableSet();
       StorageTables.LoadFromFile(StorageFileName);  // if file does not exist it will just be empty tableset.
 
       TypesTable = StorageTables[Cx.TypesTbl] ?? MakeTypesTable();
       ItemsTable = StorageTables[Cx.ItemsTbl] ?? StorageTables.MakeItemsTable();
 
-      ItemsTable.AutoValidate = false;
+      ItemsTable.AutoValidate = false;      
 
       if (nullTypeId == 0) { // if TypesTable loads from file MakeItemsTable will not run, these need to be set.
         nullTypeId = TypesTable.TypesByName(Cx.TypeNone);
@@ -168,13 +170,13 @@ namespace DaemonsMCP.Core.Repositories {
 
         todoRootNodeId = ItemsTable.GetTodoRootId(todoTypeId);
         notStartedStatusId = TypesTable.TypesByName(Cx.StatusStart);
-      } else {  //  else save tables to file.
+      } else {  
         WriteDocumentation();
-        WriteStorage();
       }
 
       DoOnNodesLoadedEvent();
     }
+
     public void WriteStorage() {
       if (StorageTables != null && StorageTables.TableCount > 0) {
         StorageTables.SaveToFile(StorageFileName);
