@@ -47,6 +47,7 @@ namespace DaemonsMCP.Core.Services {
       };
 
       _watcher.Changed += OnFileChanged;
+      _watcher.EnableRaisingEvents = true;
       _logger.LogDebug($"📁 Watching {fileName} for changes");
     }
 
