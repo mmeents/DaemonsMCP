@@ -12,7 +12,7 @@ using System.Xml.Linq;
 namespace DaemonsMCP.Core.Extensions {
   public static class Cx {
     public const string AppName = "DaemonsMCP";
-    public const string AppVersion = "2.2.0";
+    public const string AppVersion = "2.4.0";
 
     public const string CONFIG_FILE_NAME = "daemonsmcp.json"; // not used anymore. You could if you downgrade from App2Config back to AppConfig in
                                                               // program.cs.  But then the Viewer app is not going to work as it uses App2Config.

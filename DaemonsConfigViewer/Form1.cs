@@ -94,6 +94,7 @@ namespace DaemonsConfigViewer {
       get { return _nodesChangedNeedsReload; }
       set {
         _nodesChangedNeedsReload = value;
+        btnModifiedReload.Visible = value;
         btnModifiedReload.Enabled = value;
       }
     }
@@ -103,7 +104,7 @@ namespace DaemonsConfigViewer {
         var d = new RepoReloadedCallback(NodesChangedNeedsReload);
         this.Invoke(d, new object[] { });
       } else {
-        _nodesChangedNeedsReload = true;
+        NodesChangedNeedsReloadFlag = true;
       }
     }
 

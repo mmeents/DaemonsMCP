@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.md = LICENSE.md
 		README.md = README.md
+		docs\TOOLS.md = docs\TOOLS.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Tests", "DaemonsMCP.Tests\DaemonsMCP.Tests.csproj", "{5A3CEE25-F03E-471B-82E2-77FB2EF954C4}"
