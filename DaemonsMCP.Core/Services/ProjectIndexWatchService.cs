@@ -66,12 +66,9 @@ namespace DaemonsMCP.Core.Services {
         NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size
       };
 
-      _watcher.Created += OnFileEvent;
       _watcher.Changed += OnFileEvent;
       _watcher.Deleted += OnFileEvent;
       _watcher.Renamed += OnFileRenamed;
-
-      // Handle watcher errors gracefully
       _watcher.Error += OnWatcherError;
 
       _watcher.EnableRaisingEvents = _projectIndexModel?.IndexService?.Enabled?? false;
@@ -81,8 +78,7 @@ namespace DaemonsMCP.Core.Services {
 
     public void StopWatching() {
       if (_watcher != null) {
-        _watcher.EnableRaisingEvents = false;
-        _watcher.Created -= OnFileEvent;
+        _watcher.EnableRaisingEvents = false;    
         _watcher.Changed -= OnFileEvent;
         _watcher.Deleted -= OnFileEvent;
         _watcher.Renamed -= OnFileRenamed;
@@ -95,7 +91,6 @@ namespace DaemonsMCP.Core.Services {
 
     private void OnFileEvent(object sender, FileSystemEventArgs e) {
       if (_isDisposed) return;
-      if (e.FullPath.Contains(".daemons", StringComparison.OrdinalIgnoreCase)) return; // Ignore .daemons folder changes
 
       // Quick filter at watcher level
       if (!e.FullPath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)) return;
@@ -115,7 +110,6 @@ namespace DaemonsMCP.Core.Services {
 
     private void OnFileRenamed(object sender, RenamedEventArgs e) {
       if (_isDisposed) return;
-      if (e.FullPath.Contains(".daemons", StringComparison.OrdinalIgnoreCase)) return; // Ignore .daemons folder changes
 
       // Handle as delete old + create new
       _changeQueue.Enqueue(new FileChangeItem {
@@ -140,7 +134,7 @@ namespace DaemonsMCP.Core.Services {
 
       // Try to restart the watcher
       try {
-        _watcher?.Dispose();
+        StopWatching();
         StartWatching();
       } catch (Exception ex) {
         _logger.LogError($"❌ Failed to restart watcher: {ex.Message}");
