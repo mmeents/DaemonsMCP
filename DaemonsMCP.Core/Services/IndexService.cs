@@ -50,7 +50,7 @@ namespace DaemonsMCP.Core.Services {
         _indexRepository.OnProjectsReLoadedEvent += ProjectsReloaded;
 
         if (_appConfig.Projects == null || !_appConfig.Projects.Any()) {
-          throw new InvalidOperationException("No projects configured in AppConfig");
+          return;
         }
         _projectIndexModels = _appConfig.Projects.Select(p => new IndexProjectItem() { 
             Name = p.Value.Name,

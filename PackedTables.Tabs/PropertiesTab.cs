@@ -170,9 +170,8 @@ namespace PackedTableTabs {
         var propertyEditor = PropertyEditorFactory.CreateEditor(field, schema);
         if (propertyEditor != null) {        
           propertyEditor.Field = field;
-          ((UserControl)propertyEditor).Dock = DockStyle.Top;
-          ((UserControl)propertyEditor).Height = GetEditorHeight(field, schema); 
-          propertyEditor.LabelRight = 50; // Set a default label right position
+          ((UserControl)propertyEditor).Dock = DockStyle.Top;          
+          propertyEditor.LabelRight = 80; // Set a default label right position
           propertyEditor.ValueChanged += PropertyEditor_ValueChanged;
           _propertyEditors[field.Id] = propertyEditor;
           BasePanel.Controls.Add(((UserControl)propertyEditor));          

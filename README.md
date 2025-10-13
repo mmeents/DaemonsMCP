@@ -40,6 +40,8 @@ DaemonsMCP is a comprehensive C# MCP (Model Context Protocol) service that provi
 
 ### 🎨 New DaemonsConfigViewer Application
 
+![DaemonsConfigViewer Screenshot](http://mmeents.github.io/files/DaemonsConfigNodesTrees.png)
+
 **Visual Configuration Management**
 - Modern WinForms GUI for managing all DaemonsMCP settings
 - Tree-based navigation for projects and nodes
@@ -72,7 +74,7 @@ DaemonsMCP is a comprehensive C# MCP (Model Context Protocol) service that provi
 ### 📊 Enhanced Project Management
 
 **Centralized Storage Location**
-- **Windows:** `C:\\ProgramData\\DaemonsMCP`
+- **Windows:** `C:\ProgramData\DaemonsMCP`
 - **Linux/macOS:** `~/.local/share/DaemonsMCP`
 - All configuration in one place (no repository pollution)
 - Easy backup and migration
@@ -166,8 +168,8 @@ dotnet build --configuration Release
 ```
 
 **Build Output Locations:**
-- **Windows:** `DaemonsMCP\\\\bin\\\\Release\
-et9.0-windows7.0\\\\DaemonsMCP.exe`
+- **Windows:** `DaemonsMCP\bin\Release\
+et9.0-windows7.0\DaemonsMCP.exe`
 - **Linux/macOS:** `DaemonsMCP/bin/Release/net9.0/DaemonsMCP`
 
 ### Step 2: Configure Projects (5 minutes)
@@ -183,13 +185,16 @@ DaemonsMCP V2.4.0 uses PackedTables for configuration storage.
    ```
 
 2. **Add your projects** using the GUI:
-   - Click \\\"Add Project\\\" 
-   - Enter project name, description, and path
-   - Configure security settings
+   - Right Click on Projects → Add Project 
+   - Enter project name, description, and path   
    - Save
+![DaemonsConfigViewer Screenshot](http://mmeents.github.io/files/DaemonsConfigProjects.png)
+   
+3. **Configure security settings** as needed (see Security section below)
+- ![DaemonsConfigViewer Screenshot](http://mmeents.github.io/files/DaemonsConfigSettings.png)
 
 
-Default location: `C:\\\\ProgramData\\\\DaemonsMCP` (Windows) or `~/.local/share/DaemonsMCP` (Linux/macOS)
+Default location: `C:\ProgramData\DaemonsMCP` (Windows) or `~/.local/share/DaemonsMCP` (Linux/macOS)
 
 
 ### Step 3: Configure Claude Desktop (2 minutes)
@@ -198,7 +203,7 @@ Default location: `C:\\\\ProgramData\\\\DaemonsMCP` (Windows) or `~/.local/share
 
 **Windows:**
 ```
-%APPDATA%\\\\Claude\\\\claude_desktop_config.json
+%APPDATA%\Claude\claude_desktop_config.json
 ```
 
 **macOS:**
@@ -218,11 +223,11 @@ Edit or create the config file:
 **Windows:**
 ```json
 {
-  \"mcpServers\": {
-    \"daemonsmcp\": {
-      \"command\": \"C:\\\\path\\\	o\\\\DaemonsMCP\\\\DaemonsMCP\\\\bin\\\\Release\\\
-et9.0-windows7.0\\\\DaemonsMCP.exe\",
-      \"args\": []
+  "mcpServers": {
+    "daemonsmcp": {
+      "command": "C:\path\to\DaemonsMCP\DaemonsMCP\bin\Release\
+et9.0-windows7.0\DaemonsMCP.exe",
+      "args": []
     }
   }
 }
@@ -231,10 +236,10 @@ et9.0-windows7.0\\\\DaemonsMCP.exe\",
 **Linux/macOS:**
 ```json
 {
-  \"mcpServers\": {
-    \"daemonsmcp\\\": {
-      \"command\": \"/path/to/DaemonsMCP/DaemonsMCP/bin/Release/net9.0/DaemonsMCP\",
-      \"args\": []
+  "mcpServers": {
+    "daemonsmcp": {
+      "command": "/path/to/DaemonsMCP/DaemonsMCP/bin/Release/net9.0/DaemonsMCP",
+      "args": []
     }
   }
 }
@@ -310,7 +315,7 @@ DaemonsMCP V2.4.0 uses three main configuration files:
 - Custom hierarchical data
 
 **Default Location:**
-- **Windows:** `C:\\\\ProgramData\\\\DaemonsMCP`
+- **Windows:** `C:\ProgramData\DaemonsMCP`
 - **Linux/macOS:** `~/.local/share/DaemonsMCP`
 
 ### Security Configuration
@@ -465,7 +470,7 @@ ProjectRoot/.daemons/
 
 **Shared Configuration:**
 ```
-C:\\ProgramData\\DaemonsMCP\\  (Windows)
+C:\ProgramData\DaemonsMCP\  (Windows)
 ~/.local/share/DaemonsMCP   (Linux/macOS)
 ├── Projects.pktbs          # Project configurations
 ├── Settings.pktbs          # Security settings  
@@ -528,7 +533,7 @@ DaemonsMCP includes enterprise-grade security features:
 **Hot Reload Workflow:**
 1. Claude creates a node via DaemonsMCP tools
 2. ConfigViewer's `RepositoryFileWatcher` detects `Storage.pktbs` change
-3. UI shows \"Reload\" prompt in status bar
+3. UI shows "Reload" prompt in status bar
 4. User clicks reload to see updated nodes
 5. Vice versa: ConfigViewer changes immediately available to Claude
 
@@ -538,7 +543,7 @@ DaemonsMCP includes enterprise-grade security features:
 - Real-time file watching
 - Tree-based navigation
 
-### PackedTables.NET Viewer
+### [PackedTables.NET Viewer](https://github.com/mmeents/PackedTables.NET)
 
 **Direct database inspection and editing tool**
 
@@ -557,36 +562,6 @@ DaemonsMCP includes enterprise-grade security features:
 - Data recovery from backups
 - Understanding data structures
 
-### Building Custom Tools
-
-DaemonsMCP's architecture makes it easy to extend:
-
-**Adding a New MCP Tool:**
-```csharp
-[McpTool(\"my-custom-tool\")]
-public class MyCustomTool : McpToolBase
-{
-    private readonly IProjectRepository _projectRepo;
-    
-    public MyCustomTool(IProjectRepository projectRepo)
-    {
-        _projectRepo = projectRepo;
-    }
-    
-    public async Task<OperationResult<MyResult>> ExecuteAsync(MyParams parameters)
-    {
-        // Your logic here
-        return OperationResult<MyResult>.Success(result);
-    }
-}
-```
-
-**Adding to DI Container:**
-```csharp
-services.AddSingleton<MyCustomTool>();
-```
-
-That's it! MCPSharp handles the rest.
 
 ## 🚀 Available Tools
 
