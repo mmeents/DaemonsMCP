@@ -66,12 +66,9 @@ namespace DaemonsMCP.Core.Services {
         NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size
       };
 
-   //   _watcher.Created += OnFileEvent;
       _watcher.Changed += OnFileEvent;
       _watcher.Deleted += OnFileEvent;
       _watcher.Renamed += OnFileRenamed;
-
-      // Handle watcher errors gracefully
       _watcher.Error += OnWatcherError;
 
       _watcher.EnableRaisingEvents = _projectIndexModel?.IndexService?.Enabled?? false;
@@ -81,8 +78,7 @@ namespace DaemonsMCP.Core.Services {
 
     public void StopWatching() {
       if (_watcher != null) {
-        _watcher.EnableRaisingEvents = false;
-    //    _watcher.Created -= OnFileEvent;
+        _watcher.EnableRaisingEvents = false;    
         _watcher.Changed -= OnFileEvent;
         _watcher.Deleted -= OnFileEvent;
         _watcher.Renamed -= OnFileRenamed;

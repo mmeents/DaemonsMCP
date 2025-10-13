@@ -50,6 +50,7 @@ namespace DaemonsMCP.Core.Services {
         _indexRepository.OnProjectsReLoadedEvent += ProjectsReloaded;
 
         if (_appConfig.Projects == null || !_appConfig.Projects.Any()) {
+          _projectIndexModels = new List<IndexProjectItem>();
           return;
         }
         _projectIndexModels = _appConfig.Projects.Select(p => new IndexProjectItem() { 
