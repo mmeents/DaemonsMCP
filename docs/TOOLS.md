@@ -1,6 +1,29 @@
 ﻿# DaemonsMCP Tool Reference
 
-Complete reference for all DaemonsMCP V2 tools with parameters, examples, and usage patterns.
+Complete reference for all DaemonsMCP V2.4.0 tools with parameters, examples, and usage patterns.
+
+## Documentation & Metadata
+
+### `daemonsmcp:readme`
+Gets living documentation from the DaemonsMCP project's internal node structure.
+
+**Parameters:** None
+
+**Response:**
+Returns hierarchical node structure containing project documentation, architecture notes, and implementation details.
+
+**Notes:**
+- Documentation stored as nodes in `Storage.pktbs`
+- Structured hierarchically for easy navigation
+- Updated continuously as project evolves
+- Includes architecture details, data flow, and critical implementation notes
+
+**Example:**
+```
+Read the DaemonsMCP documentation to understand how it works
+```
+
+---
 
 ## File & Directory Operations
 
@@ -12,17 +35,22 @@ Lists all configured projects with metadata.
 **Response:**
 ```json
 {
-  "projects": [
+  \"projects\": [
     {
-      "Name": "ProjectName",
-      "Description": "Project description", 
-      "Path": "C:\\path\\to\\project",
-      "IndexPath": "C:\\path\\to\\project\\.daemons",
-      "BackupPath": "C:\\path\\to\\project\\.daemons\\backups"
+      \"Id\": 1,
+      \"Name\": \"ProjectName\",
+      \"Description\": \"Project description\", 
+      \"Path\": \"C:\\\\path\\\	o\\\\project\",
+      \"IndexPath\": \"C:\\\\ProgramData\\\\DaemonsMCP\"
     }
   ]
 }
 ```
+
+**Notes:**
+- V2.4.0 uses centralized IndexPath in ProgramData/DaemonsMCP
+- Projects configured via DaemonsConfigViewer or stored in Projects.pktbs
+- All projects share same index location for efficiency
 
 **Example:**
 ```
@@ -37,7 +65,7 @@ Lists files in a project directory with optional filtering.
 **Parameters:**
 - `projectName` (required): The configured project name
 - `path` (optional): Directory path relative to project root (default: root)
-- `filter` (optional): File pattern filter (e.g., "*.cs", "*.json")
+- `filter` (optional): File pattern filter (e.g., \"*.cs\", \"*.json\")
 
 **Example:**
 ```
@@ -71,13 +99,13 @@ Reads file content with complete metadata.
 **Response:**
 ```json
 {
-  "FileName": "example.cs",
-  "Path": "path/to/example.cs", 
-  "Size": 1024,
-  "ContentType": "text/plain",
-  "Encoding": "UTF-8",
-  "Content": "file content here...",
-  "IsBinary": false
+  \"FileName\": \"example.cs\",
+  \"Path\": \"path/to/example.cs\", 
+  \"Size\": 1024,
+  \"ContentType\": \"text/plain\",
+  \"Encoding\": \"UTF-8\",
+  \"Content\": \"file content here...\",
+  \"IsBinary\": false
 }
 ```
 
@@ -97,7 +125,7 @@ Creates a new file with specified content.
 - `content` (required): File content to write
 
 **Security Notes:**
-- File extension must be in `allowedExtensions` list
+- File extension must be in `allowedExtensions` list (configured in Settings.pktbs)
 - Path cannot be in `writeProtectedPaths`
 - Content size must be under `maxFileWriteSize` limit
 - Parent directories created automatically if needed
@@ -120,6 +148,7 @@ Updates an existing file with new content.
 **Security Notes:**
 - Automatic backup created before update
 - Same security restrictions as create operations
+- Backups stored in project's `.daemons/backups/` directory
 
 **Example:**
 ```
@@ -156,7 +185,7 @@ Creates a new directory.
 
 **Example:**
 ```
-Create a new directory called "Utilities" in the project
+Create a new directory called \"Utilities\" in the project
 ```
 
 ---
@@ -189,10 +218,11 @@ Indexes and analyzes C# code structure across projects.
 - `forceRebuild` (optional): Force complete rebuild vs incremental update (default: false)
 
 **Notes:**
-- Uses Microsoft.CodeAnalysis for parsing
+- Uses Microsoft.CodeAnalysis (Roslyn) for parsing
 - Indexes classes, methods, namespaces, and relationships
-- File watchers automatically trigger reindexing on changes
-- Index stored in `.daemons/*.pktbs` files
+- File watchers automatically trigger reindexing on changes (5-second debounce)
+- Index stored in centralized location: `C:\\ProgramData\\DaemonsMCP\\{ProjectName}_index.pktbs`
+- Background processing with queue management for efficiency
 
 **Example:**
 ```
@@ -209,13 +239,18 @@ Gets the current status of the indexing service.
 **Response:**
 ```json
 {
-  "Enabled": true,
-  "TotalClasses": 45,
-  "TotalMethods": 234,
-  "QueueCount": 0,
-  "LastUpdate": "2025-09-14T20:30:15Z"
+  \"Enabled\": true,
+  \"TotalClasses\": 45,
+  \"TotalMethods\": 234,
+  \"QueueCount\": 0,
+  \"LastUpdate\": \"2025-10-05T20:30:15Z\"
 }
 ```
+
+**Notes:**
+- `QueueCount` shows files waiting to be indexed
+- Queue processed in batches every 5 seconds
+- FileSystemWatcher monitors for changes automatically
 
 **Example:**
 ```
@@ -229,6 +264,11 @@ Enables or disables the indexing service.
 
 **Parameters:**
 - `enableIndex` (required): True to enable, false to disable
+
+**Notes:**
+- Disabling stops file watching and index updates
+- Useful for bulk file operations to reduce overhead
+- Re-enabling triggers incremental update
 
 **Example:**
 ```
@@ -252,17 +292,17 @@ Lists indexed classes with pagination and filtering.
 **Response:**
 ```json
 {
-  "classes": [
+  \"classes\": [
     {
-      "ClassId": 1,
-      "ClassName": "ProjectService",
-      "Namespace": "DaemonsMCP.Core.Services",
-      "FileNamePath": "DaemonsMCP.Core/Services/ProjectService.cs"
+      \"ClassId\": 1,
+      \"ClassName\": \"ProjectService\",
+      \"Namespace\": \"DaemonsMCP.Core.Services\",
+      \"FileNamePath\": \"DaemonsMCP.Core/Services/ProjectService.cs\"
     }
   ],
-  "totalCount": 45,
-  "pageNo": 1,
-  "itemsPerPage": 20
+  \"totalCount\": 45,
+  \"pageNo\": 1,
+  \"itemsPerPage\": 20
 }
 ```
 
@@ -283,14 +323,19 @@ Gets detailed class information and content.
 **Response:**
 ```json
 {
-  "ClassId": 1,
-  "ClassName": "ProjectService", 
-  "Namespace": "DaemonsMCP.Core.Services",
-  "FileNamePath": "DaemonsMCP.Core/Services/ProjectService.cs",
-  "Content": "complete class source code...",
-  "UsesClauseAdd": "additional using statements if needed"
+  \"ClassId\": 1,
+  \"ClassName\": \"ProjectService\", 
+  \"Namespace\": \"DaemonsMCP.Core.Services\",
+  \"FileNamePath\": \"DaemonsMCP.Core/Services/ProjectService.cs\",
+  \"Content\": \"complete class source code...\",
+  \"UsesClauseAdd\": \"additional using statements if needed\"
 }
 ```
+
+**Notes:**
+- Content includes complete class with XML documentation
+- UsesClauseAdd suggests additional using statements for dependencies
+- Uses smart boundary detection to capture entire class including docs
 
 **Example:**
 ```
@@ -314,7 +359,7 @@ Lists methods within classes with pagination and filtering.
 
 **Example:**
 ```
-List all methods in classes containing "Service" in their name, first 20 results
+List all methods in classes containing \"Service\" in their name, first 20 results
 ```
 
 ---
@@ -329,14 +374,14 @@ Gets detailed method implementation.
 **Response:**
 ```json
 {
-  "MethodId": 15,
-  "MethodName": "ValidateProjectPath",
-  "ClassId": 1,
-  "ClassName": "ProjectService",
-  "Namespace": "DaemonsMCP.Core.Services", 
-  "FileNamePath": "DaemonsMCP.Core/Services/ProjectService.cs",
-  "Content": "complete method source code...",
-  "UsesClauseAdd": "additional using statements if needed"
+  \"MethodId\": 15,
+  \"MethodName\": \"ValidateProjectPath\",
+  \"ClassId\": 1,
+  \"ClassName\": \"ProjectService\",
+  \"Namespace\": \"DaemonsMCP.Core.Services\", 
+  \"FileNamePath\": \"DaemonsMCP.Core/Services/ProjectService.cs\",
+  \"Content\": \"complete method source code...\",
+  \"UsesClauseAdd\": \"additional using statements if needed\"
 }
 ```
 
@@ -361,6 +406,11 @@ Adds a new class or updates an existing one.
   - `UsesClauseAdd`: Additional using statements
 
 **⚠️ Critical:** Use **PascalCase** property names (ClassId, not classId) to avoid serialization errors.
+
+**Notes:**
+- Automatically creates file if it doesn't exist
+- Respects security settings for file operations
+- Triggers automatic reindexing via FileSystemWatcher
 
 **Example:**
 ```
@@ -415,22 +465,27 @@ Lists hierarchical project nodes with filtering and depth control.
 ```json
 [
   {
-    "Id": 1,
-    "ParentId": 0,
-    "Name": "Documentation Root",
-    "Details": "Root documentation node",
-    "TypeId": 5,
-    "TypeName": "Documentation",
-    "StatusId": 10,
-    "Status": "Active",
-    "Rank": 1,
-    "Created": "2025-09-14T20:00:00Z",
-    "Modified": "2025-09-14T20:00:00Z",
-    "Completed": null,
-    "Subnodes": []
+    \"Id\": 1,
+    \"ParentId\": 0,
+    \"Name\": \"Documentation Root\",
+    \"Details\": \"Root documentation node\",
+    \"TypeId\": 5,
+    \"TypeName\": \"Documentation\",
+    \"StatusId\": 10,
+    \"Status\": \"Active\",
+    \"Rank\": 1,
+    \"Created\": \"2025-10-05T20:00:00Z\",
+    \"Modified\": \"2025-10-05T20:00:00Z\",
+    \"Completed\": null,
+    \"Subnodes\": []
   }
 ]
 ```
+
+**Notes:**
+- Nodes stored in centralized `Storage.pktbs`
+- Changes detected by RepositoryFileWatcher for hot reload
+- DaemonsConfigViewer shows live updates when nodes change
 
 **Example:**
 ```
@@ -466,6 +521,11 @@ Creates or updates a node and its subtree.
   - `Rank`: Sort order within parent
   - `Subnodes`: Array of child nodes (optional)
 
+**Notes:**
+- Saves trigger RepositoryFileWatcher in DaemonsConfigViewer
+- ConfigViewer shows reload prompt when changes detected
+- Supports recursive node creation with subnodes
+
 **Example:**
 ```
 Create a new documentation section for the API reference
@@ -478,6 +538,10 @@ Creates or updates multiple nodes in batch.
 
 **Parameters:**
 - `nodes` (required): Array of node objects
+
+**Notes:**
+- More efficient than individual updates for bulk operations
+- Single save operation triggers one hot reload event
 
 **Example:**
 ```
@@ -513,14 +577,19 @@ Lists available node types for classification.
 ```json
 [
   {
-    "Id": 1,
-    "Name": "Documentation",
-    "Description": "Documentation nodes",
-    "TypeEnum": 1,
-    "ParentId": 0
+    \"Id\": 1,
+    \"Name\": \"Documentation\",
+    \"Description\": \"Documentation nodes\",
+    \"TypeEnum\": 1,
+    \"ParentId\": 0
   }
 ]
 ```
+
+**Notes:**
+- Types stored in `Storage.pktbs`
+- Configurable via DaemonsConfigViewer or this tool
+- Supports hierarchical type structures
 
 ---
 
@@ -530,12 +599,30 @@ Creates or updates node type definitions.
 **Parameters:**
 - `type` (required): ItemType object with Id, Name, Description, TypeEnum, ParentId
 
+**Example:**
+```
+Create a new node type called \"Feature Request\"
+```
+
 ---
 
 ### `daemonsmcp:list-status-types`
 Lists available status types for nodes.
 
 **Parameters:** None
+
+**Response:**
+```json
+[
+  {
+    \"Id\": 1,
+    \"Name\": \"Not Started\",
+    \"Description\": \"Work not yet begun\",
+    \"TypeEnum\": 1,
+    \"ParentId\": 0
+  }
+]
+```
 
 ---
 
@@ -544,6 +631,23 @@ Creates or updates status type definitions.
 
 **Parameters:**
 - `status` (required): StatusType object with Id, Name, Description, TypeEnum, ParentId
+
+**Example:**
+```
+Create a new status type called \"In Review\"
+```
+
+---
+
+### `daemonsmcp:save-project-repo`
+Manually saves the project repository data to disk.
+
+**Parameters:** None
+
+**Notes:**
+- Normally called automatically after updates
+- Use for manual checkpoint/backup operations
+- Saves to `Storage.pktbs` in centralized location
 
 ---
 
@@ -559,17 +663,18 @@ Creates a todo list as a hierarchical node structure.
 **Notes:**
 - Creates or finds a todo list node by name
 - Adds items as child nodes under the list
-- Items start with "Not Started" status
+- Items start with \"Not Started\" status
+- Lists stored under \"Todo Root\" node
 
 **Example:**
 ```
-Create a todo list called "Sprint Planning" with tasks for database design, API implementation, and testing
+Create a todo list called \"Sprint Planning\" with tasks for database design, API implementation, and testing
 ```
 
 ---
 
 ### `daemonsmcp:get-next-todo`
-Gets the next available todo item and marks it as "In Progress".
+Gets the next available todo item and marks it as \"In Progress\".
 
 **Parameters:**
 - `listName` (required): Name of the todo list to search
@@ -577,17 +682,22 @@ Gets the next available todo item and marks it as "In Progress".
 **Response:**
 ```json
 {
-  "Id": 25,
-  "Name": "Implement user authentication",
-  "Details": "Add OAuth2 integration with JWT tokens",
-  "Status": "In Progress",
-  "Started": "2025-09-14T22:30:00Z"
+  \"Id\": 25,
+  \"Name\": \"Implement user authentication\",
+  \"Details\": \"Add OAuth2 integration with JWT tokens\",
+  \"Status\": \"In Progress\",
+  \"Started\": \"2025-10-05T22:30:00Z\"
 }
 ```
 
+**Notes:**
+- Automatically updates status to \"In Progress\"
+- Returns null if no pending items found
+- Searches recursively through todo list tree
+
 **Example:**
 ```
-Get the next task from the "Sprint Planning" todo list
+Get the next task from the \"Sprint Planning\" todo list
 ```
 
 ---
@@ -599,7 +709,7 @@ Marks a todo item as completed.
 - `itemId` (required): Todo item node ID
 
 **Notes:**
-- Sets status to "Complete"
+- Sets status to \"Complete\"
 - Records completion timestamp
 - Item remains in list for tracking
 
@@ -617,7 +727,7 @@ Marks a todo item as cancelled.
 - `itemId` (required): Todo item node ID
 
 **Notes:**
-- Sets status to "Cancelled"
+- Sets status to \"Cancelled\"
 - Records cancellation timestamp
 - Item remains in list for tracking
 
@@ -629,10 +739,14 @@ Cancel todo item 30 - it's no longer needed
 ---
 
 ### `daemonsmcp:restore-todo`
-Resets a todo item back to "Not Started" status.
+Resets a todo item back to \"Not Started\" status.
 
 **Parameters:**
 - `itemId` (required): Todo item node ID
+
+**Notes:**
+- Clears completion/cancellation timestamp
+- Useful for recurring tasks or when work needs redoing
 
 **Example:**
 ```
@@ -641,14 +755,49 @@ Reset todo item 25 back to not started - we need to redo this task
 
 ---
 
-### `daemonsmcp:save-project-repo`
-Manually saves the project repository data to disk.
+## V2.4.0 New Features
 
-**Parameters:** None
+### Hot Reload Support
+All operations that modify `Storage.pktbs`, `Projects.pktbs`, or `Settings.pktbs` trigger RepositoryFileWatcher events:
 
-**Notes:**
-- Normally called automatically after updates
-- Use for manual checkpoint/backup operations
+- **DaemonsConfigViewer Detection**: Shows reload prompt when Claude makes changes
+- **Bidirectional Updates**: Changes in ConfigViewer immediately available to DaemonsMCP
+- **500ms Debounce**: Prevents excessive reloads during batch operations
+- **Visual Indicators**: ConfigViewer shows when external changes detected
+
+### Centralized Configuration
+V2.4.0 moved from per-project `.daemons` folders to centralized storage:
+
+**Previous (V2.x):**
+```
+ProjectRoot/.daemons/
+├── index.pktbs
+└── backups/
+```
+
+**Current (V2.4.0):**
+```
+C:\\ProgramData\\DaemonsMCP\\  (Windows)
+~/.local/share/DaemonsMCP   (Linux/macOS)
+├── Projects.pktbs          # All project configs
+├── Settings.pktbs          # Security settings
+├── Storage.pktbs           # All nodes/todos
+└── ProjectName_index.pktbs # Code intelligence per project
+```
+
+**Benefits:**
+- No repository pollution
+- Single backup location
+- Easy configuration migration
+- Shared settings across projects
+
+### PackedTables Integration
+All configuration now uses PackedTables.NET binary format:
+
+- **Faster**: 3x faster loading vs JSON
+- **Smaller**: More efficient binary serialization
+- **Structured**: Proper schema and relationships
+- **Tooling**: Direct editing via PackedTables viewer
 
 ---
 
@@ -665,21 +814,94 @@ List the first 20 classes in the project, page 1
 2. Use `get-class` to examine current implementation  
 3. Use `add-update-class` or `add-update-method` for changes
 4. Backups are created automatically
+5. Index updates automatically via FileSystemWatcher
 
 ### Project Organization
 1. Use nodes for documentation and project structure
 2. Use todo lists for task management
 3. Use status and type systems for organization
 4. Filter and search using contains matching
+5. Leverage hot reload for cross-tool collaboration
 
 ### Security Considerations
-- All write operations respect security configuration
+- All write operations respect security configuration in `Settings.pktbs`
 - Automatic backups protect against mistakes
 - File type filtering prevents dangerous operations
 - Path validation prevents directory traversal
+- Size limits prevent context overflow and DoS
 
 ### Performance Tips
 - Use appropriate page sizes (20 items recommended)
 - Use filters to narrow results
-- Index service runs automatically in background
-- File watchers trigger incremental updates
+- Index service runs automatically in background (5-second debounce)
+- File watchers trigger incremental updates, not full rebuilds
+- Disable indexing during bulk file operations for better performance
+
+### Cross-Application Workflow
+1. **Configure in DaemonsConfigViewer**: Add projects, set security
+2. **Work with Claude**: Use DaemonsMCP tools to code and organize
+3. **Review in ConfigViewer**: See changes, navigate node trees
+4. **Hot Reload**: Both tools stay in sync automatically
+
+---
+
+## Troubleshooting
+
+### Empty Results from list-classes or list-class-methods
+**Problem:** Queries return empty arrays  
+**Solution:** Always specify `pageNo` and `itemsPerPage` explicitly:
+```
+List classes in DaemonsMCP project, page 1, 20 items per page
+```
+
+### Write Operations Failing
+**Problem:** File creation/updates rejected  
+**Checks:**
+1. File extension in `Settings.pktbs` allowedExtensions?
+2. Path not in writeProtectedPaths?
+3. Write operations enabled in Settings?
+4. File size under maxFileWriteSize limit?
+
+### Index Not Updating
+**Problem:** Code changes not reflected in searches  
+**Solutions:**
+1. Check `status-index` - is indexer enabled?
+2. Wait 5 seconds for debounce to complete
+3. Use `resync-index` with `forceRebuild: true` for full refresh
+
+### ConfigViewer Not Showing Changes
+**Problem:** Claude made changes but ConfigViewer doesn't update  
+**Solution:** Click the \"Reload\" button in ConfigViewer status bar when prompted
+
+### Serialization Errors
+**Problem:** \"Serialization failed\" errors  
+**Solution:** Use PascalCase property names in method/class content objects (ClassId not classId)
+
+---
+
+## Migration from V2.x
+
+If upgrading from DaemonsMCP V2.x:
+
+1. **Backup your data**: Copy `.daemons` folders from all projects
+2. **Run DaemonsConfigViewer**: Use \"Import\" feature to load old `daemonsmcp.json`
+3. **Verify Projects**: Check all projects loaded correctly in ConfigViewer
+4. **Update Claude Desktop config**: Point to new V2.4.0 executable
+5. **Test**: Run `list-projects` to confirm configuration
+6. **Clean up**: Old `.daemons` folders in projects can be deleted after verification
+
+**Breaking Changes:**
+- Configuration format changed from JSON to PackedTables
+- Index location moved from project/.daemons to centralized ProgramData
+- Manual reconfiguration required (import feature available)
+
+---
+
+## API Versioning
+
+DaemonsMCP follows semantic versioning:
+- **Major** (2): Breaking API changes
+- **Minor** (4): New features, backward compatible  
+- **Patch** (0): Bug fixes, performance improvements
+
+V2.4.0 is backward compatible with V2.x tool calls but requires configuration migration.

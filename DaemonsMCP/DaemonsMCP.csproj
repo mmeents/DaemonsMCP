@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DaemonsMCP.Core\DaemonsMCP.Core.csproj" />
+    <ProjectReference Include="..\PackedTables.Tabs\PackedTableTabs.csproj" />
   </ItemGroup>
 
   <ItemGroup>

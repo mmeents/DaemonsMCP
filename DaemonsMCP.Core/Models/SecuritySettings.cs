@@ -18,21 +18,29 @@ namespace DaemonsMCP.Core.Models {
     {
             ".exe", ".dll", ".bin", ".so", ".dylib"
         };
-
-    [JsonPropertyName("maxFileSize")]
-    public string MaxFileSize { get; set; } = "10MB";
-
-    [JsonPropertyName("maxDirectoryDepth")]
-    public int MaxDirectoryDepth { get; set; } = 10;
-
-    [JsonPropertyName("allowWrite")]
-    public bool AllowWrite { get; set; } = false;
-
+    
     [JsonPropertyName("writeProtectedPaths")]
     public List<string> WriteProtectedPaths { get; set; } = new()
     {
             "etc", "var", "usr/local", "bin", "sbin"
     };
+
+    [JsonPropertyName("BlockedFileNames")]
+    public List<string> BlockedFileNames { get; set; } = new()
+    {
+            "appsettings.json","appsettings.Development.json", "appsettings.Production.json","web.config", 
+            "app.config","secrets.json", "user-secrets.json", ".gitignore","database.db",
+            "id_rsa", "id_ed25519", "id_rsa.pub", "id_ed25519.pub"
+        };
+
+    [JsonPropertyName("allowWrite")]
+    public bool AllowWrite { get; set; } = false;
+
+
+    [JsonPropertyName("maxFileSize")]
+    public string MaxFileSize { get; set; } = "10MB";
+
+
 
     [JsonPropertyName("maxFileWriteSize")]
     public string MaxFileWriteSize { get; set; } = "5MB";

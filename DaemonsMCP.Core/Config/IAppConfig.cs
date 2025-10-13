@@ -11,7 +11,9 @@ namespace DaemonsMCP.Core.Config {
     IReadOnlyDictionary<string, ProjectModel> Projects { get; }
     bool IsConfigured { get; }
     SecuritySettings Security { get; }
-    void Reload(string? configPath);
+
+    event Action OnProjectsLoadedEvent;
+
   }
 
 }

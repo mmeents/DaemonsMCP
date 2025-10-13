@@ -12,15 +12,14 @@ using System.Xml.Linq;
 namespace DaemonsMCP.Core.Extensions {
   public static class Cx {
     public const string AppName = "DaemonsMCP";
-    public const string AppVersion = "0.1.0";
-    public const string CONFIG_FILE_NAME = "daemonsmcp.json";
+    public const string AppVersion = "2.4.0";
+
+    public const string CONFIG_FILE_NAME = "daemonsmcp.json"; // not used anymore. You could if you downgrade from App2Config back to AppConfig in
+                                                              // program.cs.  But then the Viewer app is not going to work as it uses App2Config.
     public const bool IsDebug = true;
 
     public const int IndexTimerIntervalSec = 10; // seconds
     public const int IndexSchIntervalSec = 3; // seconds
-
-    public const string DaemonsFolderName = ".daemons";
-    public const string BackupFolderName = "backups";
 
     // Tools Commands    
     public const string ToolListMethodsCmd = "tools/list";
@@ -191,8 +190,32 @@ namespace DaemonsMCP.Core.Extensions {
 
     // Error Messages
     public const string InvalidSkippingProject = "Skipping invalid project configuration";
-    public const string ErrorNoConfig = "AppConfig cannot be null";    
+    public const string ErrorNoConfig = "AppConfig cannot be null";
+
+    public const string SettingsTblFileName = "SettingsTbl.pktbs";
+    public const string SettingsTbl = "SettingsTbl";
+    public const string SettingIdCol = "Id"; // primary key
+    public const string SettingNameCol = "Name"; // unique
+    public const string SettingValueCol = "Value"; // unique
+
+    public const string AllowedExtensionsSetting = "AllowedExtensions";
+    public const string BlockedExtensionsSetting = "BlockedExtensions"; 
+    public const string BlockedFileNameSettings = "BlockedFileNames";
+    public const string BlockedFolderSettings = "BlockedFolderNames"; 
+    public const string MaxFileSizeSetting = "MaxFileSize"; // e.g. 10MB
+    public const string MaxFileWriteSizeSetting = "MaxFileWriteSize"; // e.g. 5MB
+    public const string AllowFileWritesSetting = "AllowFileWrites"; // true/false
+    public const string LogLevelSetting = "LogLevel"; // e.g. Information, Debug, Error
+    public const string NodesFilePathSetting = "NodesFilePath"; // path to Nodes file
+
+
     public static string ClassServiceErrorMsg(Exception ex) => $"Error: {ex.Message}. Please Stop and report the error to end user.";
+    public const string ProjectsTblFileName = "projects.pktbs";
+    public const string ProjectsTbl = "Projects";
+    public const string ProjectIdCol = "Id"; // primary key
+    public const string ProjectNameCol = "Name"; // unique
+    public const string ProjectPathCol = "Path"; // unique
+    public const string ProjectDescriptionCol = "Description";
 
     // Storage and Process Management
     public const string TypesTbl = "Types";

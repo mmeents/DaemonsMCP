@@ -19,6 +19,8 @@ namespace DaemonsMCP.Tests.Services {
     private readonly ISecurityService _securityService;
     private readonly IIndexRepository _indexRepository;
     private readonly IIndexService _indexService;
+    private readonly ISettingsRepository _settingsRepository;
+    private readonly IProjectRepository _projectRepository;
     public IndexServiceTests() {
       var logsPath = Path.Combine("C:\\MCPSandbox", "logs");
       Directory.CreateDirectory(logsPath);      
@@ -40,8 +42,10 @@ namespace DaemonsMCP.Tests.Services {
 
       Log.Information("🚀 === IndexServiceTests started ===");
       Log.Information("Test logs will be written to: {LogPath}", logsPath);
+      _projectRepository = new ProjectRepository(_loggerFactory);
+      _settingsRepository = new SettingsRepository(_loggerFactory);
 
-      _config = new AppConfig(_loggerFactory);        
+      _config = new App2Config(_loggerFactory, _projectRepository, _settingsRepository );        
       _securityService = new SecurityService(_loggerFactory, _config);
       _validationService = new ValidationService(_config, _securityService);
       _indexRepository = new IndexRepository(_loggerFactory, _config, _validationService,_securityService);

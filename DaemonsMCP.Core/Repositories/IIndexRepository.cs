@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 namespace DaemonsMCP.Core.Repositories {
 
   public interface IIndexRepository {
+
+    public event Action OnProjectsReLoadedEvent;
     public ProjectIndexModel? GetProjectIndex(string projectName);
     public Task<List<ClassListing>> GetClassListingsAsync(string projectName, int pageNo, int itemsPerPage, string? namespaceFilter = null, string? classNameFilter = null);
     public Task<ClassContent> GetClassContentAsync(string projectName, int classId);

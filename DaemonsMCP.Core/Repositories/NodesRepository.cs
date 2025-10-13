@@ -1,5 +1,7 @@
 ﻿using DaemonsMCP.Core.Config;
 using DaemonsMCP.Core.Extensions;
+using DaemonsMCP.Core.Models;
+using DaemonsMCP.Core.Services;
 using Microsoft;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
@@ -18,11 +20,12 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace DaemonsMCP.Core.Models {
-  public class NodesRepo {
+namespace DaemonsMCP.Core.Repositories {
+  public class NodesRepository : INodesRepository, IDisposable {
     #region private vars
+    private volatile bool _isDisposed = false;
     private IAppConfig _config;
-    private ILogger<NodesRepo> _logger;    
+    private ILogger<NodesRepository> _logger;    
 
     private int nullTypeId = 0;
     private int categoriesTypeId = 0;
@@ -31,43 +34,36 @@ namespace DaemonsMCP.Core.Models {
     private int todoTypeId = 0;
 
     private int todoRootNodeId = 0;
-
+    public int notStartedStatusId { get; private set; } = 0;
     public string StoragePath { get; set; } = string.Empty;
     public string StorageFileName { get; set; } = string.Empty;
     public PackedTableSet StorageTables { get; set; } = new PackedTableSet();
     public TableModel TypesTable { get; set; }
     public TableModel ItemsTable { get; set; }
+    public RepositoryFileWatcher _watcher;
     #endregion
-    public NodesRepo( IAppConfig appConfig, ILoggerFactory loggerFactory) {      
+    public NodesRepository( IAppConfig appConfig, ILoggerFactory loggerFactory) {      
       _config = appConfig;
-      _logger = loggerFactory.CreateLogger<NodesRepo>() ?? throw new ArgumentNullException(nameof(loggerFactory));      
+      _logger = loggerFactory.CreateLogger<NodesRepository>() ?? throw new ArgumentNullException(nameof(loggerFactory));      
       StoragePath = _config.Version.NodesFilePath;
-      StorageFileName = System.IO.Path.GetFullPath(System.IO.Path.Combine(_config.Version.NodesFilePath, $"Storage.pktbs"));
-      if (!System.IO.Directory.Exists(StoragePath)) {
-        System.IO.Directory.CreateDirectory(StoragePath);
+      StorageFileName = Path.GetFullPath(Path.Combine(_config.Version.NodesFilePath, $"Storage.pktbs"));
+      if (!Directory.Exists(StoragePath)) {
+        Directory.CreateDirectory(StoragePath);
       }
+      Load();
 
-      StorageTables.LoadFromFile(StorageFileName);  // if file does not exist it will just be empty tableset.
-      
+      _watcher = new RepositoryFileWatcher(
+        StorageFileName,
+        () => Load(),
+        loggerFactory
+      );
+    }
 
-      TypesTable = StorageTables[Cx.TypesTbl] ?? MakeTypesTable();
-      ItemsTable = StorageTables[Cx.ItemsTbl] ?? StorageTables.MakeItemsTable();
-
-      ItemsTable.AutoValidate = false;
-
-      if (nullTypeId == 0) { // if TypesTable loads from file MakeItemsTable will not run, these need to be set.
-        nullTypeId = TypesTable.TypesByName(Cx.TypeNone);
-        categoriesTypeId = TypesTable.TypesByName(Cx.TypeInternalRoot);
-        statusTypesId = TypesTable.TypesByName(Cx.TypeStatusTypes);
-        itemTypesId = TypesTable.TypesByName(Cx.TypeItemTypes);
-        todoTypeId = TypesTable.TypesByName(Cx.TypeTodo);
-
-        todoRootNodeId = ItemsTable.GetTodoRootId(todoTypeId);
-      } else {  //  else save tables to file.
-        WriteDocumentation();
-        WriteStorage();
-      }
-
+    public void Dispose() {
+      if (_isDisposed) return;
+      _logger.LogInformation("🛑 Project Repo Disposing.");
+      _isDisposed = true;
+      _watcher.Dispose();
     }
 
     private void WriteDocumentation() {
@@ -77,7 +73,7 @@ namespace DaemonsMCP.Core.Models {
       
       //      int setupId = TypesTable.AddType(itemTypesId, 0, "Lore", "As legend would have it.");
 
-      int notStartedId = TypesTable.AddType(statusTypesId, 1, Cx.StatusStart, "The item has not been started.");
+      notStartedStatusId = TypesTable.AddType(statusTypesId, 1, Cx.StatusStart, "The item has not been started.");
       int inProgressId = TypesTable.AddType(statusTypesId, 2, Cx.StatusInProgress, "The item is currently being worked on.");      
       int completeTypeId = TypesTable.AddType(statusTypesId, 3, Cx.StatusComplete, "The item is finished.");
       TypesTable.AddType(statusTypesId, 4, "On Hold", "The item is paused or waiting on something.");
@@ -148,6 +144,39 @@ namespace DaemonsMCP.Core.Models {
 
     }
 
+    public event Action OnNodesLoadedEvent = delegate { };
+    private void DoOnNodesLoadedEvent() {
+      if (OnNodesLoadedEvent != null) {
+        OnNodesLoadedEvent();
+      }
+    }
+
+    public void Load() {
+      nullTypeId = 0;
+      StorageTables = new PackedTableSet();
+      StorageTables.LoadFromFile(StorageFileName);  // if file does not exist it will just be empty tableset.
+
+      TypesTable = StorageTables[Cx.TypesTbl] ?? MakeTypesTable();
+      ItemsTable = StorageTables[Cx.ItemsTbl] ?? StorageTables.MakeItemsTable();
+
+      ItemsTable.AutoValidate = false;      
+
+      if (nullTypeId == 0) { // if TypesTable loads from file MakeItemsTable will not run, these need to be set.
+        nullTypeId = TypesTable.TypesByName(Cx.TypeNone);
+        categoriesTypeId = TypesTable.TypesByName(Cx.TypeInternalRoot);
+        statusTypesId = TypesTable.TypesByName(Cx.TypeStatusTypes);
+        itemTypesId = TypesTable.TypesByName(Cx.TypeItemTypes);
+        todoTypeId = TypesTable.TypesByName(Cx.TypeTodo);
+
+        todoRootNodeId = ItemsTable.GetTodoRootId(todoTypeId);
+        notStartedStatusId = TypesTable.TypesByName(Cx.StatusStart);
+      } else {  
+        WriteDocumentation();
+      }
+
+      DoOnNodesLoadedEvent();
+    }
+
     public void WriteStorage() {
       if (StorageTables != null && StorageTables.TableCount > 0) {
         StorageTables.SaveToFile(StorageFileName);
@@ -214,11 +243,11 @@ namespace DaemonsMCP.Core.Models {
     }
 
     public void UpdateTypeItem(BaseTypeModel typeItem) {
-      var hasRow = this.TypesTable.Rows.ContainsKey(typeItem.Id);
+      var hasRow = TypesTable.Rows.ContainsKey(typeItem.Id);
       if (!hasRow) {
         throw new ArgumentException($"Type with id {typeItem.Id} does not exist.");
       }
-      this.TypesTable.FindFirst(Cx.TypeIdCol, typeItem.Id);
+      TypesTable.FindFirst(Cx.TypeIdCol, typeItem.Id);
       TypesTable.Edit();
       var row = TypesTable.Current;
       row[Cx.TypeParentCol].Value = typeItem.ParentId;
@@ -396,13 +425,13 @@ namespace DaemonsMCP.Core.Models {
     }
 
     public void UpdateItem(BaseItemModel item) {
-      var hasRow = this.ItemsTable.Rows.ContainsKey(item.Id);
+      var hasRow = ItemsTable.Rows.ContainsKey(item.Id);
       if (!hasRow) {
         throw new ArgumentException($"Item with Id {item.Id} does not exist");
       }
 
-      this.ItemsTable.FindFirst(Cx.ItemIdCol, item.Id);
-      this.ItemsTable.Edit();
+      ItemsTable.FindFirst(Cx.ItemIdCol, item.Id);
+      ItemsTable.Edit();
       var row = ItemsTable.Current;
       row[Cx.ItemParentCol].Value = item.ParentId;
       row[Cx.ItemTypeIdCol].Value = item.TypeId;
@@ -434,10 +463,10 @@ namespace DaemonsMCP.Core.Models {
           string typeName2 = GetTypeNameById(typeId) ?? "";
           string name = row[Cx.ItemNameCol].ValueString;
           string details = row[Cx.ItemDetailsCol].ValueString;
-          if ((typeFilter != null && typeName2.Contains(typeFilter, StringComparison.OrdinalIgnoreCase)) ||
-              (statusFilter != null && status2.Contains(statusFilter, StringComparison.OrdinalIgnoreCase)) ||
-              (nameContains != null && name.Contains(nameContains, StringComparison.OrdinalIgnoreCase)) ||
-              (detailsContains != null && details.Contains(detailsContains, StringComparison.OrdinalIgnoreCase)) ||
+          if (typeFilter != null && typeName2.Contains(typeFilter, StringComparison.OrdinalIgnoreCase) ||
+              statusFilter != null && status2.Contains(statusFilter, StringComparison.OrdinalIgnoreCase) ||
+              nameContains != null && name.Contains(nameContains, StringComparison.OrdinalIgnoreCase) ||
+              detailsContains != null && details.Contains(detailsContains, StringComparison.OrdinalIgnoreCase) ||
               (typeFilter == null && statusFilter == null && nameContains == null && detailsContains == null)
               ) {
             var NodesC = GetNodesById(row.Id, maxDepth - 1, statusFilter, typeFilter, nameContains, detailsContains);
@@ -458,7 +487,9 @@ namespace DaemonsMCP.Core.Models {
           nodes.Add(node);
         }
       } else {
-        var rootItems = ItemsTable.Rows.Where(kvp => kvp.Value[Cx.ItemParentCol].Value.AsInt32() == 0).Select(kvp => kvp.Value);
+        var rootItems = ItemsTable.Rows.Where(kvp => kvp.Value[Cx.ItemParentCol].Value.AsInt32() == 0)
+          .OrderBy(kvp => kvp.Value[Cx.ItemRankCol].Value.AsInt32())
+          .Select(kvp => kvp.Value);
         foreach (var row in rootItems) {
           int statusId = (int)row[Cx.ItemStatusCol].Value;
           int typeId = (int)row[Cx.ItemTypeIdCol].Value;
@@ -466,10 +497,10 @@ namespace DaemonsMCP.Core.Models {
           string typeName = GetTypeNameById(typeId) ?? "";
           string name = row[Cx.ItemNameCol].ValueString ?? "";
           string details = row[Cx.ItemDetailsCol].ValueString ?? "";
-          if ((typeFilter != null && typeName.Contains(typeFilter, StringComparison.OrdinalIgnoreCase)) ||
-              (statusFilter != null && status.Contains(statusFilter, StringComparison.OrdinalIgnoreCase)) ||
-              (nameContains != null && name.Contains(nameContains, StringComparison.OrdinalIgnoreCase)) ||
-              (detailsContains != null && details.Contains(detailsContains, StringComparison.OrdinalIgnoreCase)) ||
+          if (typeFilter != null && typeName.Contains(typeFilter, StringComparison.OrdinalIgnoreCase) ||
+              statusFilter != null && status.Contains(statusFilter, StringComparison.OrdinalIgnoreCase) ||
+              nameContains != null && name.Contains(nameContains, StringComparison.OrdinalIgnoreCase) ||
+              detailsContains != null && details.Contains(detailsContains, StringComparison.OrdinalIgnoreCase) ||
               (typeFilter == null && statusFilter == null && nameContains == null && detailsContains == null)
               ) {
             var node = GetNodesById(row.Id, maxDepth, statusFilter, typeFilter, nameContains, detailsContains);

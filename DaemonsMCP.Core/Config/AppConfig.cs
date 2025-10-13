@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DaemonsMCP.Core.Config 
 {
-  public class AppConfig : IAppConfig {
+  public class AppConfig  {
     private readonly ILogger<AppConfig> _logger;
     public AppConfig(ILoggerFactory loggerFactory, string? configPath = null) {
       if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
@@ -37,6 +37,7 @@ namespace DaemonsMCP.Core.Config
     public SecuritySettings Security => _config?.Security ?? new SecuritySettings();    
     public IReadOnlyDictionary<string, ProjectModel> Projects => _projects ?? [];
 
+    public event Action OnProjectsLoadedEvent = delegate { };  // placeholder for interface
 
     private DaemonsMcpConfiguration? LoadConfiguration(string? path = null) {
       string configFileName = Cx.CONFIG_FILE_NAME;
@@ -132,12 +133,6 @@ namespace DaemonsMCP.Core.Config
       }
     }
 
-    public void Reload(string? configPath = null ) {
-      _config = LoadConfiguration(configPath) ?? new();
-      _projects = LoadProjectsFromConfig();
-      var projectCount = _projects?.Count ?? 0;
-      if (Cx.IsDebug) _logger.LogDebug($"{Cx.Dd0} Reloaded with {projectCount} projects");
-    }
   }    
 
 }
