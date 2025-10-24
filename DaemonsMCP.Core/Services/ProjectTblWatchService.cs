@@ -47,7 +47,8 @@ namespace DaemonsMCP.Core.Services {
 
       _watcher = new FileSystemWatcher(ProjectRootPath, Cx.ProjectsTblFileName) {
         IncludeSubdirectories = true,
-        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size
+        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
+        InternalBufferSize = 32 * 1024
       };
       _watcher.Created += OnFileEvent;
       _watcher.Changed += OnFileEvent;

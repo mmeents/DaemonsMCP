@@ -63,7 +63,8 @@ namespace DaemonsMCP.Core.Services {
 
       _watcher = new FileSystemWatcher(ProjectRootPath, "*.cs") {
         IncludeSubdirectories = true,
-        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size
+        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
+        InternalBufferSize = 64 * 1024
       };
 
       _watcher.Changed += OnFileEvent;
