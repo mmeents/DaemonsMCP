@@ -5,22 +5,12 @@ VisualStudioVersion = 17.14.36221.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP", "DaemonsMCP\DaemonsMCP.csproj", "{D745B223-AD4F-4E4B-8677-8D59A8795A74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCPTester", "DaemonsTester\DaemonsMCPTester.csproj", "{F2DB7590-0495-A5C6-69F5-B13C5802BA1D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 		docs\TOOLS.md = docs\TOOLS.md
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Tests", "DaemonsMCP.Tests\DaemonsMCP.Tests.csproj", "{5A3CEE25-F03E-471B-82E2-77FB2EF954C4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Core", "DaemonsMCP.Core\DaemonsMCP.Core.csproj", "{C3CA51FE-7D5D-404D-4F1F-72230DE5F972}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsConfigViewer", "DaemonsConfigViewer\DaemonsConfigViewer.csproj", "{E8352EB8-5539-41CB-A213-52419FAC0F44}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackedTableTabs", "PackedTables.Tabs\PackedTableTabs.csproj", "{09E46C93-7E8D-7891-D0BE-31C18318B96C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,26 +22,6 @@ Global
 		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F2DB7590-0495-A5C6-69F5-B13C5802BA1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F2DB7590-0495-A5C6-69F5-B13C5802BA1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F2DB7590-0495-A5C6-69F5-B13C5802BA1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F2DB7590-0495-A5C6-69F5-B13C5802BA1D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5A3CEE25-F03E-471B-82E2-77FB2EF954C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A3CEE25-F03E-471B-82E2-77FB2EF954C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5A3CEE25-F03E-471B-82E2-77FB2EF954C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5A3CEE25-F03E-471B-82E2-77FB2EF954C4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C3CA51FE-7D5D-404D-4F1F-72230DE5F972}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C3CA51FE-7D5D-404D-4F1F-72230DE5F972}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3CA51FE-7D5D-404D-4F1F-72230DE5F972}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C3CA51FE-7D5D-404D-4F1F-72230DE5F972}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E8352EB8-5539-41CB-A213-52419FAC0F44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E8352EB8-5539-41CB-A213-52419FAC0F44}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E8352EB8-5539-41CB-A213-52419FAC0F44}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E8352EB8-5539-41CB-A213-52419FAC0F44}.Release|Any CPU.Build.0 = Release|Any CPU
-		{09E46C93-7E8D-7891-D0BE-31C18318B96C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{09E46C93-7E8D-7891-D0BE-31C18318B96C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{09E46C93-7E8D-7891-D0BE-31C18318B96C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{09E46C93-7E8D-7891-D0BE-31C18318B96C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

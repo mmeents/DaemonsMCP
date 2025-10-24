@@ -1,8 +1,4 @@
-﻿using DaemonsMCP.Core;
-using DaemonsMCP.Core.Config;
-using DaemonsMCP.Core.Extensions;
-using DaemonsMCP.Core.Repositories;
-using DaemonsMCP.Core.Services;
+﻿
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -34,19 +30,19 @@ namespace DaemonsMCP
             .UseSerilog() 
             .ConfigureServices((context, services) => {
               // Configuration
-              services.ConfigureDaemonsCore();
+             // services.ConfigureDaemonsCore();
 
 
               // MCP Tools (injected with dependencies)
-              services.AddScoped<DaemonsTools>();
+            //  services.AddScoped<DaemonsTools>();
 
               // Hosted service for MCP protocol
-              services.AddHostedService<DaemonsMcpHostedService>();
+            //  services.AddHostedService<DaemonsMcpHostedService>();
             });
 
     private static void ConfigureSerilog() {
       // Ensure logs directory exists
-      var logsPath = Sx.LogsAppPath;
+      var logsPath = "needs path"; //Sx.LogsAppPath;
 
       Log.Logger = new LoggerConfiguration()
           .MinimumLevel.Debug()
