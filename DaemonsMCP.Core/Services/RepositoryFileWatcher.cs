@@ -43,7 +43,8 @@ namespace DaemonsMCP.Core.Services {
       var fileName = Path.GetFileName(_filePath);
 
       _watcher = new FileSystemWatcher(directory, fileName) {
-        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size
+        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
+        InternalBufferSize = 32 * 1024
       };
 
       _watcher.Changed += OnFileChanged;

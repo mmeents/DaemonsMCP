@@ -357,8 +357,8 @@ namespace DaemonsMCP.Core.Services {
         return aProjectIndexModel; // Skip empty files
       }
       var syntaxTree = CSharpSyntaxTree.ParseText(fileContent);
-      var root = await syntaxTree.GetRootAsync().ConfigureAwait(false);
-      var namespaceDeclarations = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>();
+      var root = await syntaxTree.GetRootAsync().ConfigureAwait(false);      
+      var namespaceDeclarations = root.DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>();
       foreach (var namespaceDecl in namespaceDeclarations) {
         string namespaceName = namespaceDecl.Name.ToString();
         var classes = namespaceDecl.DescendantNodes().OfType<ClassDeclarationSyntax>();
@@ -554,7 +554,7 @@ namespace DaemonsMCP.Core.Services {
     }
 
     private async Task HandleFileChangedAsync(IndexProjectItem project, string filePath) {
-      // Use your existing security service check
+      // Use security service check
       if (!_securityService?.IsFileAllowed(filePath) ?? false) {
         return;
       }
