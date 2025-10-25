@@ -32,9 +32,28 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
   }
 
   /// <summary>
-  /// Gets or creates a FileSystemNode, recursively creating parent directories as needed.
+  /// Validates that a relative path is safe and doesn't contain directory traversal patterns.
   /// </summary>
-  public async Task<FileSystemNode> GetOrCreateAsync(
+  private bool IsPathSafe(string relativePath) {
+    // Block directory traversal attempts
+    if (relativePath.Contains("..") || relativePath.Contains("~/")) {
+      return false;
+    }
+
+    // Block suspicious patterns
+    var suspiciousPatterns = new[] { "%", "$", "`" };
+    if (suspiciousPatterns.Any(pattern => relativePath.Contains(pattern))) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /// <summary>
+  /// Gets or creates a FileSystemNode, recursively creating parent directories as needed.
+  /// Returns null if the path is unsafe (contains directory traversal patterns).
+  /// </summary>
+  public async Task<FileSystemNode?> GetOrCreateAsync(
       int projectId,
       string relativePath,
       bool isDirectory,
@@ -42,6 +61,12 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
       CancellationToken cancellationToken = default) {
 
     var normalizedPath = relativePath.Replace('\\', '/').Trim('/');
+
+    // SECURITY: Validate path safety before any operations
+    if (!IsPathSafe(normalizedPath)) {
+      _logger.LogWarning("Rejected unsafe path: {Path} for ProjectId: {ProjectId}", normalizedPath, projectId);
+      return null; // Return null instead of throwing to allow sync to continue
+    }
 
     // Check if already exists (single query)
     var existing = await _context.FileSystemNodes
@@ -76,12 +101,20 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
     int? parentId = null;
 
     // Recursively ensure parent directory exists
+    // Note: IsPathSafe will be checked again in the recursive call
     if (!string.IsNullOrEmpty(parentPath)) {
       var parent = await GetOrCreateAsync(
           projectId,
           parentPath,
           isDirectory: true, // parent is always a directory
           cancellationToken: cancellationToken);
+      
+      // If parent path was unsafe, we can't create this node either
+      if (parent == null) {
+        _logger.LogWarning("Cannot create node {Path} because parent path is unsafe", normalizedPath);
+        return null;
+      }
+      
       parentId = parent.Id;
     }
 
@@ -142,7 +175,10 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
         .AnyAsync(f => f.ProjectId == projectId && f.RelativePath == relativePath, cancellationToken);
   }
 
-  public async Task<FileSystemNode> AddAsync(FileSystemNode node, CancellationToken cancellationToken = default) {
+  public async Task<FileSystemNode?> AddAsync(FileSystemNode node, CancellationToken cancellationToken = default) {
+    if (!IsPathSafe(node.RelativePath)) {
+      return null;
+    }
     await _context.FileSystemNodes.AddAsync(node, cancellationToken);
     return node;
   }

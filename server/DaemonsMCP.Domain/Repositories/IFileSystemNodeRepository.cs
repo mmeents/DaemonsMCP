@@ -31,7 +31,7 @@ public interface IFileSystemNodeRepository {
   Task<bool> ExistsAsync(int projectId, string relativePath, CancellationToken cancellationToken = default);
 
   // Commands
-  Task<FileSystemNode> AddAsync(FileSystemNode node, CancellationToken cancellationToken = default);
+  Task<FileSystemNode?> AddAsync(FileSystemNode node, CancellationToken cancellationToken = default);
   Task AddRangeAsync(IEnumerable<FileSystemNode> nodes, CancellationToken cancellationToken = default);
   Task UpdateAsync(FileSystemNode node, CancellationToken cancellationToken = default);
   Task DeleteAsync(FileSystemNode node, CancellationToken cancellationToken = default);
