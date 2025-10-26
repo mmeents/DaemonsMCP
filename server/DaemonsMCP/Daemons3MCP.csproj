@@ -24,4 +24,10 @@
     <ProjectReference Include="..\DaemonsMCP.Infrastructure\DaemonsMCP.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="daemonsmcp.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
