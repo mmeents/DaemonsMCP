@@ -6,6 +6,7 @@ using DaemonsMCP.Domain.Entities;
 using DaemonsMCP.Domain.Models;
 using MediatR;
 using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,14 +18,15 @@ using System.Text.Json;
 namespace DaemonsMCP.Infrastructure.Tools {
   public class FileSystemToolsHandler: IFileSystemToolsHandler {
     private ILogger<FileSystemToolsHandler> _logger;
-    private IMediator _mediator;
+    private IServiceScopeFactory _scopeFactory;
+    
     public FileSystemToolsHandler(
       ILogger<FileSystemToolsHandler> logger,
-      IMediator mediator
+      IServiceScopeFactory scopeFactory
     ) 
     {
       _logger = logger;
-      _mediator = mediator;
+      _scopeFactory = scopeFactory;
     }
 
     public async Task<string> SearchFileSystem(
@@ -36,7 +38,11 @@ namespace DaemonsMCP.Infrastructure.Tools {
         int pageSize = 20 ) 
     {
 
-      try { 
+      try {
+        // Create a scope to resolve scoped services like IMediator and repositories
+        using var scope = _scopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        
         var query = new SearchFileSystemQuery(
           projectId,
           filter,
@@ -44,7 +50,7 @@ namespace DaemonsMCP.Infrastructure.Tools {
           includeFiles,
           pageNo,
           pageSize);
-        var result = await _mediator.Send(query);
+        var result = await mediator.Send(query);
         var opResult = McpOpResult.CreateSuccess(Cx.ListFileSystemCmd, $"{Cx.ListFileSystemCmd} Success.", result);
         return JsonSerializer.Serialize(opResult);
       } catch (Exception ex) {
@@ -57,8 +63,12 @@ namespace DaemonsMCP.Infrastructure.Tools {
 
     public async Task<string> GetFile(int projectId, int fileSystemNodeId) {
       try {
+        // Create a scope to resolve scoped services like IMediator and repositories
+        using var scope = _scopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        
         var query = new GetFileContentsQuery(projectId, fileSystemNodeId);
-        var result = await _mediator.Send(query);
+        var result = await mediator.Send(query);
         var opResult = McpOpResult.CreateSuccess(Cx.GetFileCmd, $"{Cx.GetFileCmd} Success.", result);
         return JsonSerializer.Serialize(opResult);
       } catch (Exception ex) {

@@ -3,6 +3,7 @@ using DaemonsMCP.Domain.Constants;
 using DaemonsMCP.Domain.Models;
 using DaemonsMCP.Infrastructure.Extensions;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -14,20 +15,24 @@ using System.Threading.Tasks;
 namespace DaemonsMCP.Infrastructure.Tools {
   public class ProjectToolsHandler : IProjectToolsHandler {
     private ILogger<ProjectToolsHandler> _logger;
-    private IMediator _mediator;
+    private IServiceScopeFactory _scopeFactory;
 
     public ProjectToolsHandler(
       ILogger<ProjectToolsHandler> logger,
-      IMediator mediator
+      IServiceScopeFactory scopeFactory
     ) {
       _logger = logger;
-      _mediator = mediator;
+      _scopeFactory = scopeFactory;
     }
 
     public async Task<string> ListProjectsAsync() {
-      try { 
+      try {
+        // Create a scope to resolve scoped services like IMediator and repositories
+        using var scope = _scopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        
         var query = new GetAllProjectsQuery();        
-        var projects = await _mediator.Send(query);
+        var projects = await mediator.Send(query);
         var opResult = McpOpResult.CreateSuccess(Cx.ListProjectsCmd, $"{Cx.ListProjectsCmd} Success.", projects.ToArray());
         return JsonSerializer.Serialize(opResult);
       } catch (Exception ex) {
