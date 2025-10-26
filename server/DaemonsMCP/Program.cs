@@ -9,6 +9,7 @@ using Serilog.Extensions.Hosting;
 using DaemonsMCP.Application;
 using DaemonsMCP.Infrastructure.Services;
 using DaemonsMCP.Infrastructure;
+using DaemonsMCP.Domain.Constants;
 
 namespace DaemonsMCP
 {
@@ -38,7 +39,7 @@ namespace DaemonsMCP
 
     private static void ConfigureSerilog() {
       // Ensure logs directory exists
-      var logsPath = "needs path"; //Sx.LogsAppPath;
+      var logsPath = Cx.LogsAppPath;
 
       Log.Logger = new LoggerConfiguration()
           .MinimumLevel.Debug()
@@ -46,13 +47,13 @@ namespace DaemonsMCP
           .MinimumLevel.Override("System", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning))
           .Enrich.FromLogContext()
           .WriteTo.File(
-              path: Path.Combine(logsPath, "DaemonsMCP-.log"),
+              path: Path.Combine(logsPath, $"{Cx.AppName}-.log"),
               rollingInterval: RollingInterval.Day,
               retainedFileCountLimit: 7,
               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"
           )
           .WriteTo.File(
-              path: Path.Combine(logsPath, "DaemonsMCP-errors-.log"),
+              path: Path.Combine(logsPath, $"{Cx.AppName}-errors-.log"),
               rollingInterval: RollingInterval.Day,
               retainedFileCountLimit: 30,
               restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning, // Only warnings and errors

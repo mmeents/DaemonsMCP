@@ -13,7 +13,7 @@ namespace DaemonsMCP.Infrastructure.Tools {
   public class FileSystemTools {
     private static FileSystemToolsHandler GetTools() => DIServiceBridge.GetService<FileSystemToolsHandler>();
 
-    [McpTool(Cx.ListProjectsCmd, Cx.ListProjectsDesc)]
+    [McpTool(Cx.ListFileSystemCmd, Cx.ListFileSystemDesc)]
     public static async Task<string> SearchFileSystem(
         [Description(Cx.ProjectParamDesc)] int projectId,
         [Description(Cx.SearchFilterParamDesc)] string? filter,

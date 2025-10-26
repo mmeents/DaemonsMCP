@@ -34,7 +34,8 @@ namespace DaemonsMCP.Infrastructure.Services {
 
       // Register your tools bridge (parameterless constructor)
       MCPServer.Register<ProjectTools>();
-      
+      MCPServer.Register<FileSystemTools>();
+
       // Start MCPSharp server - blocks until cancellation
       await MCPServer.StartAsync(Cx.AppName, Cx.AppVersion);
     }

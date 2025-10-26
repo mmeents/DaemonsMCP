@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace DaemonsMCP.Domain.Constants {
   public static class Cx {
-    public const string AppName = "DaemonsMCP";
-    public const string AppVersion = "3.0.0";
-
-    public const string CONFIG_FILE_NAME = "daemonsmcp.json"; 
-    public const bool IsDebug = true;
+    public const string AppName = "Daemons3MCP";
+    public const string AppVersion = "3.0.0";        
 
     // Tools Names
     public const string ListProjectsCmd = "list-projects";
@@ -173,5 +170,37 @@ namespace DaemonsMCP.Domain.Constants {
     public const string StatusInProgress = "In Progress";
     public const string StatusComplete = "Completed";
     public const string StatusCancelled = "Cancelled";
+
+    public static string ResolvePath(this string path) {
+      // Handle relative paths
+      if (!Path.IsPathRooted(path)) {
+        // Relative to config file directory or current directory
+        return Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), path));
+      }
+
+      // Handle cross-platform path separators
+      return Path.GetFullPath(path);
+    }
+
+
+    public static string CommonAppPath {
+      get {
+        string commonPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), Cx.AppName).ResolvePath();
+        if (!Directory.Exists(commonPath)) {
+          Directory.CreateDirectory(commonPath);
+        }
+        return commonPath;
+      }
+    }
+
+    public static string LogsAppPath {
+      get {
+        string logsPath = Path.Combine(CommonAppPath, "logs").ResolvePath();
+        if (!Directory.Exists(logsPath)) {
+          Directory.CreateDirectory(logsPath);
+        }
+        return logsPath;
+      }
+    }
   }
 }

@@ -6,6 +6,7 @@ using DaemonsMCP.Application.Projects.Queries.GetAllProjects;
 using DaemonsMCP.Domain.Repositories;
 using DaemonsMCP.Infrastructure;
 using DaemonsMCP.Infrastructure.Services;
+using DaemonsMCP.Domain.Constants;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -64,7 +65,7 @@ namespace DaemonsMCP.Api
 
     private static void ConfigureSerilog() {
       // Ensure logs directory exists
-      var logsPath = "c:\\MCPSandbox\\logs"; // Sx.LogsAppPath;
+      var logsPath = Cx.LogsAppPath;
 
       Log.Logger = new LoggerConfiguration()
           .MinimumLevel.Debug()
