@@ -1,4 +1,4 @@
-using DaemonsMCP.Api.Extensions;
+﻿using DaemonsMCP.Api.Extensions;
 using DaemonsMCP.Application;
 using DaemonsMCP.Application.FileSystem.Commands.SyncProjectFileSystem;
 using DaemonsMCP.Application.Projects.Commands.CreateProject;
@@ -22,6 +22,15 @@ namespace DaemonsMCP.Api
         {
             ConfigureSerilog();
             var builder = WebApplication.CreateBuilder(args);
+            
+            // Configure to use daemonsmcp.json instead of appsettings.json
+            builder.Configuration.Sources.Clear();
+            builder.Configuration
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("daemonsmcp.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"daemonsmcp.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .AddCommandLine(args);
             
             builder.Logging.ClearProviders();
             builder.Logging.AddSerilog();

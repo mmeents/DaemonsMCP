@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events; 
@@ -31,6 +32,17 @@ namespace DaemonsMCP
 
     static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((context, config) => {
+              // Clear default configuration sources
+              config.Sources.Clear();
+              
+              // Add custom configuration file
+              config.SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("daemonsmcp.json", optional: false, reloadOnChange: true)
+                    .AddJsonFile($"daemonsmcp.{context.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                    .AddEnvironmentVariables()
+                    .AddCommandLine(args);
+            })
             .UseSerilog() 
             .ConfigureServices((context, services) => {
               services.AddApplication();
@@ -38,7 +50,7 @@ namespace DaemonsMCP
             });
 
     private static void ConfigureSerilog() {
-      // Ensure logs directory exists
+      // Use the proper logs path from Cx.LogsAppPath
       var logsPath = Cx.LogsAppPath;
 
       Log.Logger = new LoggerConfiguration()

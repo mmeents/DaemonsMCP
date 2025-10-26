@@ -29,10 +29,6 @@
     <ProjectReference Include="..\DaemonsMCP.Domain\DaemonsMCP.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\DaemonsMCP.Api\appsettings.json" Link="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+
 
 </Project>
