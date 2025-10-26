@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docs\TOOLS.md = docs\TOOLS.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP", "server\DaemonsMCP\DaemonsMCP.csproj", "{0479DD8D-EAED-A9EF-C9A7-5BD29BBBDAF2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daemons3MCP", "server\DaemonsMCP\Daemons3MCP.csproj", "{0479DD8D-EAED-A9EF-C9A7-5BD29BBBDAF2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Domain", "server\DaemonsMCP.Domain\DaemonsMCP.Domain.csproj", "{ADD23232-2A0E-FE53-F63B-BE2C5200CA03}"
 EndProject
