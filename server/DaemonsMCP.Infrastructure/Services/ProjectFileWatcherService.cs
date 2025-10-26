@@ -182,8 +182,10 @@ namespace DaemonsMCP.Infrastructure.Services {
               fileSize);
 
           // Create IndexQueue entry
-          IndexQueue item = IndexQueue.Create( _projectId, fileSystemNode.Id, relativePath);
-          await indexQueueRepository.AddAsync(item);
+          if (fileSystemNode != null) {
+            IndexQueue item = IndexQueue.Create( _projectId, fileSystemNode.Id, relativePath);
+            await indexQueueRepository.AddAsync(item);
+          }
 
         } catch (Exception ex) {
           _logger.LogError(ex, "Failed to enqueue change for {FilePath}", change.FilePath);

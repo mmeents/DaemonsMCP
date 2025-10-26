@@ -222,6 +222,45 @@ public class IndexingService : IIndexingService {
                 propDecl, touchedIds, cancellationToken);
           }
         }
+
+        // Process interfaces in namespace
+        var interfaceDecls = namespaceDecl.DescendantNodes().OfType<InterfaceDeclarationSyntax>();
+        foreach (var interfaceDecl in interfaceDecls) {
+          var interfaceName = interfaceDecl.Identifier.Text;
+          var interfaceId = await GetOrCreateHierarchyAsync(
+              fileSystemNodeId, projectId, interfaceName,
+              (int)IdentifierTypeEnum.Interface, parentId: namespaceId,
+              interfaceDecl, touchedIds, cancellationToken);
+
+          // Process methods in interface
+          var methodDecls = interfaceDecl.DescendantNodes().OfType<MethodDeclarationSyntax>();
+          foreach (var methodDecl in methodDecls) {
+            var methodName = methodDecl.Identifier.Text;
+            var methodId = await GetOrCreateHierarchyAsync(
+                fileSystemNodeId, projectId, methodName,
+                (int)IdentifierTypeEnum.Method, parentId: interfaceId,
+                methodDecl, touchedIds, cancellationToken);
+
+            // Process method parameters
+            foreach (var param in methodDecl.ParameterList.Parameters) {
+              var paramName = param.Identifier.Text;
+              await GetOrCreateHierarchyAsync(
+                  fileSystemNodeId, projectId, paramName,
+                  (int)IdentifierTypeEnum.MethodParameter, parentId: methodId,
+                  param, touchedIds, cancellationToken);
+            }
+          }
+
+          // Process properties in interface
+          var propertyDecls = interfaceDecl.DescendantNodes().OfType<PropertyDeclarationSyntax>();
+          foreach (var propDecl in propertyDecls) {
+            var propName = propDecl.Identifier.Text;
+            await GetOrCreateHierarchyAsync(
+                fileSystemNodeId, projectId, propName,
+                (int)IdentifierTypeEnum.Property, parentId: interfaceId,
+                propDecl, touchedIds, cancellationToken);
+          }
+        }
       }
     } catch (Exception ex) {
       _logger.LogError(ex, "Error parsing file {FilePath}", filePath);

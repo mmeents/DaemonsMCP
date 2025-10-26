@@ -3,6 +3,7 @@ using DaemonsMCP.Domain.Repositories;
 using DaemonsMCP.Infrastructure.Persistence;
 using DaemonsMCP.Infrastructure.Repositories;
 using DaemonsMCP.Infrastructure.Services;
+using DaemonsMCP.Infrastructure.Tools;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,11 @@ public static class DependencyInjection {
     // Register file watching
     services.AddSingleton<IProjectFileWatcherFactory, ProjectFileWatcherFactory>();
     services.AddHostedService<FileWatcherCoordinatorService>();
+
+    // Register Mcp Tools
+    services.AddSingleton<IProjectToolsHandler, ProjectToolsHandler>();
+
+    services.AddHostedService<McpServerHostedService>();
 
     return services;
   }

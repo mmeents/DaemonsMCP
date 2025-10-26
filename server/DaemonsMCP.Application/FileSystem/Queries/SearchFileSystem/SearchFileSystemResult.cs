@@ -10,6 +10,7 @@ namespace DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem {
     public int TotalCount { get; set; }
     public int PageNo { get; set; }
     public int PageSize { get; set; }
+    public string Filter { get; set; } = string.Empty;
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
   }
 

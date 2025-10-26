@@ -17,7 +17,7 @@ public interface IFileSystemNodeRepository {
   /// <summary>
   /// Gets or creates a FileSystemNode, recursively creating parent directories as needed.
   /// </summary>
-  Task<FileSystemNode> GetOrCreateAsync(
+  Task<FileSystemNode?> GetOrCreateAsync(
       int projectId,
       string relativePath,
       bool isDirectory,

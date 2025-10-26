@@ -6,6 +6,9 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events; 
 using Serilog.Extensions.Hosting;
+using DaemonsMCP.Application;
+using DaemonsMCP.Infrastructure.Services;
+using DaemonsMCP.Infrastructure;
 
 namespace DaemonsMCP
 {
@@ -29,15 +32,8 @@ namespace DaemonsMCP
         Host.CreateDefaultBuilder(args)
             .UseSerilog() 
             .ConfigureServices((context, services) => {
-              // Configuration
-             // services.ConfigureDaemonsCore();
-
-
-              // MCP Tools (injected with dependencies)
-            //  services.AddScoped<DaemonsTools>();
-
-              // Hosted service for MCP protocol
-            //  services.AddHostedService<DaemonsMcpHostedService>();
+              services.AddApplication();
+              services.AddInfrastructure(context.Configuration);
             });
 
     private static void ConfigureSerilog() {

@@ -47,7 +47,7 @@ namespace DaemonsMCP.Infrastructure.Services {
 
       foreach (var project in projects) {   
         if (project != null) { 
-          await StartWatcherForProjectAsync(project, indexingService, stoppingToken);
+          StartWatcherForProject(project, fileSystemSyncService, indexingService, stoppingToken);
         }
       }
 
@@ -58,12 +58,7 @@ namespace DaemonsMCP.Infrastructure.Services {
       // Initial sync and indexing for all projects
       foreach (var project in projects) {
         if (project != null) {
-          try {
-            await fileSystemSyncService.SyncProjectAsync(project, stoppingToken);
-            await indexingService.RunAsync(project.Id, stoppingToken);
-          } catch (Exception ex) {
-            _logger.LogError(ex, "Error running indexing for project {ProjectId}", project.Id);
-          }
+          await RunIndexingForProject(project, fileSystemSyncService, indexingService, stoppingToken);     
         }
       }
 
@@ -71,9 +66,24 @@ namespace DaemonsMCP.Infrastructure.Services {
 
     }
 
-    private async Task StartWatcherForProjectAsync(
+    private async Task RunIndexingForProject(
         DaemonsMCP.Domain.Entities.Project project,
+        IFileSystemSyncService fileSystemSyncService,
         IIndexingService indexingService,
+        CancellationToken cancellationToken) 
+    {      
+        try {
+          await fileSystemSyncService.SyncProjectAsync(project, cancellationToken);
+          await indexingService.RunAsync(project.Id, cancellationToken);
+        } catch (Exception ex) {
+          _logger.LogError(ex, "Error running indexing for project {Id}", project.Id);
+        }      
+    }
+
+    private void StartWatcherForProject(
+        DaemonsMCP.Domain.Entities.Project project,
+        IFileSystemSyncService fileSystemSyncService,
+        IIndexingService indexingService,        
         CancellationToken cancellationToken) {
       lock (_watchersLock) {
         if (_watchers.ContainsKey(project.Id)) {
@@ -91,7 +101,10 @@ namespace DaemonsMCP.Infrastructure.Services {
 
       // Subscribe to IndexingRequested event
       watcher.IndexingRequested += (sender, projectId) => {
-        _logger.LogDebug("⚡ Indexing requested for project {ProjectId}", projectId);     
+        _logger.LogDebug("⚡ Indexing requested for project {ProjectId}", projectId);
+        Task.Run(async () => {
+          await RunIndexingForProject(project, fileSystemSyncService, indexingService, cancellationToken);
+        });
       };
 
       watcher.StartWatching();

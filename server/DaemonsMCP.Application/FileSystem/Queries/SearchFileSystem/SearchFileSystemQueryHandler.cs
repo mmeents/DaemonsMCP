@@ -60,6 +60,7 @@ namespace DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem{
 
       return new SearchFileSystemResult {
         Data = results,
+        Filter = request.Filter ?? string.Empty,
         TotalCount = totalCount,
         PageNo = request.PageNo,
         PageSize = request.PageSize
