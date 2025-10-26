@@ -129,7 +129,7 @@ namespace DaemonsMCP.Domain.Constants {
     public const string ChangeStatusIndexEnableDesc = "Enable or disable the indexer, pass true to enable false to disable";
 
     public const string ClassFilterParamDesc = "Filter classes by name uses string.Contains in filter";
-    public const string MethodFilterParamDesc = "Filter methods by name uses string.Comtains in filter ";
+    public const string MethodFilterParamDesc = "Filter methods by name uses string.Contains in filter ";
     public const string PageNoParamDesc = "REQUIRED: The page number to take results from default is 1.";
     public const string ItemsPerPageParamDesc = "REQUIRED: The max number of items to take in this call.";
     public const string NamespaceFilterParamDesc = "Filter namespaces by name uses string.Contains as filter";

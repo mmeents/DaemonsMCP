@@ -13,6 +13,7 @@ public interface IObjectHierarchyRepository {
   Task<List<ObjectHierarchy>> GetByParentIdAsync(int parentId, CancellationToken cancellationToken = default);
   Task<ObjectHierarchy> GetOrCreateAsync(ObjectHierarchy hierarchy, CancellationToken cancellationToken = default);
   Task DeleteByFileSystemNodeIdAsync(int fileSystemNodeId, CancellationToken cancellationToken = default);
+  Task DeleteRangeAsync(IEnumerable<ObjectHierarchy> hierarchies, CancellationToken cancellationToken = default);
   Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 

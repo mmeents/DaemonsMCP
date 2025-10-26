@@ -265,7 +265,7 @@ namespace DaemonsMCP.Infrastructure.Services {
           // Allow only if it's within a configured project path
           var boundryCheck = filePath.StartsWith(project.RootPath, StringComparison.OrdinalIgnoreCase);
           if (!boundryCheck) {
-            error = $"final rooted boundy check false";
+            error = $"final rooted boundary check false";
           }
           return boundryCheck;
         }

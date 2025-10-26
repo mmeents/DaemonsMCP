@@ -64,6 +64,11 @@ public class ObjectHierarchyRepository : IObjectHierarchyRepository {
     _dbContext.ObjectHierarchies.RemoveRange(hierarchies);
   }
 
+  public Task DeleteRangeAsync(IEnumerable<ObjectHierarchy> hierarchies, CancellationToken cancellationToken = default) {
+    _dbContext.ObjectHierarchies.RemoveRange(hierarchies);
+    return Task.CompletedTask;
+  }
+
   public async Task SaveChangesAsync(CancellationToken cancellationToken = default) {
     await _dbContext.SaveChangesAsync(cancellationToken);
   }

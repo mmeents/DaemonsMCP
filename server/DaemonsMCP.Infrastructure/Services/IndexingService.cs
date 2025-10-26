@@ -1,16 +1,17 @@
-﻿using System;
+﻿using DaemonsMCP.Domain.Entities;
+using DaemonsMCP.Domain.Repositories;
+using DaemonsMCP.Infrastructure.Persistance.Configurations;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DaemonsMCP.Domain.Entities;
-using DaemonsMCP.Domain.Repositories;
-using DaemonsMCP.Infrastructure.Persistance.Configurations;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Extensions.Logging;
 
 namespace DaemonsMCP.Infrastructure.Services;
 
@@ -131,9 +132,9 @@ public class IndexingService : IIndexingService {
       var existingHierarchies = await _objectHierarchyRepository.GetByFileSystemNodeIdAsync(fileSystemNode.Id, cancellationToken);
       var orphans = existingHierarchies.Where(h => !touchedHierarchyIds.Contains(h.Id)).ToList();
 
-      foreach (var orphan in orphans) {
-        // Note: You may need cascade delete strategy here
-        _logger.LogDebug("Removing orphaned ObjectHierarchy {Id}", orphan.Id);
+      if (orphans.Any()) {
+        _logger.LogDebug("Removing {Count} orphaned ObjectHierarchy nodes", orphans.Count);
+        await _objectHierarchyRepository.DeleteRangeAsync(orphans, cancellationToken);
       }
 
       // Note: EF Core tracking handles orphan deletion if configured with OnDelete(DeleteBehavior.Cascade)
