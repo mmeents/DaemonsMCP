@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DaemonsMCP.Infrastructure.Tools {
   public class FileSystemTools {
-    private static FileSystemToolsHandler GetTools() => DIServiceBridge.GetService<FileSystemToolsHandler>();
+    private static IFileSystemToolsHandler GetTools() => DIServiceBridge.GetService<IFileSystemToolsHandler>();
 
     [McpTool(Cx.ListFileSystemCmd, Cx.ListFileSystemDesc)]
     public static async Task<string> SearchFileSystem(

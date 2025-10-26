@@ -16,7 +16,7 @@ using System.Text.Json;
 namespace DaemonsMCP.Infrastructure.Tools {
   public class ProjectTools {
 
-    private static ProjectToolsHandler GetTools() => DIServiceBridge.GetService<ProjectToolsHandler>();
+    private static IProjectToolsHandler GetTools() => DIServiceBridge.GetService<IProjectToolsHandler>();
 
     [McpTool(Cx.ListProjectsCmd, Cx.ListProjectsDesc)]
     public static async Task<string> ListProjects() => await GetTools().ListProjectsAsync();

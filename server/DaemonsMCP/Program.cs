@@ -11,6 +11,7 @@ using DaemonsMCP.Application;
 using DaemonsMCP.Infrastructure.Services;
 using DaemonsMCP.Infrastructure;
 using DaemonsMCP.Domain.Constants;
+using System.Reflection;
 
 namespace DaemonsMCP
 {
@@ -36,8 +37,14 @@ namespace DaemonsMCP
               // Clear default configuration sources
               config.Sources.Clear();
               
-              // Add custom configuration file
-              config.SetBasePath(Directory.GetCurrentDirectory())
+              // Get the directory where the executable is located
+              var exeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) 
+                                 ?? Directory.GetCurrentDirectory();
+              
+              Log.Information("Loading configuration from: {ExeDirectory}", exeDirectory);
+              
+              // Add custom configuration file relative to executable location
+              config.SetBasePath(exeDirectory)
                     .AddJsonFile("daemonsmcp.json", optional: false, reloadOnChange: true)
                     .AddJsonFile($"daemonsmcp.{context.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
                     .AddEnvironmentVariables()
