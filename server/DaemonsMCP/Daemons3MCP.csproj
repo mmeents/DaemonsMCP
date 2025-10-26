@@ -15,7 +15,13 @@
     <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="System.Formats.Asn1" Version="9.0.8" />
+    <PackageReference Include="System.Formats.Asn1" Version="9.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DaemonsMCP.Application\DaemonsMCP.Application.csproj" />
+    <ProjectReference Include="..\DaemonsMCP.Domain\DaemonsMCP.Domain.csproj" />
+    <ProjectReference Include="..\DaemonsMCP.Infrastructure\DaemonsMCP.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

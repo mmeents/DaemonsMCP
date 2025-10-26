@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36221.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP", "DaemonsMCP\DaemonsMCP.csproj", "{D745B223-AD4F-4E4B-8677-8D59A8795A74}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.md = LICENSE.md
@@ -12,16 +10,42 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docs\TOOLS.md = docs\TOOLS.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daemons3MCP", "server\DaemonsMCP\Daemons3MCP.csproj", "{0479DD8D-EAED-A9EF-C9A7-5BD29BBBDAF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Domain", "server\DaemonsMCP.Domain\DaemonsMCP.Domain.csproj", "{ADD23232-2A0E-FE53-F63B-BE2C5200CA03}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Application", "server\DaemonsMCP.Application\DaemonsMCP.Application.csproj", "{1E4F1990-4F99-5358-F86E-D938BBD6D8C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Infrastructure", "server\DaemonsMCP.Infrastructure\DaemonsMCP.Infrastructure.csproj", "{FBF22AB1-38A7-A050-07DD-D6E2A38FC55D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Api", "server\DaemonsMCP.Api\DaemonsMCP.Api.csproj", "{FFC5AB4B-C483-3857-0D8A-50178B8E28DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D745B223-AD4F-4E4B-8677-8D59A8795A74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0479DD8D-EAED-A9EF-C9A7-5BD29BBBDAF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0479DD8D-EAED-A9EF-C9A7-5BD29BBBDAF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0479DD8D-EAED-A9EF-C9A7-5BD29BBBDAF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0479DD8D-EAED-A9EF-C9A7-5BD29BBBDAF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADD23232-2A0E-FE53-F63B-BE2C5200CA03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADD23232-2A0E-FE53-F63B-BE2C5200CA03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADD23232-2A0E-FE53-F63B-BE2C5200CA03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADD23232-2A0E-FE53-F63B-BE2C5200CA03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E4F1990-4F99-5358-F86E-D938BBD6D8C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E4F1990-4F99-5358-F86E-D938BBD6D8C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E4F1990-4F99-5358-F86E-D938BBD6D8C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E4F1990-4F99-5358-F86E-D938BBD6D8C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBF22AB1-38A7-A050-07DD-D6E2A38FC55D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBF22AB1-38A7-A050-07DD-D6E2A38FC55D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBF22AB1-38A7-A050-07DD-D6E2A38FC55D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBF22AB1-38A7-A050-07DD-D6E2A38FC55D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFC5AB4B-C483-3857-0D8A-50178B8E28DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFC5AB4B-C483-3857-0D8A-50178B8E28DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFC5AB4B-C483-3857-0D8A-50178B8E28DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFC5AB4B-C483-3857-0D8A-50178B8E28DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

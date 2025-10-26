@@ -2,10 +2,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events; 
 using Serilog.Extensions.Hosting;
+using DaemonsMCP.Application;
+using DaemonsMCP.Infrastructure.Services;
+using DaemonsMCP.Infrastructure;
+using DaemonsMCP.Domain.Constants;
+using System.Reflection;
 
 namespace DaemonsMCP
 {
@@ -27,22 +33,32 @@ namespace DaemonsMCP
 
     static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((context, config) => {
+              // Clear default configuration sources
+              config.Sources.Clear();
+              
+              // Get the directory where the executable is located
+              var exeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) 
+                                 ?? Directory.GetCurrentDirectory();
+              
+              Log.Information("Loading configuration from: {ExeDirectory}", exeDirectory);
+              
+              // Add custom configuration file relative to executable location
+              config.SetBasePath(exeDirectory)
+                    .AddJsonFile("daemonsmcp.json", optional: false, reloadOnChange: true)
+                    .AddJsonFile($"daemonsmcp.{context.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                    .AddEnvironmentVariables()
+                    .AddCommandLine(args);
+            })
             .UseSerilog() 
             .ConfigureServices((context, services) => {
-              // Configuration
-             // services.ConfigureDaemonsCore();
-
-
-              // MCP Tools (injected with dependencies)
-            //  services.AddScoped<DaemonsTools>();
-
-              // Hosted service for MCP protocol
-            //  services.AddHostedService<DaemonsMcpHostedService>();
+              services.AddApplication();
+              services.AddInfrastructure(context.Configuration);
             });
 
     private static void ConfigureSerilog() {
-      // Ensure logs directory exists
-      var logsPath = "needs path"; //Sx.LogsAppPath;
+      // Use the proper logs path from Cx.LogsAppPath
+      var logsPath = Cx.LogsAppPath;
 
       Log.Logger = new LoggerConfiguration()
           .MinimumLevel.Debug()
@@ -50,13 +66,13 @@ namespace DaemonsMCP
           .MinimumLevel.Override("System", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning))
           .Enrich.FromLogContext()
           .WriteTo.File(
-              path: Path.Combine(logsPath, "DaemonsMCP-.log"),
+              path: Path.Combine(logsPath, $"{Cx.AppName}-.log"),
               rollingInterval: RollingInterval.Day,
               retainedFileCountLimit: 7,
               outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}"
           )
           .WriteTo.File(
-              path: Path.Combine(logsPath, "DaemonsMCP-errors-.log"),
+              path: Path.Combine(logsPath, $"{Cx.AppName}-errors-.log"),
               rollingInterval: RollingInterval.Day,
               retainedFileCountLimit: 30,
               restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning, // Only warnings and errors
