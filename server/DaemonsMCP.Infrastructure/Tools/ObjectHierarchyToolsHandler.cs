@@ -35,11 +35,11 @@ namespace DaemonsMCP.Infrastructure.Tools {
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
                
         var result = await mediator.Send(request);
-        var opResult = McpOpResult.CreateSuccess(Cx.ListFileSystemCmd, $"{Cx.ListFileSystemCmd} Success.", result);
+        var opResult = McpOpResult.CreateSuccess(Cx.SearchObjectHierarchyCmd, $"{Cx.SearchObjectHierarchyCmd} Success.", result);
         return JsonSerializer.Serialize(opResult);
       } catch (Exception ex) {
-        _logger.LogError(ex, "Error Searching File System");
-        var opResult = McpOpResult.CreateFailure(Cx.ListFileSystemCmd, $"Failed: {ex.Message}", null);
+        _logger.LogError(ex, "Error Searching Object Hierarchy");
+        var opResult = McpOpResult.CreateFailure(Cx.SearchObjectHierarchyCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
     }

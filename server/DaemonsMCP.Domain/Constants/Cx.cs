@@ -133,9 +133,9 @@ namespace DaemonsMCP.Domain.Constants {
     public const string ForceRebuildOptionDesc = "Force a complete rebuild of every file in the index, otherwise only the changes will be processed";
     public const string ChangeStatusIndexEnableDesc = "Enable or disable the indexer, pass true to enable false to disable";
 
-    public const string SearchTermParamDesc = "The search term to look for in objects identifier";
+    public const string SearchTermParamDesc = "The search term to look for in object identifiers";
     public const string IdentifierTypeFilterParamDesc = "Filter by IdentifierTypeId types are: 1 namespace; 2 interface; 3 class; 4 method; 5 property; 6 field; 7 event; 8 method param ";
-    public const string ParentIdFilterParamDesc = "A ObjectHierarchyId to Filter by Parent of the ObjectHierarchy record, basically show siblings";
+    public const string ParentIdFilterParamDesc = "An ObjectHierarchyId to Filter by Parent of the ObjectHierarchy record, basically show siblings";
 
     public const string ClassFilterParamDesc = "Filter classes by name uses string.Contains in filter";
     public const string MethodFilterParamDesc = "Filter methods by name uses string.Contains in filter ";

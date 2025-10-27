@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DaemonsMCP.Domain.Entities;
-using DaemonsMCP.Application.ObjectHierarchy.Queries.SearchObjectHierarchy;
+using DaemonsMCP.Domain.Models;
 
 namespace DaemonsMCP.Domain.Repositories;
 

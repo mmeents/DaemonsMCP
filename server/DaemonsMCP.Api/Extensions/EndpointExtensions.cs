@@ -1,6 +1,6 @@
 ﻿using DaemonsMCP.Application.FileSystem.Commands.SyncProjectFileSystem;
 using DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem;
-using DaemonsMCP.Application.ObjectHierarchy.Queries.SearchObjectHierarchy;
+using DaemonsMCP.Domain.Models;
 using DaemonsMCP.Application.Projects.Commands.CreateProject;
 using DaemonsMCP.Application.Projects.Queries.GetAllProjects;
 using DaemonsMCP.Domain.Repositories;

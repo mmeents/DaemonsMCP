@@ -26,8 +26,5 @@ namespace DaemonsMCP.Application.ObjectHierarchy.Queries.SearchObjectHierarchy {
     }
   }
 
-  public interface ISearchObjectHierarchyQueryHandler {
-    Task<SearchObjectHierarchyResult> Handle(SearchObjectHierarchyQuery request, CancellationToken cancellationToken);
-  }
 
 }

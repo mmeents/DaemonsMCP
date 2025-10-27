@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DaemonsMCP.Application.ObjectHierarchy.Queries.SearchObjectHierarchy {
+namespace DaemonsMCP.Domain.Models {
   public record SearchObjectHierarchyQuery(
     int ProjectId,               // Required - scope to project
     string? SearchTerm,          // Optional - search identifier names (partial match)

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DaemonsMCP.Application.ObjectHierarchy.Queries.SearchObjectHierarchy {
+namespace DaemonsMCP.Domain.Models {
   public record SearchObjectHierarchyResult {
     public List<ObjectHierarchyNodeDto> Data { get; set; } = new();
     public int TotalCount { get; set; }
