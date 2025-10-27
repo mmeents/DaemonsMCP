@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DaemonsMCP.Domain.Entities;
+using DaemonsMCP.Domain.Models;
 
 namespace DaemonsMCP.Domain.Repositories;
 
@@ -15,5 +16,6 @@ public interface IObjectHierarchyRepository {
   Task DeleteByFileSystemNodeIdAsync(int fileSystemNodeId, CancellationToken cancellationToken = default);
   Task DeleteRangeAsync(IEnumerable<ObjectHierarchy> hierarchies, CancellationToken cancellationToken = default);
   Task SaveChangesAsync(CancellationToken cancellationToken = default);
+  Task<SearchObjectHierarchyResult> Search(SearchObjectHierarchyQuery request, CancellationToken cancellationToken);
 }
 

@@ -1,5 +1,6 @@
 ﻿using DaemonsMCP.Application.FileSystem.Commands.SyncProjectFileSystem;
 using DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem;
+using DaemonsMCP.Domain.Models;
 using DaemonsMCP.Application.Projects.Commands.CreateProject;
 using DaemonsMCP.Application.Projects.Queries.GetAllProjects;
 using DaemonsMCP.Domain.Repositories;
@@ -89,6 +90,8 @@ namespace DaemonsMCP.Api.Extensions {
           })
       .WithName("SearchFileSystem");
 
+
+
       return app;
     }
 
@@ -125,6 +128,31 @@ namespace DaemonsMCP.Api.Extensions {
         });
       })
       .WithName("GetIndexingQueueStatus");
+
+      app.MapGet("/api/hierarchy/search", async (
+        IMediator mediator,
+        int projectId,
+        string? searchTerm = null,
+        int? identifierTypeId = null,
+        int? fileSystemNodeId = null,
+        int? parentId = null,
+        int pageNo = 1,
+        int pageSize = 20) =>
+        {
+          var query = new SearchObjectHierarchyQuery(
+              projectId,
+              searchTerm,
+              identifierTypeId,
+              fileSystemNodeId,
+              parentId,
+              pageNo,
+              pageSize);
+
+          var result = await mediator.Send(query);
+          return Results.Ok(result);
+        })
+      .WithName("SearchObjectHierarchy");
+
 
       return app;
     }

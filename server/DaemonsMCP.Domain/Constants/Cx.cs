@@ -14,6 +14,7 @@ namespace DaemonsMCP.Domain.Constants {
 
     public const string ListFoldersCmd = "list-project-directories";
     public const string ListFilesCmd = "list-project-files";
+
     public const string ListFileSystemCmd = "search-file-system";
 
     public const string GetFileCmd = "get-project-file";
@@ -27,6 +28,8 @@ namespace DaemonsMCP.Domain.Constants {
     public const string ResyncIndexCmd = "resync-index";
     public const string StatusIndexCmd = "status-index";
     public const string ChangeStatusIndexCmd = "change-status-index";
+
+    public const string SearchObjectHierarchyCmd = "search-object-hierarchy";
 
     public const string ListClassesCmd = "list-classes";
     public const string GetClassCmd = "get-class";
@@ -75,6 +78,8 @@ namespace DaemonsMCP.Domain.Constants {
     public const string ResyncIndexCmdDesc = "Resyncs the Index. The index will parse namespaces, classes and methods.  When a file changes file watchers detect and reindex within 5 seconds after first change and will run 5 second intervals until queue is cleared, processing batch at a time.";
     public const string StatusIndexCmdDesc = "Gets the status of the index service. Returns Currnet Counts and if it's Enabled or not.  Queue result is a snapshot of current count of files being indexed.";
     public const string ChangeStatusIndexCmdDesc = "Used to change the status of the index service. Enabled parameter, pass true to endable false to disable.  Active by default.";
+
+    public const string SearchObjectHierarchyDesc = "Searches the object hierarchy index for namespaces, classes, and methods matching the filters provided. All filters are optional, if not provided all namespaces, classes, and methods are returned.  Search is db table like list of results.";
 
     public const string ListClassesCmdDesc = "Lists indexed namespaces, classes in the index service. Filters are StringColumn.Contains filter value if non null";
     public const string GetClassCmdDesc = "Gets the class and its contents from the file. ";
@@ -127,6 +132,10 @@ namespace DaemonsMCP.Domain.Constants {
 
     public const string ForceRebuildOptionDesc = "Force a complete rebuild of every file in the index, otherwise only the changes will be processed";
     public const string ChangeStatusIndexEnableDesc = "Enable or disable the indexer, pass true to enable false to disable";
+
+    public const string SearchTermParamDesc = "The search term to look for in object identifiers";
+    public const string IdentifierTypeFilterParamDesc = "Filter by IdentifierTypeId types are: 1 namespace; 2 interface; 3 class; 4 method; 5 property; 6 field; 7 event; 8 method param ";
+    public const string ParentIdFilterParamDesc = "An ObjectHierarchyId to Filter by Parent of the ObjectHierarchy record, basically show siblings";
 
     public const string ClassFilterParamDesc = "Filter classes by name uses string.Contains in filter";
     public const string MethodFilterParamDesc = "Filter methods by name uses string.Contains in filter ";
