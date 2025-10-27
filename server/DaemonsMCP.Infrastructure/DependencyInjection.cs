@@ -40,6 +40,7 @@ public static class DependencyInjection {
     // Register Mcp Tools
     services.AddSingleton<IProjectToolsHandler, ProjectToolsHandler>();
     services.AddSingleton<IFileSystemToolsHandler, FileSystemToolsHandler>();
+    services.AddSingleton<IObjectHierarchyToolsHandler, ObjectHierarchyToolsHandler>();
 
     services.AddHostedService<McpServerHostedService>();
 
