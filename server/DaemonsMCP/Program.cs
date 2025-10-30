@@ -11,6 +11,7 @@ using DaemonsMCP.Application;
 using DaemonsMCP.Infrastructure.Services;
 using DaemonsMCP.Infrastructure;
 using DaemonsMCP.Domain.Constants;
+using DaemonsMCP.Domain.Extensions;
 using System.Reflection;
 
 namespace DaemonsMCP
@@ -58,7 +59,7 @@ namespace DaemonsMCP
 
     private static void ConfigureSerilog() {
       // Use the proper logs path from Cx.LogsAppPath
-      var logsPath = Cx.LogsAppPath;
+      var logsPath = CommonPath.LogsAppPath;
 
       Log.Logger = new LoggerConfiguration()
           .MinimumLevel.Debug()

@@ -1,5 +1,5 @@
 ﻿using DaemonsMCP.Domain.Constants;
-using DaemonsMCP.Infrastructure.Extensions;
+using DaemonsMCP.Domain.Extensions;
 using MCPSharp;
 using MediatR;
 using System;

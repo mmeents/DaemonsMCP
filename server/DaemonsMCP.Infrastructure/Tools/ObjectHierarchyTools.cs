@@ -1,5 +1,5 @@
 ﻿using DaemonsMCP.Domain.Constants;
-using DaemonsMCP.Infrastructure.Extensions;
+using DaemonsMCP.Domain.Extensions;
 using DaemonsMCP.Domain.Models;
 using MCPSharp;
 using System;

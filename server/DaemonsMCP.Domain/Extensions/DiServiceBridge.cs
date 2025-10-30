@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DaemonsMCP.Infrastructure.Extensions {
+namespace DaemonsMCP.Domain.Extensions {
   public static class DIServiceBridge {
     private static IServiceProvider? _serviceProvider;
 

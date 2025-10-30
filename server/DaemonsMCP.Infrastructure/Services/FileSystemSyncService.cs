@@ -8,26 +8,32 @@ using System.Diagnostics;
 using DaemonsMCP.Application.FileSystem.Services;
 using DaemonsMCP.Domain.Entities;
 using DaemonsMCP.Domain.Repositories;
+using DaemonsMCP.Domain.Models;
 
 namespace DaemonsMCP.Infrastructure.Services { 
 
   public class FileSystemSyncService : IFileSystemSyncService {
-    private readonly IFileSystemNodeRepository _nodeRepository;
+    private readonly IFileSystemNodeRepository _fileSystemRepository;
     private readonly ISettingRepository _settingRepository;
     private readonly IIndexQueueRepository _indexQueueRepository;
+    private readonly IValidationService _validationService;
 
     public FileSystemSyncService(
-        IFileSystemNodeRepository nodeRepository,
+        IFileSystemNodeRepository fileSystemRepository,
         ISettingRepository settingRepository,
-        IIndexQueueRepository indexQueueRepository) {
-      _nodeRepository = nodeRepository;
+        IIndexQueueRepository indexQueueRepository,
+        IValidationService validationService) 
+    {
+      _fileSystemRepository = fileSystemRepository;
       _settingRepository = settingRepository;
       _indexQueueRepository = indexQueueRepository;
+      _validationService = validationService;
     }
 
     public async Task<SyncResult> SyncProjectAsync(
         DaemonsMCP.Domain.Entities.Project project,
-        CancellationToken cancellationToken = default) {
+        CancellationToken cancellationToken = default) 
+    {
       var stopwatch = Stopwatch.StartNew();
 
       // Validate root path exists
@@ -36,10 +42,10 @@ namespace DaemonsMCP.Infrastructure.Services {
       }
 
       // Load filter settings
-      var filters = await LoadFiltersAsync(cancellationToken);
+      var filters = await _validationService.GetFileSystemFiltersAsync(cancellationToken);
 
       // Step 1: Load existing DB state into dictionary for fast lookup
-      var existingNodes = await _nodeRepository.GetByProjectIdAsync(project.Id, cancellationToken);
+      var existingNodes = await _fileSystemRepository.GetByProjectIdAsync(project.Id, cancellationToken);
       var existingByPath = existingNodes.ToDictionary(n => n.RelativePath, StringComparer.OrdinalIgnoreCase);
 
       // Step 2: Scan filesystem and build what SHOULD exist
@@ -78,11 +84,11 @@ namespace DaemonsMCP.Infrastructure.Services {
       var dirsToDelete = toDelete.Where(n => n.IsDirectory).OrderByDescending(n => n.RelativePath.Length).ToList();
 
       foreach (var node in filesToDelete) {
-        await _nodeRepository.DeleteAsync(node, cancellationToken);
+        await _fileSystemRepository.DeleteAsync(node, cancellationToken);
       }
 
       foreach (var node in dirsToDelete) {
-        await _nodeRepository.DeleteAsync(node, cancellationToken);
+        await _fileSystemRepository.DeleteAsync(node, cancellationToken);
       }
 
       // Add directories first (top-down), then files
@@ -95,11 +101,11 @@ namespace DaemonsMCP.Infrastructure.Services {
 
       // Update existing nodes
       foreach (var node in toUpdate) {
-        await _nodeRepository.UpdateAsync(node, cancellationToken);
+        await _fileSystemRepository.UpdateAsync(node, cancellationToken);
       }
 
       // Step 5: Save all changes
-      await _nodeRepository.SaveChangesAsync(cancellationToken);
+      await _fileSystemRepository.SaveChangesAsync(cancellationToken);
 
       stopwatch.Stop();
 
@@ -112,33 +118,7 @@ namespace DaemonsMCP.Infrastructure.Services {
           Duration: stopwatch.Elapsed
       );
     }
-
-    private async Task<FileSystemFilters> LoadFiltersAsync(CancellationToken cancellationToken) {
-      var settings = await _settingRepository.GetAllAsDictionaryAsync(cancellationToken);
-
-      var blockedFolders = ParseCommaSeparated(settings.GetValueOrDefault("FileSystem.BlockedFolders", ""));
-      var blockedExtensions = ParseCommaSeparated(settings.GetValueOrDefault("FileSystem.BlockedExtensions", ""));
-      var allowedExtensions = ParseCommaSeparated(settings.GetValueOrDefault("FileSystem.AllowedExtensions", ""));
-      var blockedFiles = ParseCommaSeparated(settings.GetValueOrDefault("FileSystem.BlockedFiles", ""));
-
-      return new FileSystemFilters(
-          blockedFolders,
-          blockedExtensions,
-          allowedExtensions,
-          blockedFiles
-      );
-    }
-
-    private HashSet<string> ParseCommaSeparated(string value) {
-      if (string.IsNullOrWhiteSpace(value)) {
-        return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-      }
-
-      return value
-          .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-          .ToHashSet(StringComparer.OrdinalIgnoreCase);
-    }
-
+    
     private List<FileSystemNode> ScanFileSystem(DaemonsMCP.Domain.Entities.Project project, string rootPath, FileSystemFilters filters) {
       var nodes = new List<FileSystemNode>();
       var rootDir = new DirectoryInfo(rootPath);
@@ -323,11 +303,11 @@ namespace DaemonsMCP.Infrastructure.Services {
             }
           }
 
-          var addedNode = await _nodeRepository.AddAsync(node, cancellationToken);       
+          var addedNode = await _fileSystemRepository.AddAsync(node, cancellationToken);       
         }
 
         // Save after each level so new nodes get IDs for the next level
-        await _nodeRepository.SaveChangesAsync(cancellationToken);
+        await _fileSystemRepository.SaveChangesAsync(cancellationToken);
 
         // Update lookup with newly added nodes
         foreach (var node in level) {
@@ -351,14 +331,5 @@ namespace DaemonsMCP.Infrastructure.Services {
       return relativePath.Substring(0, lastSeparator);
     }
   }
-
-
-  // Helper record for filter settings
-  internal record FileSystemFilters(
-      HashSet<string> BlockedFolders,
-      HashSet<string> BlockedExtensions,
-      HashSet<string> AllowedExtensions,
-      HashSet<string> BlockedFiles
-  );
 
 }

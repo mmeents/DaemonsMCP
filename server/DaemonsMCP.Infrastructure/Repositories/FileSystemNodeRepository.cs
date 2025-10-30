@@ -79,11 +79,7 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
       // Update metadata if it's a file and size changed
       if (!isDirectory && fileSizeBytes.HasValue && existing.SizeInBytes != fileSizeBytes.Value) {
         // Re-attach and update
-        var tracked = await _context.FileSystemNodes
-            .FirstOrDefaultAsync(
-                n => n.Id == existing.Id,
-                cancellationToken);
-
+        var tracked = await _context.FileSystemNodes.FirstOrDefaultAsync( n => n.Id == existing.Id, cancellationToken);
         if (tracked != null) {
           tracked.UpdateMetadata(fileSizeBytes.Value, DateTime.UtcNow);
           await _context.SaveChangesAsync(cancellationToken);
@@ -103,18 +99,11 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
     // Recursively ensure parent directory exists
     // Note: IsPathSafe will be checked again in the recursive call
     if (!string.IsNullOrEmpty(parentPath)) {
-      var parent = await GetOrCreateAsync(
-          projectId,
-          parentPath,
-          isDirectory: true, // parent is always a directory
-          cancellationToken: cancellationToken);
-      
-      // If parent path was unsafe, we can't create this node either
-      if (parent == null) {
+      var parent = await GetOrCreateAsync(projectId, parentPath, true, cancellationToken: cancellationToken);            
+      if (parent == null) {  // If parent path was unsafe, we can't create this node either
         _logger.LogWarning("Cannot create node {Path} because parent path is unsafe", normalizedPath);
         return null;
-      }
-      
+      }      
       parentId = parent.Id;
     }
 
@@ -123,13 +112,8 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
     if (isDirectory) {
       node = FileSystemNode.CreateDirectory(projectId, fileName, normalizedPath, parentId);
     } else {
-      node = FileSystemNode.CreateFile(
-          projectId,
-          fileName,
-          normalizedPath,
-          fileSizeBytes ?? 0,
-          extension ?? string.Empty,
-          parentId);
+      node = FileSystemNode.CreateFile(projectId,fileName,normalizedPath,fileSizeBytes ?? 0,
+        extension ?? string.Empty, parentId);
     }
 
     _context.FileSystemNodes.Add(node);
@@ -176,11 +160,8 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
   }
 
   public async Task<FileSystemNode?> AddAsync(FileSystemNode node, CancellationToken cancellationToken = default) {
-    if (!IsPathSafe(node.RelativePath)) {
-      return null;
-    }
-    await _context.FileSystemNodes.AddAsync(node, cancellationToken);
-    return node;
+    var newNode = await GetOrCreateAsync( node.ProjectId,  node.RelativePath, false, node.SizeInBytes, cancellationToken );       
+    return newNode;
   }
 
   public async Task AddRangeAsync(IEnumerable<FileSystemNode> nodes, CancellationToken cancellationToken = default) {

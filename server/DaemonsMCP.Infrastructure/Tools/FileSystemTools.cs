@@ -1,5 +1,5 @@
 ﻿using DaemonsMCP.Domain.Constants;
-using DaemonsMCP.Infrastructure.Extensions;
+using DaemonsMCP.Domain.Extensions;
 using MCPSharp;
 using System;
 using System.Collections.Generic;
@@ -40,7 +40,26 @@ namespace DaemonsMCP.Infrastructure.Tools {
       return await GetTools().GetFile(projectId, fileSystemNodeId);
     }
 
+    [McpTool(Cx.InsertFileCmd, Cx.InsertFileDesc)]
+    public static async Task<string> CreateProjectFile(
+    [Description(Cx.ProjectParamDesc)] int projectId,
+    [Description(Cx.FilePathParamDesc)] string relativePath,
+    [Description(Cx.FileContentParamDesc)] string content)
+    => await GetTools().CreateProjectFile(projectId, relativePath, content).ConfigureAwait(false);
 
+    [McpTool(Cx.UpdateFileCmd, Cx.UpdateFileDesc)]
+    public static async Task<object> UpdateProjectFile(
+    [Description(Cx.ProjectParamDesc)] int projectId,
+    [Description(Cx.FileSystemNodeIdParamDesc)] int fileSystemNodeId,
+    [Description(Cx.FileContentParamDesc)] string content)
+    => await GetTools().UpdateProjectFile(projectId, fileSystemNodeId, content).ConfigureAwait(false);
+
+
+    [McpTool(Cx.CreateFolderCmd, Cx.CreateFolderDesc)]
+    public static async Task<object> CreateProjectDirectory(
+    [Description(Cx.ProjectParamDesc)] int projectId,
+    [Description(Cx.FolderPathParamDesc)] string path)
+    => await GetTools().CreateFolderAsync(projectId, path).ConfigureAwait(false);
 
   }
 }

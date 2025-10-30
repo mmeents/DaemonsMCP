@@ -122,7 +122,7 @@ namespace DaemonsMCP.Domain.Constants {
 
     public const string FolderPathParamDesc = "Path to the directory. (relative to project root) If empty, the root of the project is used.";
     public const string FolderFilterParamDesc = "Filter for directories. (See Directory.GetDirectories SearchPattern) If empty, * is used.";
-    public const string FilePathParamDesc = "Path to the file. (relative to project root)";
+    public const string FilePathParamDesc = "Path to the file. (relative to project root) should include file name.";
     public const string FileFilterParamDesc = "Filter for files. (See Directory.GetFiles SearchPattern specifically) If empty, * is used.";
 
     public const string FileContentParamDesc = "File content to write";
@@ -180,36 +180,13 @@ namespace DaemonsMCP.Domain.Constants {
     public const string StatusComplete = "Completed";
     public const string StatusCancelled = "Cancelled";
 
-    public static string ResolvePath(this string path) {
-      // Handle relative paths
-      if (!Path.IsPathRooted(path)) {
-        // Relative to config file directory or current directory
-        return Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), path));
-      }
+    public const string MaxFileSizeSetting = "MaxFileSize"; // e.g. 10MB
+    public const string MaxFileWriteSizeSetting = "MaxFileWriteSize"; // e.g. 5MB
+    public const string AllowFileWritesSetting = "AllowFileWrites"; // true/false
+    public const string LogLevelSetting = "LogLevel"; // e.g. Information, Debug, Error
+    public const string NodesFilePathSetting = "NodesFilePath"; // path to Nodes file
 
-      // Handle cross-platform path separators
-      return Path.GetFullPath(path);
-    }
+  
 
-
-    public static string CommonAppPath {
-      get {
-        string commonPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), Cx.AppName).ResolvePath();
-        if (!Directory.Exists(commonPath)) {
-          Directory.CreateDirectory(commonPath);
-        }
-        return commonPath;
-      }
-    }
-
-    public static string LogsAppPath {
-      get {
-        string logsPath = Path.Combine(CommonAppPath, "logs").ResolvePath();
-        if (!Directory.Exists(logsPath)) {
-          Directory.CreateDirectory(logsPath);
-        }
-        return logsPath;
-      }
-    }
   }
 }

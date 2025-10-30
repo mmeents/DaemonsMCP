@@ -14,17 +14,17 @@ using System.Threading.Tasks;
 
 namespace DaemonsMCP.Infrastructure.Services {
 
-  public class FileWatcherCoordinatorService : BackgroundService {
+  public class FileWatcherHostedService : BackgroundService {
     private readonly IServiceProvider _serviceProvider;
     private readonly IProjectFileWatcherFactory _watcherFactory;
-    private readonly ILogger<FileWatcherCoordinatorService> _logger;
+    private readonly ILogger<FileWatcherHostedService> _logger;
     private readonly Dictionary<int, ProjectFileWatcherService> _watchers = new();
     private readonly Lock _watchersLock = new();
 
-    public FileWatcherCoordinatorService(
+    public FileWatcherHostedService(
         IServiceProvider serviceProvider,
         IProjectFileWatcherFactory watcherFactory,        
-        ILogger<FileWatcherCoordinatorService> logger) 
+        ILogger<FileWatcherHostedService> logger) 
     {
       _serviceProvider = serviceProvider;
       _watcherFactory = watcherFactory;      
@@ -32,7 +32,7 @@ namespace DaemonsMCP.Infrastructure.Services {
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
-      _logger.LogInformation("🚀 FileWatcherCoordinatorService starting");
+      _logger.LogInformation("🚀 FileWatcherHostedService starting");
 
       // Wait a bit for app to fully start
       await Task.Delay(2000, stoppingToken);
@@ -118,7 +118,7 @@ namespace DaemonsMCP.Infrastructure.Services {
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken) {
-      _logger.LogInformation("🛑 Stopping FileWatcherCoordinatorService");
+      _logger.LogInformation("🛑 Stopping FileWatcherHostedService");
 
       lock (_watchersLock) {
         foreach (var watcher in _watchers.Values) {

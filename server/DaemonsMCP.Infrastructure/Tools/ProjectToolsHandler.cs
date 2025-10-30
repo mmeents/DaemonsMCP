@@ -1,7 +1,7 @@
 ﻿using DaemonsMCP.Application.Projects.Queries.GetAllProjects;
 using DaemonsMCP.Domain.Constants;
 using DaemonsMCP.Domain.Models;
-using DaemonsMCP.Infrastructure.Extensions;
+using DaemonsMCP.Domain.Extensions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

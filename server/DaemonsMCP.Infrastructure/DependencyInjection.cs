@@ -11,9 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DaemonsMCP.Infrastructure;
 
 public static class DependencyInjection {
-  public static IServiceCollection AddInfrastructure(
-      this IServiceCollection services,
-      IConfiguration configuration) {
+  public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration) {
 
     // Add DbContext
     services.AddDbContext<DaemonsMcpDbContext>(options =>
@@ -29,13 +27,14 @@ public static class DependencyInjection {
     services.AddScoped<IIdentifierTypeRepository, IdentifierTypeRepository>();
     services.AddScoped<IIndexQueueRepository, IndexQueueRepository>();
     services.AddScoped<IIndexingService, IndexingService>();
+    services.AddScoped<IValidationService, ValidationService>();
 
     // Register Services
     services.AddScoped<IFileSystemSyncService, FileSystemSyncService>();
 
     // Register file watching
     services.AddSingleton<IProjectFileWatcherFactory, ProjectFileWatcherFactory>();
-    services.AddHostedService<FileWatcherCoordinatorService>();
+    services.AddHostedService<FileWatcherHostedService>();
 
     // Register Mcp Tools
     services.AddSingleton<IProjectToolsHandler, ProjectToolsHandler>();
