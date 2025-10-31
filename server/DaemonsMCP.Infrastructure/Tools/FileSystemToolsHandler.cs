@@ -1,46 +1,28 @@
-﻿using Azure;
-using DaemonsMCP.Application.FileSystem.Queries.GetFileContents;
+﻿using DaemonsMCP.Application.FileSystem.Queries.GetFileContents;
 using DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem;
 using DaemonsMCP.Domain.Constants;
-using DaemonsMCP.Domain.Entities;
 using DaemonsMCP.Domain.Models;
 using DaemonsMCP.Domain.Extensions;
 using DaemonsMCP.Infrastructure.Services;
 using MediatR;
-using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using DaemonsMCP.Domain.Repositories;
 
 namespace DaemonsMCP.Infrastructure.Tools {
   public class FileSystemToolsHandler: IFileSystemToolsHandler {
     private ILogger<FileSystemToolsHandler> _logger;
     private IServiceScopeFactory _scopeFactory;
-    private IValidationService _validationService;
-    private IFileSystemNodeRepository _fileSystemNodeRepository;
-    private IIndexQueueRepository _indexQueueRepository;
 
     public FileSystemToolsHandler(
-      ILogger<FileSystemToolsHandler> logger,
-      IValidationService validationService,
-      IFileSystemNodeRepository fileSystemNodeRepository,
-      IIndexQueueRepository indexQueueRepository,
+      ILogger<FileSystemToolsHandler> logger,            
       IServiceScopeFactory scopeFactory
     ) 
     {
       _logger = logger;
-      _scopeFactory = scopeFactory;
-      _validationService = validationService;
-      _fileSystemNodeRepository = fileSystemNodeRepository;
-      _indexQueueRepository = indexQueueRepository;
+      _scopeFactory = scopeFactory;      
     }
 
     public async Task<string> SearchFileSystem(
@@ -95,6 +77,9 @@ namespace DaemonsMCP.Infrastructure.Tools {
     public async Task<string> CreateProjectFile( int projectId, string relativePath, string content) {
       string path = relativePath;
       try {
+        using var scope = _scopeFactory.CreateScope();
+        var _validationService = scope.ServiceProvider.GetRequiredService<IValidationService>();
+        var _fileSystemNodeRepository = scope.ServiceProvider.GetRequiredService<IFileSystemNodeRepository>();
 
         _validationService.ValidatePath(path);
         _validationService.ValidateContent(content);
@@ -149,6 +134,9 @@ namespace DaemonsMCP.Infrastructure.Tools {
 
     public async Task<string> UpdateProjectFile( int projectId, int fileSystemNodeId, string content) {
       try {
+        using var scope = _scopeFactory.CreateScope();
+        var _validationService = scope.ServiceProvider.GetRequiredService<IValidationService>();
+        var _fileSystemNodeRepository = scope.ServiceProvider.GetRequiredService<IFileSystemNodeRepository>();
 
         var fileSystemNode = await _fileSystemNodeRepository.GetByIdAsync(fileSystemNodeId);
         if (fileSystemNode == null || fileSystemNode.ProjectId != projectId || fileSystemNode.IsDirectory) {
@@ -199,6 +187,9 @@ namespace DaemonsMCP.Infrastructure.Tools {
 
     public async Task<string> CreateFolderAsync(int projectId, string path) {
       try {
+        using var scope = _scopeFactory.CreateScope();
+        var _validationService = scope.ServiceProvider.GetRequiredService<IValidationService>();
+        var _fileSystemNodeRepository = scope.ServiceProvider.GetRequiredService<IFileSystemNodeRepository>();
 
         var context = await _validationService.ValidateAndPrepareFolder(projectId, path, true);
         var fullDirPath = context.FullPath;
