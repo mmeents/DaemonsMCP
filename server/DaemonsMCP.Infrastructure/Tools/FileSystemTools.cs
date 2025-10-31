@@ -48,7 +48,7 @@ namespace DaemonsMCP.Infrastructure.Tools {
     => await GetTools().CreateProjectFile(projectId, relativePath, content).ConfigureAwait(false);
 
     [McpTool(Cx.UpdateFileCmd, Cx.UpdateFileDesc)]
-    public static async Task<object> UpdateProjectFile(
+    public static async Task<string> UpdateProjectFile(
     [Description(Cx.ProjectParamDesc)] int projectId,
     [Description(Cx.FileSystemNodeIdParamDesc)] int fileSystemNodeId,
     [Description(Cx.FileContentParamDesc)] string content)
@@ -56,10 +56,10 @@ namespace DaemonsMCP.Infrastructure.Tools {
 
 
     [McpTool(Cx.CreateFolderCmd, Cx.CreateFolderDesc)]
-    public static async Task<object> CreateProjectDirectory(
+    public static async Task<string> CreateProjectDirectory(
     [Description(Cx.ProjectParamDesc)] int projectId,
     [Description(Cx.FolderPathParamDesc)] string path)
-    => await GetTools().CreateFolderAsync(projectId, path).ConfigureAwait(false);
+    => await GetTools().CreateFolder(projectId, path).ConfigureAwait(false);
 
   }
 }

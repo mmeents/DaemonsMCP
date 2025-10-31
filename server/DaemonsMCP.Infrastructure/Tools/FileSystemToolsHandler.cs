@@ -103,7 +103,7 @@ namespace DaemonsMCP.Infrastructure.Tools {
         // Return success info
         var fileInfo = new FileInfo(fullPath);
 
-        var fsn = await _fileSystemNodeRepository.GetOrCreateAsync(
+        _ = await _fileSystemNodeRepository.GetOrCreateAsync(
           projectId,
           context.RelativePath,
           isDirectory: false,
@@ -185,7 +185,7 @@ namespace DaemonsMCP.Infrastructure.Tools {
       }
     }
 
-    public async Task<string> CreateFolderAsync(int projectId, string path) {
+    public async Task<string> CreateFolder(int projectId, string path) {
       try {
         using var scope = _scopeFactory.CreateScope();
         var _validationService = scope.ServiceProvider.GetRequiredService<IValidationService>();
@@ -194,14 +194,12 @@ namespace DaemonsMCP.Infrastructure.Tools {
         var context = await _validationService.ValidateAndPrepareFolder(projectId, path, true);
         var fullDirPath = context.FullPath;
 
-        // Check if directory already exists
-        if (Directory.Exists(fullDirPath)) {
-          throw new InvalidOperationException($"Directory already exists: {path}");
+        // In CreateProjectFile
+        var directory = Path.GetDirectoryName(fullDirPath);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory)) {
+          Directory.CreateDirectory(directory);
         }
-
-        // Create directory       
-        Directory.CreateDirectory(fullDirPath);
-        _fileSystemNodeRepository.GetOrCreateAsync(projectId, context.RelativePath, isDirectory: true, fileSizeBytes: 0 ).Wait();
+        await _fileSystemNodeRepository.GetOrCreateAsync(projectId, context.RelativePath, isDirectory: true, fileSizeBytes: 0 );
 
         // Return success info
         var dirInfo = new DirectoryInfo(fullDirPath);        
@@ -241,7 +239,7 @@ namespace DaemonsMCP.Infrastructure.Tools {
 
     public Task<string> UpdateProjectFile(int projectId, int fileSystemNodeId, string content);
 
-    public Task<string> CreateFolderAsync(int projectId, string path);
+    public Task<string> CreateFolder(int projectId, string path);
   }
 
 }
