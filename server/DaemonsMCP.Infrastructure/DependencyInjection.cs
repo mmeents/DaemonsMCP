@@ -26,6 +26,8 @@ public static class DependencyInjection {
     services.AddScoped<IIdentifierRepository, IdentifierRepository>();
     services.AddScoped<IIdentifierTypeRepository, IdentifierTypeRepository>();
     services.AddScoped<IIndexQueueRepository, IndexQueueRepository>();
+    services.AddScoped<IItemRepository, ItemRepository>();
+    services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
     services.AddScoped<IIndexingService, IndexingService>();
     services.AddScoped<IValidationService, ValidationService>();
 

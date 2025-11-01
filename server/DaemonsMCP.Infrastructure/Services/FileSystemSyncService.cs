@@ -9,6 +9,7 @@ using DaemonsMCP.Application.FileSystem.Services;
 using DaemonsMCP.Domain.Entities;
 using DaemonsMCP.Domain.Repositories;
 using DaemonsMCP.Domain.Models;
+using Microsoft.Extensions.Logging;
 
 namespace DaemonsMCP.Infrastructure.Services { 
 
@@ -17,17 +18,20 @@ namespace DaemonsMCP.Infrastructure.Services {
     private readonly ISettingRepository _settingRepository;
     private readonly IIndexQueueRepository _indexQueueRepository;
     private readonly IValidationService _validationService;
+    private readonly ILogger<FileSystemSyncService> _logger;
 
     public FileSystemSyncService(
         IFileSystemNodeRepository fileSystemRepository,
         ISettingRepository settingRepository,
         IIndexQueueRepository indexQueueRepository,
-        IValidationService validationService) 
+        IValidationService validationService,
+        ILogger<FileSystemSyncService> logger) 
     {
       _fileSystemRepository = fileSystemRepository;
       _settingRepository = settingRepository;
       _indexQueueRepository = indexQueueRepository;
       _validationService = validationService;
+      _logger = logger;
     }
 
     public async Task<SyncResult> SyncProjectAsync(
@@ -287,35 +291,46 @@ namespace DaemonsMCP.Infrastructure.Services {
           .OrderBy(g => g.Key)
           .ToList();
 
+      
       // Process level by level so parents always exist before children
       foreach (var level in nodesByDepth) {
+        List<FileSystemNode> addedNodes = new List<FileSystemNode>();
         foreach (var node in level) {
-          // Resolve parent ID by finding parent directory path
-          var parentPath = GetParentPath(node.RelativePath);
+          try { 
+            // Resolve parent ID by finding parent directory path
+            var parentPath = GetParentPath(node.RelativePath);
 
-          if (!string.IsNullOrEmpty(parentPath)) {
-            // Check if parent exists in DB (including nodes we just added)
-            if (existingByPath.TryGetValue(parentPath, out var parentNode)) {
-              // Use reflection to set ParentId since it's private
-              typeof(FileSystemNode)
-                  .GetProperty("ParentId")!
-                  .SetValue(node, parentNode.Id);
+            if (!string.IsNullOrEmpty(parentPath)) {
+              // Check if parent exists in DB (including nodes we just added)
+              if (existingByPath.TryGetValue(parentPath, out var parentNode)) {
+                // Use reflection to set ParentId since it's private
+                typeof(FileSystemNode)
+                    .GetProperty("ParentId")!
+                    .SetValue(node, parentNode.Id);
+              }
             }
-          }
+            
+            var addedNode = await _fileSystemRepository.AddAsync(node, cancellationToken);       
+            if (addedNode != null) {
+              addedNodes.Add(addedNode);
+            }
 
-          var addedNode = await _fileSystemRepository.AddAsync(node, cancellationToken);       
-        }
-
-        // Save after each level so new nodes get IDs for the next level
-        await _fileSystemRepository.SaveChangesAsync(cancellationToken);
+          } catch (Exception ex) { 
+            _logger.LogError(ex, "Error adding FileSystemNode: {Path}", node.RelativePath);
+          } 
+        }        
 
         // Update lookup with newly added nodes
-        foreach (var node in level) {
+        foreach (var node in addedNodes) {
           existingByPath[node.RelativePath] = node;
           // If it's a code file (.cs), queue it for indexing
-          if (!node.IsDirectory && node.Extension == "cs") {
-            var queueItem = IndexQueue.Create(projectId, node.Id, node.RelativePath);
-            await _indexQueueRepository.AddAsync(queueItem);
+          if (!node.IsDirectory && node.Extension == ".cs") {
+            try { 
+              var queueItem = IndexQueue.Create(projectId, node.Id, node.RelativePath);
+              await _indexQueueRepository.AddAsync(queueItem);
+            } catch (Exception ex) {
+              _logger.LogError(ex, "Error queuing file for indexing: {Path}", node.RelativePath);
+            }
           }
         }
       }

@@ -99,30 +99,44 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
     // Recursively ensure parent directory exists
     // Note: IsPathSafe will be checked again in the recursive call
     if (!string.IsNullOrEmpty(parentPath)) {
-      var parent = await GetOrCreateAsync(projectId, parentPath, true, cancellationToken: cancellationToken);            
-      if (parent == null) {  // If parent path was unsafe, we can't create this node either
-        _logger.LogWarning("Cannot create node {Path} because parent path is unsafe", normalizedPath);
+      FileSystemNode parent;
+      try { 
+        parent = await GetOrCreateAsync(projectId, parentPath, isDirectory: true, cancellationToken: cancellationToken);
+        if (parent == null) {  // If parent path was unsafe, we can't create this node either
+          _logger.LogWarning("Cannot create node {Path} because parent path is unsafe", normalizedPath);
+          return null;
+        }
+      } catch (Exception ex) {
+        _logger.LogError(ex, "Error creating parent directory for path: {Path}", normalizedPath);
         return null;
-      }      
+      }            
       parentId = parent.Id;
     }
 
     // Create the node
     FileSystemNode node;
-    if (isDirectory) {
-      node = FileSystemNode.CreateDirectory(projectId, fileName, normalizedPath, parentId);
-    } else {
-      node = FileSystemNode.CreateFile(projectId,fileName,normalizedPath,fileSizeBytes ?? 0,
-        extension ?? string.Empty, parentId);
+    try { 
+      if (isDirectory) {
+        node = FileSystemNode.CreateDirectory(projectId, fileName, normalizedPath, parentId);
+      } else {
+        node = FileSystemNode.CreateFile(projectId,fileName,normalizedPath,fileSizeBytes ?? 0,
+          extension ?? string.Empty, parentId);
+      }
+
+      _context.FileSystemNodes.Add(node);
+      await _context.SaveChangesAsync(cancellationToken);
+
+      _logger.LogDebug("Created FileSystemNode: {Path} (IsDirectory: {IsDirectory}, ParentId: {ParentId})",
+          normalizedPath, isDirectory, parentId);
+
+      return node;
+
+      } catch (Exception ex) {
+        _logger.LogError(ex, "Error creating FileSystemNode: {Path} (IsDirectory: {IsDirectory}, ParentId: {ParentId})", 
+          normalizedPath, isDirectory, parentId);
+        return null;
     }
-
-    _context.FileSystemNodes.Add(node);
-    await _context.SaveChangesAsync(cancellationToken);
-
-    _logger.LogDebug("Created FileSystemNode: {Path} (IsDirectory: {IsDirectory}, ParentId: {ParentId})",
-        normalizedPath, isDirectory, parentId);
-
-    return node;
+    
   }
 
   public async Task<List<FileSystemNode>> GetByProjectIdAsync(int projectId, CancellationToken cancellationToken = default) {
@@ -160,7 +174,12 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
   }
 
   public async Task<FileSystemNode?> AddAsync(FileSystemNode node, CancellationToken cancellationToken = default) {
-    var newNode = await GetOrCreateAsync( node.ProjectId,  node.RelativePath, false, node.SizeInBytes, cancellationToken );       
+    var newNode = await GetOrCreateAsync( node.ProjectId,  node.RelativePath, node.IsDirectory, node.SizeInBytes, cancellationToken );
+    if (newNode == null) {
+      _logger.LogWarning("Failed to add FileSystemNode: {Path} for ProjectId: {ProjectId}", node.RelativePath, node.ProjectId);
+      return null;
+    }
+    await SaveChangesAsync(cancellationToken);
     return newNode;
   }
 
