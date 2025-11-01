@@ -17,6 +17,10 @@ public class DaemonsMcpDbContext : DbContext {
 
   public DbSet<IndexQueue> IndexQueues => Set<IndexQueue>();
 
+  // Nodes system
+  public DbSet<Item> Items => Set<Item>();
+  public DbSet<ItemType> ItemTypes => Set<ItemType>();  
+
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     base.OnModelCreating(modelBuilder);
 

@@ -166,18 +166,35 @@ namespace DaemonsMCP.Domain.Constants {
     public const string ItemsParamDesc = "The list of items to add to the todo list as child Nodes of the list.";
     public const string ItemIdParamDesc = $"The int Id of the todo item node to mark done or restore. Additionally you could use this Id with {Cx.GetNodesByIdCmd}. ";
 
-    // Nodes Status and Type defaults
+    // Well-known ItemType IDs (must match seed data in ItemTypeConfiguration)
+    public const int ItemTypeIdNone = 1;
+    public const int ItemTypeIdCategories = 2;
+    public const int ItemTypeIdItemTypes = 3;
+    public const int ItemTypeIdStatusTypes = 4;
+    public const int ItemTypeIdTodo = 5;
+    public const int ItemTypeIdReadme = 6;
+    public const int ItemTypeIdNote = 7;
+    public const int StatusTypeIdNotStarted = 10;
+    public const int StatusTypeIdInProgress = 11;
+    public const int StatusTypeIdComplete = 12;
+    public const int StatusTypeIdOnHold = 13;
+    public const int StatusTypeIdCancelled = 14;
+
+    // Nodes Status and Type defaults (names)
     public const string TypeNone = "None";
-    public const string TypeInternalRoot = "Internal Categories";
-    public const string TypeStatusTypes = "Status Types";
-    public const string TypeItemTypes = "Item Types";
+    public const string TypeInternalRoot = "Categories";
+    public const string TypeStatusTypes = "StatusTypes";
+    public const string TypeItemTypes = "ItemTypes";
     public const string TypeTodo = "Todo";
+    public const string TypeReadme = "Readme";
+    public const string TypeNote = "Note";
 
     public const int TypeTodoMaxDepth = 3;
 
     public const string StatusStart = "Not Started";
     public const string StatusInProgress = "In Progress";
-    public const string StatusComplete = "Completed";
+    public const string StatusComplete = "Complete";
+    public const string StatusOnHold = "On Hold";
     public const string StatusCancelled = "Cancelled";
 
     public const string MaxFileSizeSetting = "MaxFileSize"; // e.g. 10MB
