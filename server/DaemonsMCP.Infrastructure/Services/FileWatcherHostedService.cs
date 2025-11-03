@@ -37,17 +37,16 @@ namespace DaemonsMCP.Infrastructure.Services {
       // Wait a bit for app to fully start
       await Task.Delay(2000, stoppingToken);
 
-      using var scope = _serviceProvider.CreateScope();
-      var projectRepository = scope.ServiceProvider.GetRequiredService<IProjectRepository>();
-      var indexingService = scope.ServiceProvider.GetRequiredService<IIndexingService>();
-      var fileSystemSyncService = scope.ServiceProvider.GetRequiredService<IFileSystemSyncService>();
-
       // Load all projects and start watchers
-      var projects = await projectRepository.GetAllAsync(stoppingToken);
+      List<DaemonsMCP.Domain.Entities.Project> projects;
+      using (var scope = _serviceProvider.CreateScope()) {
+        var projectRepository = scope.ServiceProvider.GetRequiredService<IProjectRepository>();
+        projects = await projectRepository.GetAllAsync(stoppingToken);
+      }
 
       foreach (var project in projects) {   
         if (project != null) { 
-          StartWatcherForProject(project, fileSystemSyncService, indexingService, stoppingToken);
+          StartWatcherForProject(project, stoppingToken);
         }
       }
 
@@ -58,7 +57,7 @@ namespace DaemonsMCP.Infrastructure.Services {
       // Initial sync and indexing for all projects
       foreach (var project in projects) {
         if (project != null) {
-          await RunIndexingForProject(project, fileSystemSyncService, indexingService, stoppingToken);     
+          await RunIndexingForProjectAsync(project.Id, stoppingToken);     
         }
       }
 
@@ -66,24 +65,35 @@ namespace DaemonsMCP.Infrastructure.Services {
 
     }
 
-    private async Task RunIndexingForProject(
-        DaemonsMCP.Domain.Entities.Project project,
-        IFileSystemSyncService fileSystemSyncService,
-        IIndexingService indexingService,
-        CancellationToken cancellationToken) 
-    {      
-        try {
-          await fileSystemSyncService.SyncProjectAsync(project, cancellationToken);
-          await indexingService.RunAsync(project.Id, cancellationToken);
-        } catch (Exception ex) {
-          _logger.LogError(ex, "Error running indexing for project {Id}", project.Id);
-        }      
+    /// <summary>
+    /// Create a NEW scope for each indexing run - this prevents DbContext concurrency issues!
+    /// </summary>
+    private async Task RunIndexingForProjectAsync(int projectId, CancellationToken cancellationToken) {      
+      try {
+        // 🎯 KEY FIX: Create NEW scope for THIS operation
+        using var scope = _serviceProvider.CreateScope();
+        var fileSystemSyncService = scope.ServiceProvider.GetRequiredService<IFileSystemSyncService>();
+        var indexingService = scope.ServiceProvider.GetRequiredService<IIndexingService>();
+        var projectRepository = scope.ServiceProvider.GetRequiredService<IProjectRepository>();
+        
+        var project = await projectRepository.GetByIdAsync(projectId, cancellationToken);
+        if (project == null) {
+          _logger.LogWarning("Project {ProjectId} not found", projectId);
+          return;
+        }
+
+        await fileSystemSyncService.SyncProjectAsync(project, cancellationToken);
+        await indexingService.RunAsync(project.Id, cancellationToken);
+        
+        _logger.LogDebug("✅ Completed indexing for project {ProjectId}", projectId);
+      } catch (Exception ex) {
+        _logger.LogError(ex, "❌ Error running indexing for project {ProjectId}", projectId);
+      }
+      // Scope disposes here - DbContext gets cleaned up!
     }
 
     private void StartWatcherForProject(
-        DaemonsMCP.Domain.Entities.Project project,
-        IFileSystemSyncService fileSystemSyncService,
-        IIndexingService indexingService,        
+        DaemonsMCP.Domain.Entities.Project project,        
         CancellationToken cancellationToken) {
       lock (_watchersLock) {
         if (_watchers.ContainsKey(project.Id)) {
@@ -92,18 +102,15 @@ namespace DaemonsMCP.Infrastructure.Services {
         }
       }
 
-      using var scope = _serviceProvider.CreateScope();
-      var indexQueueRepository = scope.ServiceProvider.GetRequiredService<IIndexQueueRepository>();
-      var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
-
-      // Use factory to create watcher with proper DI
+      // Use factory to create watcher
       var watcher = _watcherFactory.Create(project.Id, project.RootPath);
 
       // Subscribe to IndexingRequested event
       watcher.IndexingRequested += (sender, projectId) => {
         _logger.LogDebug("⚡ Indexing requested for project {ProjectId}", projectId);
-        Task.Run(async () => {
-          await RunIndexingForProject(project, fileSystemSyncService, indexingService, cancellationToken);
+        // Fire and forget - each call creates its own scope
+        _ = Task.Run(async () => {
+          await RunIndexingForProjectAsync(projectId, cancellationToken);
         });
       };
 
