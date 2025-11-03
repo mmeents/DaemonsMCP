@@ -27,12 +27,7 @@ namespace DaemonsMCP.Infrastructure.Tools {
       _logger = logger;
       _scopeFactory = scopeFactory;      
     }
-
-    private IMediator GetMediator() {
-      using var scope = _scopeFactory.CreateScope();
-      return scope.ServiceProvider.GetRequiredService<IMediator>();
-    }
-
+    
     public async Task<string> SearchFileSystem(
         int projectId,
         string? filter,
@@ -42,10 +37,10 @@ namespace DaemonsMCP.Infrastructure.Tools {
         int pageSize = 20 ) 
     {
 
-      try {
-        // Create a scope to resolve scoped services like IMediator and repositories
-        
-        var mediator = GetMediator();
+      try {        
+
+        using var scope = _scopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();         
         
         var query = new SearchFileSystemQuery(
           projectId,
@@ -67,7 +62,8 @@ namespace DaemonsMCP.Infrastructure.Tools {
 
     public async Task<string> GetFile(int projectId, int fileSystemNodeId) {
       try {
-        var mediator = GetMediator();
+        using var scope = _scopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         var query = new GetFileContentsQuery(projectId, fileSystemNodeId);
         var result = await mediator.Send(query);
@@ -82,7 +78,9 @@ namespace DaemonsMCP.Infrastructure.Tools {
 
     public async Task<string> CreateProjectFile( int projectId, string relativePath, string content) {     
       try {
-        var mediator = GetMediator();
+        using var scope = _scopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
         var query = new CreateProjectFileCommand(
           projectId,
           relativePath,
