@@ -36,6 +36,8 @@ namespace DaemonsMCP.Infrastructure.Services {
       MCPServer.Register<ProjectTools>();
       MCPServer.Register<FileSystemTools>();
       MCPServer.Register<ObjectHierarchyTools>();
+      MCPServer.Register<ItemTools>();
+      MCPServer.Register<ItemTypeTools>();
 
       // Start MCPSharp server - blocks until cancellation
       await MCPServer.StartAsync(Cx.AppName, Cx.AppVersion);

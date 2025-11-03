@@ -107,6 +107,8 @@ public class ItemRepository : IItemRepository {
 
     if (parentId.HasValue) {
       query = query.Where(i => i.ParentId == parentId.Value);
+    } else { 
+      query = query.Where(i => i.ParentId == null);
     }
 
     return await query

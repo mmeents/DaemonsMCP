@@ -42,8 +42,6 @@ public static class DependencyInjection {
     services.AddSingleton<IProjectToolsHandler, ProjectToolsHandler>();
     services.AddSingleton<IFileSystemToolsHandler, FileSystemToolsHandler>();
     services.AddSingleton<IObjectHierarchyToolsHandler, ObjectHierarchyToolsHandler>();
-    services.AddSingleton<IItemToolsHandler, ItemToolsHandler>();
-    services.AddSingleton<IItemTypeToolsHandler, ItemTypeToolsHandler>();
 
     services.AddHostedService<McpServerHostedService>();
 

@@ -213,15 +213,5 @@ namespace DaemonsMCP.Infrastructure.Services {
 
   }
 
-  public interface IValidationService {
-
-    Task<FileValidationContext> ValidateAndPrepareFolder(int projectId, string relativePath, bool isNewFolder);
-
-    Task<FileValidationContext> ValidateAndPrepareFile(int projectId, string relativePath, bool isNewFile);
-    void ValidatePath(string path);
-    void ValidateContent(string content);
-    Task<FileSystemFilters> GetFileSystemFiltersAsync(CancellationToken cancellationToken = default);
-
-    bool IsWriteAllowed(string filePath, FileSystemFilters filters);
-  } 
+ 
 }

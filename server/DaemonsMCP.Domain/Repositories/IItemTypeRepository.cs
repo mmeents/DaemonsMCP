@@ -9,6 +9,8 @@ public interface IItemTypeRepository {
   Task<ItemType?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
   Task<List<ItemType>> GetAllAsync(CancellationToken cancellationToken = default);
   Task<List<ItemType>> GetByParentIdAsync(int? parentId, CancellationToken cancellationToken = default);
+  Task<List<ItemType>> GetItemTypes(CancellationToken cancellationToken = default);
+  Task<List<ItemType>> GetStatusTypes(CancellationToken cancellationToken = default);
   Task<List<ItemType>> GetRootTypesAsync(CancellationToken cancellationToken = default);
   Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
   Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken = default);

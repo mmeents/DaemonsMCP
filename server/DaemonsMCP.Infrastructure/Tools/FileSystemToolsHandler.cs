@@ -1,5 +1,8 @@
 ﻿using DaemonsMCP.Application.FileSystem.Queries.GetFileContents;
 using DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem;
+using DaemonsMCP.Application.FileSystem.Commands.CreateProjectFile;
+using DaemonsMCP.Application.FileSystem.Commands.UpdateProjectFile;
+using DaemonsMCP.Application.FileSystem.Commands.CreateProjectFolder;
 using DaemonsMCP.Domain.Constants;
 using DaemonsMCP.Domain.Models;
 using DaemonsMCP.Domain.Extensions;
@@ -25,6 +28,11 @@ namespace DaemonsMCP.Infrastructure.Tools {
       _scopeFactory = scopeFactory;      
     }
 
+    private IMediator GetMediator() {
+      using var scope = _scopeFactory.CreateScope();
+      return scope.ServiceProvider.GetRequiredService<IMediator>();
+    }
+
     public async Task<string> SearchFileSystem(
         int projectId,
         string? filter,
@@ -36,8 +44,8 @@ namespace DaemonsMCP.Infrastructure.Tools {
 
       try {
         // Create a scope to resolve scoped services like IMediator and repositories
-        using var scope = _scopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        
+        var mediator = GetMediator();
         
         var query = new SearchFileSystemQuery(
           projectId,
@@ -59,10 +67,8 @@ namespace DaemonsMCP.Infrastructure.Tools {
 
     public async Task<string> GetFile(int projectId, int fileSystemNodeId) {
       try {
-        // Create a scope to resolve scoped services like IMediator and repositories
-        using var scope = _scopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        
+        var mediator = GetMediator();
+
         var query = new GetFileContentsQuery(projectId, fileSystemNodeId);
         var result = await mediator.Send(query);
         var opResult = McpOpResult.CreateSuccess(Cx.GetFileCmd, $"{Cx.GetFileCmd} Success.", result);
@@ -74,46 +80,20 @@ namespace DaemonsMCP.Infrastructure.Tools {
       }
     }
 
-    public async Task<string> CreateProjectFile( int projectId, string relativePath, string content) {
-      string path = relativePath;
+    public async Task<string> CreateProjectFile( int projectId, string relativePath, string content) {     
       try {
-        using var scope = _scopeFactory.CreateScope();
-        var _validationService = scope.ServiceProvider.GetRequiredService<IValidationService>();
-        var _fileSystemNodeRepository = scope.ServiceProvider.GetRequiredService<IFileSystemNodeRepository>();
-
-        _validationService.ValidatePath(path);
-        _validationService.ValidateContent(content);
-        FileValidationContext context = await _validationService.ValidateAndPrepareFile(projectId, path, true);
-        var fullPath = context.FullPath;        
-
-        // Create directory if needed
-        var directory = Path.GetDirectoryName(fullPath);
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory)) {
-          Directory.CreateDirectory(directory);
-        }
-
-        if (File.Exists(fullPath)) {
-          context.Project.CopyToBackup(fullPath);
-          _logger.LogInformation("Backup created for file being overwritten: {FilePath}", fullPath);
-        }
-
-        // Write the file
-        await File.WriteAllTextAsync(fullPath, content, Encoding.UTF8);
-
-        // Return success info
-        var fileInfo = new FileInfo(fullPath);
-
-        _ = await _fileSystemNodeRepository.GetOrCreateAsync(
+        var mediator = GetMediator();
+        var query = new CreateProjectFileCommand(
           projectId,
-          context.RelativePath,
-          isDirectory: false,
-          fileSizeBytes: fileInfo.Length
-        );        
-
-        _logger.LogInformation("File created successfully: {FilePath}", fullPath);
+          relativePath,
+          content
+        );
+        var filePath = await mediator.Send(query);
+        var fileInfo = new FileInfo(filePath);
+        _logger.LogInformation("File created successfully: {FilePath}", filePath);
         var opResult = McpOpResult.CreateSuccess(
           Cx.InsertFileCmd,
-          $"File created successfully: {path}",
+          $"File created successfully: {filePath}",
           new {
             fileName = fileInfo.Name,
             path = relativePath,
@@ -121,62 +101,37 @@ namespace DaemonsMCP.Infrastructure.Tools {
             created = fileInfo.CreationTime,
           }
         );
-
         return JsonSerializer.Serialize(opResult);
       } catch (Exception ex) {
         _logger.LogError(ex, $"Error creating file: {relativePath} in project: {projectId}");
         var opResult = McpOpResult.CreateFailure(Cx.InsertFileCmd, $"Failed: {ex.Message}", null);
         return JsonSerializer.Serialize(opResult);
       }
-
-
     }
 
     public async Task<string> UpdateProjectFile( int projectId, int fileSystemNodeId, string content) {
       try {
         using var scope = _scopeFactory.CreateScope();
-        var _validationService = scope.ServiceProvider.GetRequiredService<IValidationService>();
-        var _fileSystemNodeRepository = scope.ServiceProvider.GetRequiredService<IFileSystemNodeRepository>();
-
-        var fileSystemNode = await _fileSystemNodeRepository.GetByIdAsync(fileSystemNodeId);
-        if (fileSystemNode == null || fileSystemNode.ProjectId != projectId || fileSystemNode.IsDirectory) {
-          throw new FileNotFoundException("File not found for the given FileSystemNodeId and ProjectId");
-        }
-
-        // Validate inputs
-        FileValidationContext context = await _validationService.ValidateAndPrepareFile(projectId, fileSystemNode.RelativePath, false);
-        var fullPath = context.FullPath;
-        var path = fileSystemNode.RelativePath;
-        _validationService.ValidatePath(fullPath);
-        _validationService.ValidateContent(content);
-        
-        // Security validations
-        if (!_validationService.IsWriteAllowed(fullPath, context.Filters)) {
-          throw new UnauthorizedAccessException("Write operation not allowed for security reasons");
-        }       
-
-        string backupPath = context.Project.CopyToBackup(fullPath);
-        _logger.LogInformation("Backup created for file being overwritten: {FilePath}", fullPath);
-
-        // UpdateClassItem the file
-        await File.WriteAllTextAsync(fullPath, content, Encoding.UTF8).ConfigureAwait(false);
-
+        var _meditor = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var query = new UpdateProjectFileCommand(
+          projectId,
+          fileSystemNodeId,
+          content
+        );
+        var result = await _meditor.Send(query);
         // Return success info
-        var fileInfo = new FileInfo(fullPath);
-        var relativePath = path;        
-
+        var fileInfo = new FileInfo(result.FullPath);        
         var opResult = McpOpResult.CreateSuccess(
           Cx.UpdateFileCmd,
-          $"File updated successfully: {path}",
+          $"File updated successfully: {result.FullPath}",
           new {
             fileName = fileInfo.Name,
-            path = relativePath,
+            path = result.RelativePath,
             size = fileInfo.Length,
             modified = fileInfo.LastWriteTime,
             backupCreated = true            
           }
-        );
-        
+        );        
         return JsonSerializer.Serialize(opResult);
       } catch (Exception ex) {
         _logger.LogError(ex, "Error Updating File");
@@ -188,19 +143,12 @@ namespace DaemonsMCP.Infrastructure.Tools {
     public async Task<string> CreateFolder(int projectId, string path) {
       try {
         using var scope = _scopeFactory.CreateScope();
-        var _validationService = scope.ServiceProvider.GetRequiredService<IValidationService>();
-        var _fileSystemNodeRepository = scope.ServiceProvider.GetRequiredService<IFileSystemNodeRepository>();
-
-        var context = await _validationService.ValidateAndPrepareFolder(projectId, path, true);
-        var fullDirPath = context.FullPath;
-
-        // In CreateProjectFile
-        var directory = Path.GetDirectoryName(fullDirPath);
-        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory)) {
-          Directory.CreateDirectory(directory);
-        }
-        await _fileSystemNodeRepository.GetOrCreateAsync(projectId, context.RelativePath, isDirectory: true, fileSizeBytes: 0 );
-
+        var _mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var query = new CreateProjectFolderCommand(
+          projectId,
+          path
+        );  
+        var fullDirPath = await _mediator.Send(query);
         // Return success info
         var dirInfo = new DirectoryInfo(fullDirPath);        
         var opResult = McpOpResult.CreateSuccess(
@@ -208,7 +156,7 @@ namespace DaemonsMCP.Infrastructure.Tools {
           $"Directory created successfully: {path}",
           new {
             directoryName = dirInfo.Name,
-            path = context.RelativePath,
+            path = path,
             created = dirInfo.CreationTime,
           }
         );

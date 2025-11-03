@@ -45,10 +45,10 @@ namespace DaemonsMCP.Domain.Constants {
     public const string AddUpdateStatusTypeCmd = "add-update-status-type";
 
     public const string GetReadMeCmd = "readme";
-    public const string GetNodesCmd = "list-nodes";
-    public const string GetNodesByIdCmd = "get-nodes-by-id";
-    public const string AddUpdateNodesCmd = "add-update-nodes";
-    public const string AddUpdateNodesListCmd = "add-update-nodes-list";
+    public const string SearchItemsCmd = "search-items";
+    public const string GetItemByIdCmd = "get-item-by-id";
+    public const string AddUpdateItemCmd = "add-update-item";
+    public const string AddUpdateItemsListCmd = "add-update-item-list";
 
     public const string RemoveNodeCmd = "remove-node";
 
@@ -98,9 +98,9 @@ namespace DaemonsMCP.Domain.Constants {
     public const string AddUpdateStatusTypeCmdDesc = "Add update status type, use to update status types listed by list-status-types. use id=0 to add new.";
 
     public const string GetReadMeCmdDesc = "Critical: Gets living documentation for the DaemonsMCP tool. Please invoke and read ASAP.";
-    public const string GetNodesCmdDesc = "List nodes command searches for item nodes recursively maxDepth deep. Item nodes are hierarchical trees with configurable types and status. Use add-update-nodes to add or update the tree nodes. Supports filtering by status, type, name contains, and details contains.";
-    public const string GetNodesByIdCmdDesc = "Get nodes by id, allows you to grab 1 tree recursiv by id maxLevels deep.";
-    public const string AddUpdateNodesCmdDesc = "Add update nodes command adds or updates depending on tree passed in.  if it has id non zero it tries to update otherwise it tries to add. Recursive adds updates all nodes passed in. ";
+    public const string SearchItemCmdDesc = "Search items command searches recursively maxDepth deep. Items are hierarchical trees with configurable types and status. ";
+    public const string GetItemByIdCmdDesc = "Get item by id, allows you to grab 1 tree recursiv by id maxLevels deep.";
+    public const string AddUpdateItemCmdDesc = "Add update item command adds or updates depending on tree passed in.  if it has id non zero it tries to update otherwise it tries to add. Recursive adds updates all nodes passed in. ";
 
     public const string AddUpdateNodesListCmdDesc = "Add update nodes list command adds or updates depending on list of trees passed in.  if it has id non zero it tries to update otherwise it tries to add. Recursive adds updates all nodes passed in. ";
     public const string RemoveNodeCmdDesc = "Remove a node from the tree. Strategy options: PreventIfHasChildren (default), DeleteCascade, OrphanChildren, ReparentToGrandparent";
@@ -150,21 +150,33 @@ namespace DaemonsMCP.Domain.Constants {
     public const string MethodContentParamDesc = "The MethodContent object returned from GetClass or a modified version to update.";
     public const string MethodIdParamDesc = "The int ID of the Method in the Methods table.";
 
-    public const string NodeIdParamDesc = "The int Id of the node to get the tree for.";
-    public const string MaxDepthParamDesc = "The max depth to recurse when listing nodes. Default is 1 (immediate children only). 2 returns children and grandchildren. 0 returns only parent nodes without subnodes.";
-    public const string StatusFilterParamDesc = "Filter nodes by status type name, uses string.Contains c# type filtering or null for all.";
-    public const string TypeFilterParamDesc = "Filter nodes by item type name, uses string.Contains c# type filtering or null for all.";
-    public const string NameContainsParamDesc = "Filter nodes by name, uses string.Contains c# type filtering or null for all.";
-    public const string DetailsContainsParamDesc = "Filter nodes by details, uses string.Contains c# type filtering or null for all.";
+    public const string ParentIdParamDesc = "The int Id of the parent item to start the search from, or null to search from root.";
+    public const string SearchParentIdParamDesc = "The int Id of the parent to filter by, or null for all.";
+    public const string SearchTypeIdParamDesc = "The int Id of the type to filter by, or null for all.";
+    public const string SearchStatusIdParamDesc = "The int Id of the status to filter by, or null for all.";
+    public const string NodeIdParamDesc = "The int Id of the item to get the tree for.";
+    public const string MaxDepthParamDesc = "The max depth to recurse when listing items. Default is 1 (immediate children only). 2 returns children and grandchildren. 0 returns only parent items without children.";
+    
+    public const string TypeIdParamDesc = "the item type id. foreign key to ItemType table.";
+
+    public const string NameContainsParamDesc = "Filter items by name.";
+    public const string DetailsContainsParamDesc = "Filter item details.";
     public const string NodesTreeParamDesc = "The Nodes tree object to add or update.";
-    public const string ItemTypeParamDesc = "The ItemType object to add or update, result record from get-item-type call.";
-    public const string StatusTypeParamDesc = "The StatusType object to add or update, result record from get-status-type call.";
     public const string NodesListTreeParamDesc = "The List<Nodes> tree objects to add or update.";
     public const string RemoveStrategyParamDesc = "How to handle child nodes: PreventIfHasChildren, DeleteCascade, OrphanChildren, or ReparentToGrandparent";
 
+    public const string ItemTypeParamDesc = "The items type id object.";
+    public const string StatusIdParamDesc = "The items status id object.";
+    public const string RankParamDesc = "The rank (order) of the item among its siblings.";
+    public const string NameParamDesc = "The name of the item.";
+    public const string DetailsParamDesc = "The details or description of the item.";
+    public const string RefFileSystemIdParamDesc = "Optional int FileSystemNodeId to reference this item to a file or folder in the file system.";
+    public const string RefObjectHierarchyIdParamDesc = "Optional int ObjectHierarchyId to reference this item to any nuber of supported object types. ";
+
+
     public const string ListNameParamDesc = "Requires. The name of the todo list, corresponds to Nodes.Name of a Nodes with Type 'Todo'.";
     public const string ItemsParamDesc = "The list of items to add to the todo list as child Nodes of the list.";
-    public const string ItemIdParamDesc = $"The int Id of the todo item node to mark done or restore. Additionally you could use this Id with {Cx.GetNodesByIdCmd}. ";
+    public const string ItemIdParamDesc = $"The int Id of the todo item node to mark done or restore. Additionally you could use this Id with {Cx.GetItemByIdCmd}. ";
 
     // Well-known ItemType IDs (must match seed data in ItemTypeConfiguration)
     public const int ItemTypeIdNone = 1;

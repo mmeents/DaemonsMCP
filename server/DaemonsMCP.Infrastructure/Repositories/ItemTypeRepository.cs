@@ -2,6 +2,7 @@
 using DaemonsMCP.Domain.Entities;
 using DaemonsMCP.Domain.Repositories;
 using DaemonsMCP.Infrastructure.Persistence;
+using DaemonsMCP.Domain.Constants;
 
 namespace DaemonsMCP.Infrastructure.Repositories;
 
@@ -46,6 +47,24 @@ public class ItemTypeRepository : IItemTypeRepository {
         .OrderBy(it => it.Rank)
         .ThenBy(it => it.Name)
         .ToListAsync(cancellationToken);
+  }
+
+  public async Task<List<ItemType>> GetItemTypes(CancellationToken cancellationToken = default) {
+    var items = await _context.ItemTypes
+        .Where(it => it.ParentId == Cx.ItemTypeIdItemTypes)
+        .OrderBy(it => it.Rank)
+        .ThenBy(it => it.Name)
+        .ToListAsync(cancellationToken);
+    return items;
+  }
+
+  public async Task<List<ItemType>> GetStatusTypes(CancellationToken cancellationToken = default) {
+    var items = await _context.ItemTypes
+        .Where(it => it.ParentId == Cx.ItemTypeIdStatusTypes)
+        .OrderBy(it => it.Rank)
+        .ThenBy(it => it.Name)
+        .ToListAsync(cancellationToken);
+    return items;
   }
 
   public async Task<List<ItemType>> GetRootTypesAsync(CancellationToken cancellationToken = default) {
