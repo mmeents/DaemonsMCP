@@ -1,0 +1,48 @@
+﻿<div class="container">
+  <header>
+    <h1>{{ title() }}</h1>
+  </header>
+
+  <main>
+    @if (loading()) {
+      <div class="loading">
+        <p>Loading projects...</p>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="error">
+        <h2>Error</h2>
+        <p>{{ error() }}</p>
+        <button (click)="loadProjects()">Retry</button>
+      </div>
+    }
+
+    @if (!loading() && !error() && projects().length > 0) {
+      <div class="projects-list">
+        <h2>Available Projects</h2>
+        <div class="project-grid">
+          @for (project of projects(); track project.id) {
+            <div class="project-card">
+              <h3>{{ project.name }}</h3>
+              <p class="description">{{ project.description }}</p>
+              <div class="details">
+                <div class="detail-item">
+                  <strong>Path:</strong> {{ project.rootPath }}
+                </div>                
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (!loading() && !error() && projects().length === 0) {
+      <div class="empty">
+        <p>No projects found.</p>
+      </div>
+    }
+  </main>
+</div>
+
+<router-outlet />

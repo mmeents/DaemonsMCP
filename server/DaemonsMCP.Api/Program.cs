@@ -44,7 +44,19 @@ namespace DaemonsMCP.Api
               options.SwaggerDoc("v1", new OpenApiInfo { Title = "DaemonsMCP API", Version = "v3" });
             });
 
+            builder.Services.AddCors(options =>
+            {
+              options.AddPolicy("LocalDev", policy =>
+              {
+                policy.WithOrigins("http://localhost:4200")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+              });
+            });
+
             var app = builder.Build();
+
+            app.UseCors("LocalDev");
 
             // Configure middleware
             if (app.Environment.IsDevelopment()) {
