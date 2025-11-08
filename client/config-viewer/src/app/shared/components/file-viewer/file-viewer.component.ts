@@ -267,21 +267,36 @@ export class FileViewerComponent implements AfterViewInit, OnDestroy {
   }
 
   private updateEditorContent(content: string, fileName: string) {
-    if (!this.editor) {
-      console.error('Cannot update content - editor not initialized');
-      return;
+    console.log('Updating editor content, length:', content.length);
+
+    // Check if editor exists and is still connected to a valid DOM element
+    if (!this.editor || !this.editor.getDomNode()?.isConnected) {
+        console.log('Editor invalid or disconnected, recreating...');
+        if (this.editor) {
+        try {
+            this.editor.dispose();
+        } catch (e) {
+            console.warn('Error disposing old editor:', e);
+        }
+        this.editor = null;
+        }
+        this.createEditor();
     }
 
-    console.log('Updating editor content, length:', content.length);
+    if (!this.editor) {
+        console.error('Cannot update content - editor not initialized');
+        return;
+    }
+
     const language = this.getLanguageFromFileName(fileName);
     console.log('Detected language:', language);
-    
+
     // Dispose old model if it exists
     const oldModel = this.editor.getModel();
     if (oldModel) {
-      oldModel.dispose();
+        oldModel.dispose();
     }
-    
+
     const model = monaco.editor.createModel(content, language);
     this.editor.setModel(model);
     console.log('Content updated successfully');
