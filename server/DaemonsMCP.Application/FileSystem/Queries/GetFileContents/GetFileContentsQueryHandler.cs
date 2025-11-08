@@ -21,7 +21,7 @@ namespace DaemonsMCP.Application.FileSystem.Queries.GetFileContents {
     public async Task<GetFileContentsResult> Handle(GetFileContentsQuery request, CancellationToken cancellationToken) {
 
       // 1. Get the FileSystemNode
-      var node = await _fileSystemNodeRepository.GetByIdAsync(request.fileSystemNodeId, cancellationToken);
+      var node = await _fileSystemNodeRepository.GetByIdAsync(request.fileSystemNodeId, cancellationToken).ConfigureAwait(false);
       if (node == null || node.ProjectId != request.projectId) {
         throw new Exception($"File {request.fileSystemNodeId} not found in project {request.projectId}");
       }
@@ -31,7 +31,7 @@ namespace DaemonsMCP.Application.FileSystem.Queries.GetFileContents {
       }
 
       // 2. Get the project for RootPath
-      var project = await _projectRepository.GetByIdAsync(request.projectId, cancellationToken);
+      var project = await _projectRepository.GetByIdAsync(request.projectId, cancellationToken).ConfigureAwait(false);
       if (project == null) {
         throw new Exception($"Project {request.projectId} not found");
       }
@@ -49,7 +49,7 @@ namespace DaemonsMCP.Application.FileSystem.Queries.GetFileContents {
         throw new FileNotFoundException($"Physical file not found: {fullPath}");
       }
 
-      var content = await File.ReadAllTextAsync(fullPath, cancellationToken);
+      var content = await File.ReadAllTextAsync(fullPath, cancellationToken).ConfigureAwait(false);
 
       return new GetFileContentsResult {
         FileSystemNodeId = node.Id,

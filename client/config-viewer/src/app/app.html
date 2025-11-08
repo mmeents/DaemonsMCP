@@ -1,48 +1,54 @@
-﻿<div class="container">
-  <header>
+﻿<div class="app-container">
+  <header class="app-header">
     <h1>{{ title() }}</h1>
+    
+    @if (selectedProject()) {
+      <div class="project-selector">
+        <label>Project:</label>
+        <select 
+          [value]="selectedProject()?.id"
+          (change)="selectProject(projects()[$any($event.target).selectedIndex])"
+        >
+          @for (project of projects(); track project.id) {
+            <option [value]="project.id">{{ project.name }}</option>
+          }
+        </select>
+      </div>
+    }
   </header>
 
-  <main>
+  <main class="app-main">
     @if (loading()) {
-      <div class="loading">
-        <p>Loading projects...</p>
-      </div>
-    }
-
-    @if (error()) {
-      <div class="error">
-        <h2>Error</h2>
-        <p>{{ error() }}</p>
-        <button (click)="loadProjects()">Retry</button>
-      </div>
-    }
-
-    @if (!loading() && !error() && projects().length > 0) {
-      <div class="projects-list">
-        <h2>Available Projects</h2>
-        <div class="project-grid">
-          @for (project of projects(); track project.id) {
-            <div class="project-card">
-              <h3>{{ project.name }}</h3>
-              <p class="description">{{ project.description }}</p>
-              <div class="details">
-                <div class="detail-item">
-                  <strong>Path:</strong> {{ project.rootPath }}
-                </div>                
-              </div>
-            </div>
-          }
+      <div class="loading">Loading projects...</div>
+    } @else if (error()) {
+      <div class="error">{{ error() }}</div>
+    } @else if (selectedProject()) {
+      <div class="split-pane">
+        <!-- Left: File Search -->
+        <div class="search-pane">
+          <app-searchable-list
+            [items]="files"
+            [loading]="searchLoading"
+            [columns]="fileColumns"
+            searchPlaceholder="Search files in {{ selectedProject()!.name }}..."
+            emptyMessage="Type to search for files"
+            noResultsMessage="No files found matching your search"
+            (searchChanged)="onSearchChanged($event)"
+            (itemSelected)="onFileSelected($event)"
+          />
         </div>
-      </div>
-    }
 
-    @if (!loading() && !error() && projects().length === 0) {
-      <div class="empty">
-        <p>No projects found.</p>
+        <!-- Right: File Viewer -->
+        <div class="viewer-pane">
+          <app-file-viewer
+            [fileName]="selectedFileName"
+            [filePath]="selectedFilePath"
+            [fileContent]="fileContent"
+            [loading]="fileLoading"
+            [error]="fileError"
+          />
+        </div>
       </div>
     }
   </main>
 </div>
-
-<router-outlet />

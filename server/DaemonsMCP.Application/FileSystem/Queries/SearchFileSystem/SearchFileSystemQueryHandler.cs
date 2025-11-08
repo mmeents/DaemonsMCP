@@ -51,6 +51,7 @@ namespace DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem{
           .Select(f => new FileSystemNodeDto {
             Id = f.Id,
             ParentId = f.ParentId,
+            ProjectId = f.ProjectId,
             Name = f.Name,
             RelativePath = f.RelativePath,
             IsDirectory = f.IsDirectory,
