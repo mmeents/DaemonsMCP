@@ -1,6 +1,8 @@
-﻿.app-container {
+.app-container {
   display: flex;
+  flex: 1;
   flex-direction: column;
+  overflow: hidden;
   height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
@@ -43,10 +45,13 @@
 }
 
 .app-main {
-  flex: 1;
+   flex: 1;
   display: flex;
+  width: 100%;
+  min-width: 0; 
   overflow: hidden;
   background: #f8f9fa;
+
 }
 
 .split-pane {
@@ -85,4 +90,51 @@
 
 .error {
   color: #dc3545;
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+}
+
+.app-nav {
+  width: 160px;
+  flex-shrink:0;
+  background: #2d2d30;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 4px;
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #cccccc;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-size: 14px;
+
+    .nav-icon {
+      font-size: 18px;
+    }
+
+    .nav-label {
+      font-weight: 500;
+    }
+
+    &:hover {
+      background: #3e3e42;
+      color: white;
+    }
+
+    &.active {
+      background: #0e639c;
+      color: white;
+    }
+  }
 }

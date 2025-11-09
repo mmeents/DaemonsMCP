@@ -1,0 +1,85 @@
+<div class="files-page">
+  <!-- Header with project selector -->
+  <header class="page-header">
+    @if (selectedProject()) {
+      <div class="project-selector">
+        <label>Project:</label>
+        <select 
+          [value]="selectedProject()?.id"
+          (change)="selectProject(projects()[$any($event.target).selectedIndex])"
+        >
+          @for (project of projects(); track project.id) {
+            <option [value]="project.id">{{ project.name }}</option>
+          }
+        </select>
+      </div>
+    }
+  </header>
+
+  @if (loading()) {
+    <div class="loading">Loading projects...</div>
+  } @else if (error()) {
+    <div class="error">{{ error() }}</div>
+  } @else if (selectedProject()) {
+    <div class="content-area">
+      <!-- Search box with floating dropdown -->
+      <div class="search-container">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input 
+            #searchInput
+            type="text"
+            [value]="searchTerm()"
+            (input)="onSearchInput($any($event.target).value)"
+            (focus)="onSearchFocus()"
+            (blur)="onSearchBlur()"
+            placeholder="Search files in {{ selectedProject()!.name }}... (Ctrl+P)"
+            class="search-input"
+          />
+          @if (searchTerm()) {
+            <button (click)="clearSearch()" class="clear-btn" type="button">✕</button>
+          }
+        </div>
+
+        <!-- Floating dropdown results -->
+        @if (showResults() && (searchLoading() || files().length > 0)) {
+          <div class="results-dropdown">
+            @if (searchLoading()) {
+              <div class="loading-state">
+                <div class="spinner"></div>
+                <span>Searching...</span>
+              </div>
+            } @else {
+              <div class="results-info">
+                {{ files().length }} file{{ files().length === 1 ? '' : 's' }} found
+              </div>
+              <div class="results-list">
+                @for (file of files(); track file.id) {
+                  <div 
+                    class="result-item"
+                    [class.selected]="selectedFileId() === file.id"
+                    (mousedown)="onFileSelected(file)"
+                  >
+                    <div class="file-name">{{ file.name }}</div>
+                    <div class="file-path">{{ file.relativePath }}</div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Full-width Monaco editor -->
+      <div class="editor-area">
+        <app-file-viewer
+          [fileName]="selectedFileName"
+          [filePath]="selectedFilePath"
+          [fileContent]="fileContent"
+          [loading]="fileLoading"
+          [error]="fileError"
+        />
+      </div>
+    </div>
+  }
+</div>

@@ -193,13 +193,6 @@ export class FileViewerComponent implements AfterViewInit, OnDestroy {
           resolve();
         }
       }, 50);
-      
-      // Timeout after 5 seconds
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        console.error('Timeout waiting for editor container');
-        resolve();
-      }, 5000);
     });
   }
 
