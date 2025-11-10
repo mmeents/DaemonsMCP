@@ -78,7 +78,9 @@ namespace DaemonsMCP.Api
 
             app.MapProjectEndpoints()
                .MapFileSystemEndpoints()
-               .MapIndexingEndpoints();
+               .MapIndexingEndpoints()
+               .MapItemsEndpoints()
+               .MapObjectHierarchyEndpoints();
 
             app.Run();
         }

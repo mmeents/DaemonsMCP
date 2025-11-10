@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ProjectsService } from '../../core/services/projects.service';
 import { FileSystemService } from '../../core/services/filesystem.service';
 import { Project, FileSystemNode } from '../../shared/models/api.models';
-import { SearchableListComponent, ColumnConfig } from '../../shared/components/searchable-list/searchable-list.component';
+import { ColumnConfig } from '../../shared/components/searchable-list/searchable-list.component';
 import { FileViewerComponent } from '../../shared/components/file-viewer/file-viewer.component';
 
 @Component({
   selector: 'app-files-page',
   standalone: true,
-  imports: [CommonModule, SearchableListComponent, FileViewerComponent],
+  imports: [CommonModule, FileViewerComponent],
   templateUrl: './files-page.component.html',
   styleUrl: './files-page.component.scss',
 })

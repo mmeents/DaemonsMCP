@@ -100,3 +100,61 @@ export interface IndexingQueueStatus {
   isProcessing: boolean;
   lastProcessed?: string;
 }
+
+// Item Models - add these to api.models.ts
+
+export interface ItemDto {
+  id: number;
+  parentId?: number;
+  itemTypeId: number;
+  itemTypeName: string;
+  statusTypeId: number;
+  statusTypeName: string;
+  rank: number;
+  name: string;
+  details: string;
+  created: string;  // ISO date string
+  modified: string; // ISO date string
+  completed?: string; // ISO date string
+  referenceFileSystemId?: number;
+  referenceObjectHierarchyId?: number;
+  children: ItemDto[];
+}
+
+export interface ItemTypeDto {
+  id: number;
+  name: string;
+  description: string;
+  rank: number;
+  parentId?: number;
+  isStatusType: boolean;
+}
+
+export interface AddUpdateItemRequest {
+  id: number;
+  parentId?: number;
+  itemTypeId: number;
+  statusTypeId: number;
+  rank: number;
+  name: string;
+  details: string;
+  referenceFileSystemId?: number;
+  referenceObjectHierarchyId?: number;
+}
+
+export interface AddUpdateItemTypeRequest {
+  id: number;
+  name: string;
+  description: string;
+  rank: number;
+  parentId?: number;
+}
+
+export interface SearchItemsParams {
+  parentId?: number;
+  nameContains?: string;
+  detailsContains?: string;
+  typeId?: number;
+  statusId?: number;
+  maxDepth?: number;
+}
