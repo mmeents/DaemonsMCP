@@ -266,7 +266,8 @@ namespace DaemonsMCP.Infrastructure.Services {
       var root = new Uri(rootPath.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar);
       var full = new Uri(fullPath);
       var relative = root.MakeRelativeUri(full).ToString();
-      return Uri.UnescapeDataString(relative).Replace('/', Path.DirectorySeparatorChar);
+      var decoded = Uri.UnescapeDataString(relative).Replace('/', Path.DirectorySeparatorChar);
+      return decoded.Replace('\\', '/');
     }
 
     private bool NeedsUpdate(FileSystemNode existing, FileSystemNode filesystem) {
