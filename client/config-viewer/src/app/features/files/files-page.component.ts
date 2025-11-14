@@ -5,6 +5,7 @@ import { FileSystemService } from '../../core/services/filesystem.service';
 import { Project, FileSystemNode } from '../../shared/models/api.models';
 import { ColumnConfig } from '../../shared/components/searchable-list/searchable-list.component';
 import { FileViewerComponent } from '../../shared/components/file-viewer/file-viewer.component';
+import { FilePageStateService } from '../../core/services/file-page-state.service';
 
 @Component({
   selector: 'app-files-page',
@@ -29,6 +30,7 @@ export class FilesPageComponent implements OnInit {
   protected showResults = signal<boolean>(false);
   protected selectedFileId = signal<number | null>(null);
 
+  private stateService = inject(FilePageStateService);
   private projectsService = inject(ProjectsService);
   private fileSystemService = inject(FileSystemService);
 
@@ -71,7 +73,30 @@ export class FilesPageComponent implements OnInit {
         this.projects.set(projects);
         this.loading.set(false);
         
-        // Auto-select first project
+        // Try to restore saved project first
+        const savedProjectId = this.stateService.getProjectId();
+        if (savedProjectId) {
+          const savedProject = projects.find(p => p.id === savedProjectId);
+          if (savedProject) {
+            this.selectProject(savedProject);
+            
+            // If there was a search term, restore the search
+            const savedSearchTerm = this.stateService.getSearchTerm();
+            if (savedSearchTerm) {
+              this.onSearchChanged(savedSearchTerm);
+            }
+            
+            // Try to restore selected file
+            const savedFileId = this.stateService.getSelectedFileId();
+            if (savedFileId) {
+              this.restoreSelectedFile(savedFileId);
+            }
+            
+            return;
+          }
+        }
+        
+        // Fallback: Auto-select first project if no saved state
         if (projects.length > 0) {
           this.selectProject(projects[0]);
         }
@@ -86,7 +111,11 @@ export class FilesPageComponent implements OnInit {
 
   selectProject(project: Project) {
     this.selectedProject.set(project);
-    this.files.set([]); // Clear files when switching projects
+    this.stateService.setProjectId(project.id);
+    this.files.set([]); 
+      
+    this.selectedFileId.set(null);
+    this.stateService.setSelectedFileId(null);
   }
 
   onSearchChanged(searchTerm: string) {
@@ -120,9 +149,9 @@ export class FilesPageComponent implements OnInit {
     });
   }
 
-  // Add this method:
   onSearchInput(value: string) {
     this.searchTerm.set(value);
+    this.stateService.setSearchTerm(value);
     this.showResults.set(true);
     
     if (!value.trim()) {
@@ -150,6 +179,7 @@ export class FilesPageComponent implements OnInit {
 
   clearSearch() {
     this.searchTerm.set('');
+    this.stateService.setSearchTerm('');
     this.files.set([]);
     this.showResults.set(false);
   }
@@ -159,6 +189,7 @@ export class FilesPageComponent implements OnInit {
     console.log('Selected file:', file);
     
     this.selectedFileId.set(file.id);
+    this.stateService.setSelectedFileId(file.id);
     this.selectedFileName.set(file.name);
     this.selectedFilePath.set(file.relativePath);
     this.fileLoading.set(true);
@@ -179,6 +210,28 @@ export class FilesPageComponent implements OnInit {
         this.fileError.set('Failed to load file content');
         this.fileLoading.set(false);
         }
+    });
+  }
+
+  private restoreSelectedFile(fileId: number) {
+    const project = this.selectedProject();
+    if (!project) return;
+    
+    this.fileSystemService.getFileSystemNode(project.id, fileId).subscribe({
+      next: (fileNode) => {
+        // Simulate file selection
+        this.onFileSelected({
+          project: fileNode.projectId,
+          id: fileNode.fileSystemNodeId,  
+          name: fileNode.name,        
+          relativePath: fileNode.relativePath
+        });
+      },
+      error: (err) => {
+        console.error('Error restoring file:', err);
+        // Clear invalid file ID
+        this.stateService.setSelectedFileId(null);
+      }
     });
   }
 

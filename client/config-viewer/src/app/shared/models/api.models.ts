@@ -53,6 +53,7 @@ export interface FileSystemFile {
   projectId: number;
   fileSystemNodeId: number;
   sizeInBytes: number;
+  name:string;
   relativePath: string;
   content: string;
 }

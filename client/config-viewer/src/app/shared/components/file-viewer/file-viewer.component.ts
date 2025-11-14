@@ -26,7 +26,7 @@ declare const monaco: any;
         </div>
       } @else {
         <div class="file-header">
-          <span class="file-name">{{ fileName() }}</span>
+          <span class="file-name">Id:{{ fileSystemId()}}  {{ fileName() }}</span>
           <span class="file-path">{{ filePath() }}</span>
         </div>
         <div #editorContainer class="editor-container"></div>
@@ -110,7 +110,7 @@ declare const monaco: any;
 })
 export class FileViewerComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editorContainer', { static: false }) editorContainer?: ElementRef;
-  
+  @Input() fileSystemId = signal<number | null>(null);
   @Input() fileName = signal<string>('');
   @Input() filePath = signal<string>('');
   @Input() fileContent = signal<string>('');
@@ -125,7 +125,7 @@ export class FileViewerComponent implements AfterViewInit, OnDestroy {
     effect(() => {
       const content = this.fileContent();
       const name = this.fileName();
-      
+
       console.log('Effect triggered - content length:', content?.length, 'fileName:', name);
       
       if (content && name) {

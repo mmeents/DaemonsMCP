@@ -60,7 +60,7 @@
                     [class.selected]="selectedFileId() === file.id"
                     (mousedown)="onFileSelected(file)"
                   >
-                    <div class="file-name">{{ file.name }}</div>
+                    <div class="file-name">Id:{{ file.id }}, {{ file.name }}</div>
                     <div class="file-path">{{ file.relativePath }}</div>
                   </div>
                 }
@@ -72,7 +72,8 @@
 
       <!-- Full-width Monaco editor -->
       <div class="editor-area">
-        <app-file-viewer
+        <app-file-viewer     
+          [fileSystemId]="selectedFileId"     
           [fileName]="selectedFileName"
           [filePath]="selectedFilePath"
           [fileContent]="fileContent"
