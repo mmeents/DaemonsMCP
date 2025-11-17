@@ -28,11 +28,12 @@ public static class DependencyInjection {
     services.AddScoped<IIndexQueueRepository, IndexQueueRepository>();
     services.AddScoped<IItemRepository, ItemRepository>();
     services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
-    services.AddScoped<IIndexingService, IndexingService>();
-    services.AddScoped<IValidationService, ValidationService>();
 
     // Register Services
+    services.AddScoped<IIndexingService, IndexingService>();
+    services.AddScoped<IValidationService, ValidationService>();
     services.AddScoped<IFileSystemSyncService, FileSystemSyncService>();
+    services.AddScoped<IDatabaseManagementService,  DatabaseManagementService >();
 
     // Register file watching
     services.AddSingleton<IProjectFileWatcherFactory, ProjectFileWatcherFactory>();

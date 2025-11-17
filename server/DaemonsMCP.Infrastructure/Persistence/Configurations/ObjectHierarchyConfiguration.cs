@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DaemonsMCP.Infrastructure.Persistance.Configurations {
+namespace DaemonsMCP.Infrastructure.Persistence.Configurations {
   public class ObjectHierarchyConfiguration : IEntityTypeConfiguration<ObjectHierarchy>{ 
     public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<ObjectHierarchy> builder) {
       builder.HasKey(oh => oh.Id);

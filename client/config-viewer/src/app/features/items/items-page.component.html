@@ -4,10 +4,16 @@
     <div class="tree-pane">
       <div class="pane-header">
         <h2>Items Hierarchy</h2>
-        <button class="btn-primary">+ New Item</button>
+        <button class="btn-primary" (click)="onNewItem()">+ New Item</button>
       </div>
       <div class="tree-content">
-        <p class="placeholder">Items tree will go here...</p>
+        <app-items-tree
+          [items]="items"
+          [loading]="loading"
+          (itemSelected)="onItemSelected($event)"
+          (itemMoved)="onItemMoved($event)"
+        >
+        </app-items-tree>
       </div>
     </div>
 
@@ -17,7 +23,16 @@
         <h2>Item Details</h2>
       </div>
       <div class="details-content">
-        <p class="placeholder">Select an item to view details...</p>
+        <div *ngIf="selectedItem; else noSelection">
+          <h3>{{ selectedItem.name }}</h3>
+          <p><strong>Type:</strong> {{ selectedItem.itemTypeName }}</p>
+          <p><strong>Status:</strong> {{ selectedItem.statusTypeName }}</p>
+          <p><strong>Details:</strong> {{ selectedItem.details }}</p>
+          <p><strong>Created:</strong> {{ selectedItem.created | date }}</p>
+        </div>
+        <ng-template #noSelection>
+          <p class="placeholder">Select an item to view details...</p>
+        </ng-template>
       </div>
     </div>
   </div>

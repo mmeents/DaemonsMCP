@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DaemonsMCP.Infrastructure.Persistance.Configurations { 
+namespace DaemonsMCP.Infrastructure.Persistence.Configurations { 
   public enum IdentifierTypeEnum {
     Namespace = 1,
     Interface = 2,

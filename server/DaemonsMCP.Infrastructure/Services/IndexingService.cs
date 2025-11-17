@@ -1,6 +1,6 @@
 ﻿using DaemonsMCP.Domain.Entities;
 using DaemonsMCP.Domain.Repositories;
-using DaemonsMCP.Infrastructure.Persistance.Configurations;
+using DaemonsMCP.Infrastructure.Persistence.Configurations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
