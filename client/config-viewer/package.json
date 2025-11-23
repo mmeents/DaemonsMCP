@@ -29,6 +29,7 @@
     "@angular/forms": "^20.3.0",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "@primeuix/themes": "^1.2.5",
     "monaco-editor": "^0.54.0",
     "primeicons": "^7.0.0",
     "primeng": "^20.3.0",

@@ -1,4 +1,4 @@
-﻿import { Component, Input, Output, EventEmitter, OnInit, OnChanges } from '@angular/core';
+﻿import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TreeModule } from 'primeng/tree';
 import { TreeNode } from 'primeng/api';
@@ -12,6 +12,8 @@ import { ItemDto } from '../../models/api.models';
     <div class="tree-wrapper">
       <p-tree
         [value]="treeNodes"
+        [filter]="true"
+        [filterInputAutoFocus]="true"
         [draggableNodes]="enableDragDrop"
         [droppableNodes]="enableDragDrop"
         (onNodeDrop)="onNodeDrop($event)"
@@ -37,7 +39,7 @@ import { ItemDto } from '../../models/api.models';
       height: 100%;
       overflow: auto;
     }
-    
+
     .empty-state {
       padding: 2rem;
       text-align: center;
@@ -55,46 +57,83 @@ import { ItemDto } from '../../models/api.models';
     }
     
     :host ::ng-deep .status-complete {
-      color: #198754;
-      text-decoration: line-through;
+      color: #02331cff;      
     }
     
     :host ::ng-deep .status-cancelled {
       color: #dc3545;
       text-decoration: line-through;
     }
+
+    :host ::ng-deep .p-tree-node-label {
+      margin-left: 0.5rem;
+    }
+    :host ::ng-deep .p-tree-node-selected {
+      background-color: #e2e2ffff;
+      border-radius: 4px;
+    }
+    :host ::ng-deep .p-tree-node-children {
+      padding-left: 1.0rem; 
+    }
   `]
 })
 export class ItemsTreeComponent implements OnInit, OnChanges {
   @Input() items: ItemDto[] = [];
   @Input() loading = false;
+  @Input() selectedItemId?: number;
   @Output() itemSelected = new EventEmitter<ItemDto>();
   @Output() itemMoved = new EventEmitter<{ item: ItemDto; newParentId?: number }>();
 
   treeNodes: TreeNode[] = [];
   selectedNode?: TreeNode;
+  expandedKeys: {[key: string]: boolean } = {};
   enableDragDrop = false;
 
   ngOnInit() {
     this.buildTree();
   }
 
-  ngOnChanges() {
-    this.buildTree();
+  ngOnChanges(changes: SimpleChanges) {
+      if (changes['items']) {
+      this.buildTree();
+    } else if (changes['selectedItemId'] && this.selectedItemId) {
+      // Just update selection without rebuilding
+      this.selectedNode = this.findNodeById(this.treeNodes, this.selectedItemId);
+    }
   }
 
   private buildTree() {
     this.treeNodes = this.convertToTreeNodes(this.items);
+    this.enableDragDrop = false;
     
-    // Enable drag-drop only after nodes are built and rendered
-    // Short delay to let PrimeNG finish rendering
-    if (this.treeNodes.length > 0) {
-      setTimeout(() => {
-        this.enableDragDrop = true;
-      }, 100);
-    } else {
-      this.enableDragDrop = false;
+    // Restore selection after rebuild
+    if (this.selectedItemId) {
+      this.selectedNode = this.findNodeById(this.treeNodes, this.selectedItemId);
     }
+  }
+
+  private restoreExpandedState(nodes: TreeNode[]) {
+    nodes.forEach(node => {
+      if (node.key && this.expandedKeys[node.key]) {
+        node.expanded = true;
+      }
+      if (node.children?.length) {
+        this.restoreExpandedState(node.children);
+      }
+    });
+  }
+
+  private findNodeById(nodes: TreeNode[], itemId: number): TreeNode | undefined {
+    for (const node of nodes) {
+      if (node.data?.id === itemId) {
+        return node;
+      }
+      if (node.children?.length) {
+        const found = this.findNodeById(node.children, itemId);
+        if (found) return found;
+      }
+    }
+    return undefined;
   }
 
   private convertToTreeNodes(items: ItemDto[]): TreeNode[] {
@@ -109,8 +148,8 @@ export class ItemsTreeComponent implements OnInit, OnChanges {
       children: item.children ? this.convertToTreeNodes(item.children) : [],
       icon: this.getIconForType(item.itemTypeName),
       styleClass: this.getStyleClassForStatus(item.statusTypeName),
-      draggable: true,
-      droppable: true,
+      draggable: false,
+      droppable: false,
     }));
   }
 

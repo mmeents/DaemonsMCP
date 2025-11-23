@@ -1,13 +1,26 @@
+:host {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+:host ::ng-deep .p-treeselect {
+  width: 100%;
+  background-color: #fff;
+}
+
 .items-page {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width:100%;
 }
 
 .split-pane {
   display: flex;
   flex: 1;
   height: 100%;
+  width:100%;
   gap: 0;
 }
 
@@ -23,7 +36,9 @@
 
 .details-pane {
   flex: 1;
+  min-width: 0;
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   background: white;
@@ -65,6 +80,8 @@
   flex: 1;
   padding: 16px;
   overflow: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .placeholder {
@@ -72,4 +89,122 @@
   font-style: italic;
   text-align: center;
   margin-top: 40px;
+}
+
+.pane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Form styles */
+.edit-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.form-group label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-group .readonly-value {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Button styles (if not already defined) */
+.btn-primary {
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #4f46e5;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+/* View mode */
+.view-mode h3 {
+  margin: 0 0 1rem 0;
+  color: #111827;
+}
+
+.view-mode p {
+  margin: 0.5rem 0;
+  color: #374151;
+}
+
+.placeholder {
+  color: #6b7280;
+  text-align: center;
+  padding: 2rem;
 }

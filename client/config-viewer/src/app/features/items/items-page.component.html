@@ -4,12 +4,16 @@
     <div class="tree-pane">
       <div class="pane-header">
         <h2>Items Hierarchy</h2>
-        <button class="btn-primary" (click)="onNewItem()">+ New Item</button>
+        <button class="btn-primary" (click)="onNewItem()">+ Add</button>
+        <div class="header-actions" *ngIf="!isEditing && selectedItem">
+          <button class="btn-secondary" (click)="onEditItem()">Edit</button>
+        </div>
       </div>
       <div class="tree-content">
         <app-items-tree
           [items]="items"
           [loading]="loading"
+          [selectedItemId]="selectedItem?.id"
           (itemSelected)="onItemSelected($event)"
           (itemMoved)="onItemMoved($event)"
         >
@@ -20,19 +24,87 @@
     <!-- Right: Item Details -->
     <div class="details-pane">
       <div class="pane-header">
-        <h2>Item Details</h2>
-      </div>
-      <div class="details-content">
-        <div *ngIf="selectedItem; else noSelection">
-          <h3>{{ selectedItem.name }}</h3>
-          <p><strong>Type:</strong> {{ selectedItem.itemTypeName }}</p>
-          <p><strong>Status:</strong> {{ selectedItem.statusTypeName }}</p>
-          <p><strong>Details:</strong> {{ selectedItem.details }}</p>
-          <p><strong>Created:</strong> {{ selectedItem.created | date }}</p>
+        <h2>{{ isEditing ? (editForm.id === 0 ? 'New Item' : 'Edit Item') : 'Item Details' }}</h2>
+        <div class="header-actions" *ngIf="!isEditing && selectedItem">
+          <button class="btn-secondary" (click)="onEditItem()">Edit</button>
         </div>
-        <ng-template #noSelection>
-          <p class="placeholder">Select an item to view details...</p>
-        </ng-template>
+      </div>
+      
+      <div class="details-content">
+        <!-- VIEW MODE -->
+        <div *ngIf="!isEditing && selectedItem" class="view-mode">
+          <p><strong>Id: {{ selectedItem.id}};  {{ selectedItem.name }}</strong></p>
+          <p><strong>Details:</strong><br/>{{ selectedItem.details || '(none)' }}</p>
+          <p><strong>Type:</strong> {{ selectedItem.itemTypeName }};
+          <strong>Status:</strong> {{ selectedItem.statusTypeName }}; 
+          <strong>Modified:</strong> {{ selectedItem.modified | date:'medium' }}</p>          
+        </div>
+
+        <!-- EDIT MODE -->
+        <div *ngIf="isEditing" class="edit-mode">
+          <div class="form-group">
+            <label for="itemName">Name *</label>
+            <input 
+              id="itemName" 
+              type="text" 
+              [(ngModel)]="editForm.name" 
+              placeholder="Enter item name"
+              [disabled]="isSaving"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="itemType">Type</label>
+            <select id="itemType" [(ngModel)]="editForm.itemTypeId" [disabled]="isSaving">
+              <option *ngFor="let t of itemTypes" [ngValue]="t.id">{{ t.name }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="itemStatus">Status</label>
+            <select id="itemStatus" [(ngModel)]="editForm.statusTypeId" [disabled]="isSaving">
+              <option *ngFor="let s of statusTypes" [ngValue]="s.id">{{ s.name }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="itemDetails">Details</label>
+            <textarea 
+              id="itemDetails" 
+              [(ngModel)]="editForm.details" 
+              rows="4"
+              placeholder="Enter details..."
+              [disabled]="isSaving"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="itemParent">Parent</label>
+            <p-treeSelect
+              id="itemParent"
+              [options]="parentTreeOptions"
+              [(ngModel)]="selectedParentNode"
+              placeholder="Select parent (or none for root)"
+              [disabled]="isSaving"
+              [showClear]="true"
+              containerStyleClass="w-full"
+            ></p-treeSelect>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-primary" (click)="onSaveItem()" [disabled]="isSaving">
+              {{ isSaving ? 'Saving...' : 'Save' }}
+            </button>
+            <button class="btn-secondary" (click)="onCancelEdit()" [disabled]="isSaving">
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <!-- NO SELECTION -->
+        <div *ngIf="!isEditing && !selectedItem" class="placeholder">
+          <p>Select an item to view details, or click "+ New Item" to create one.</p>
+        </div>
       </div>
     </div>
   </div>
