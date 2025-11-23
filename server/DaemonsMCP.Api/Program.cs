@@ -7,6 +7,7 @@ using DaemonsMCP.Domain.Repositories;
 using DaemonsMCP.Infrastructure;
 using DaemonsMCP.Infrastructure.Services;
 using DaemonsMCP.Domain.Constants;
+using DaemonsMCP.Domain.Extensions;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -37,15 +38,25 @@ namespace DaemonsMCP.Api
             builder.Services.AddMvc();
 
             builder.Services.AddApplication();
-            
-            // This line is CRITICAL for migrations to work
             builder.Services.AddInfrastructure(builder.Configuration);
 
             builder.Services.AddSwaggerGen(options => { 
-              options.SwaggerDoc("v1", new OpenApiInfo { Title = "DaemonsMCP API", Version = "v4" });
+              options.SwaggerDoc("v1", new OpenApiInfo { Title = "DaemonsMCP API", Version = "v3" });
+            });
+
+            builder.Services.AddCors(options =>
+            {
+              options.AddPolicy("LocalDev", policy =>
+              {
+                policy.WithOrigins("http://localhost:4200")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+              });
             });
 
             var app = builder.Build();
+
+            app.UseCors("LocalDev");
 
             // Configure middleware
             if (app.Environment.IsDevelopment()) {
@@ -67,14 +78,16 @@ namespace DaemonsMCP.Api
 
             app.MapProjectEndpoints()
                .MapFileSystemEndpoints()
-               .MapIndexingEndpoints();
+               .MapIndexingEndpoints()
+               .MapItemsEndpoints()
+               .MapObjectHierarchyEndpoints();
 
             app.Run();
         }
 
     private static void ConfigureSerilog() {
       // Ensure logs directory exists
-      var logsPath = Cx.LogsAppPath;
+      var logsPath = CommonPath.LogsAppPath;
 
       Log.Logger = new LoggerConfiguration()
           .MinimumLevel.Debug()

@@ -1,0 +1,77 @@
+﻿<div class="searchable-list">
+  <!-- Search Box -->
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input 
+      type="text"
+      [value]="searchTerm()"
+      (input)="onSearchInput($any($event.target).value)"
+      [placeholder]="searchPlaceholder"
+      class="search-input"
+    />
+    @if (searchTerm()) {
+      <button (click)="clearSearch()" class="clear-btn" type="button">✕</button>
+    }
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <span>Searching...</span>
+    </div>
+  }
+
+  <!-- Empty State (no search yet) -->
+  @else if (!searchTerm() && items().length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">📂</span>
+      <p>{{ emptyMessage }}</p>
+    </div>
+  }
+
+  <!-- No Results -->
+  @else if (searchTerm() && items().length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">🔍</span>
+      <p>{{ noResultsMessage }}</p>
+      <small>Try a different search term</small>
+    </div>
+  }
+
+  <!-- Results Table -->
+  @else {
+    <div class="results-info">
+      {{ items().length }} file{{ items().length === 1 ? '' : 's' }} found
+    </div>
+    
+    <div class="table-container">
+      <table class="results-table">
+        <thead>
+          <tr>
+            @for (column of columns; track column.header) {
+              <th [style.width]="column.width" [style.text-align]="column.align || 'left'">
+                {{ column.header }}
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track trackByIndex($index)) {
+            <tr 
+              (click)="selectItem(item)"
+              [class.selected]="isSelected(item)"
+              class="result-row"
+            >
+              @for (column of columns; track column.header) {
+                <td [style.text-align]="column.align || 'left'">
+                  {{ getCellValue(item, column) }}
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

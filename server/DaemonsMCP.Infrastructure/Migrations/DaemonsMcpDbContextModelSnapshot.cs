@@ -211,6 +211,234 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.ToTable("IndexQueues");
                 });
 
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.Item", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Completed")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ItemTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ItemTypeId1")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReferenceFileSystemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReferenceObjectHierarchyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Completed");
+
+                    b.HasIndex("Created");
+
+                    b.HasIndex("ItemTypeId");
+
+                    b.HasIndex("ItemTypeId1");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("ReferenceFileSystemId");
+
+                    b.HasIndex("ReferenceObjectHierarchyId");
+
+                    b.HasIndex("StatusTypeId");
+
+                    b.HasIndex("ItemTypeId", "StatusTypeId");
+
+                    b.HasIndex("ParentId", "Rank");
+
+                    b.ToTable("Items");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Created = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Details = "Living documentation for the Daemons3MCP tool. This documentation is stored as hierarchical nodes and can be extended through the nodes interface. The system provides tools for file management, code indexing, and hierarchical note/task organization.",
+                            ItemTypeId = 6,
+                            Modified = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Daemons3MCP Documentation",
+                            Rank = 1,
+                            StatusTypeId = 12
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Created = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Details = "Root container for all todo lists. Todo lists are created as children of this node. Use make-todo-list to create new lists, and get-next-todo to retrieve the next actionable item.",
+                            ItemTypeId = 5,
+                            Modified = new DateTime(2025, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Todo Root",
+                            Rank = 2,
+                            StatusTypeId = 11
+                        });
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.ItemType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("ParentId", "Rank");
+
+                    b.ToTable("ItemTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Reserved null type - default unset value",
+                            Name = "None",
+                            Rank = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Internal root - high-level grouping for type categories",
+                            Name = "Categories",
+                            Rank = 0
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Parent container for all item type definitions",
+                            Name = "ItemTypes",
+                            ParentId = 2,
+                            Rank = 1
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Parent container for all status type definitions",
+                            Name = "StatusTypes",
+                            ParentId = 2,
+                            Rank = 2
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "A task or action item to be completed",
+                            Name = "Todo",
+                            ParentId = 3,
+                            Rank = 1
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Documentation or informational content",
+                            Name = "Readme",
+                            ParentId = 3,
+                            Rank = 2
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "General note or observation",
+                            Name = "Note",
+                            ParentId = 3,
+                            Rank = 3
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Item has not been started yet",
+                            Name = "Not Started",
+                            ParentId = 4,
+                            Rank = 1
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Description = "Item is currently being worked on",
+                            Name = "In Progress",
+                            ParentId = 4,
+                            Rank = 2
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Description = "Item is finished",
+                            Name = "Complete",
+                            ParentId = 4,
+                            Rank = 3
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Description = "Item is paused or waiting",
+                            Name = "On Hold",
+                            ParentId = 4,
+                            Rank = 4
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Description = "Item was cancelled and will not be completed",
+                            Name = "Cancelled",
+                            ParentId = 4,
+                            Rank = 5
+                        });
+                });
+
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.ObjectHierarchy", b =>
                 {
                     b.Property<int>("Id")
@@ -402,6 +630,60 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.Item", b =>
+                {
+                    b.HasOne("DaemonsMCP.Domain.Entities.ItemType", "ItemType")
+                        .WithMany()
+                        .HasForeignKey("ItemTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DaemonsMCP.Domain.Entities.ItemType", null)
+                        .WithMany("Items")
+                        .HasForeignKey("ItemTypeId1");
+
+                    b.HasOne("DaemonsMCP.Domain.Entities.Item", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DaemonsMCP.Domain.Entities.FileSystemNode", "ReferenceFileSystem")
+                        .WithMany()
+                        .HasForeignKey("ReferenceFileSystemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DaemonsMCP.Domain.Entities.ObjectHierarchy", "ReferenceObjectHierarchy")
+                        .WithMany()
+                        .HasForeignKey("ReferenceObjectHierarchyId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DaemonsMCP.Domain.Entities.ItemType", "StatusType")
+                        .WithMany()
+                        .HasForeignKey("StatusTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ItemType");
+
+                    b.Navigation("Parent");
+
+                    b.Navigation("ReferenceFileSystem");
+
+                    b.Navigation("ReferenceObjectHierarchy");
+
+                    b.Navigation("StatusType");
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.ItemType", b =>
+                {
+                    b.HasOne("DaemonsMCP.Domain.Entities.ItemType", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.ObjectHierarchy", b =>
                 {
                     b.HasOne("DaemonsMCP.Domain.Entities.FileSystemNode", "FileSystemNode")
@@ -447,6 +729,18 @@ namespace DaemonsMCP.Infrastructure.Migrations
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.FileSystemNode", b =>
                 {
                     b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.Item", b =>
+                {
+                    b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.ItemType", b =>
+                {
+                    b.Navigation("Children");
+
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.ObjectHierarchy", b =>

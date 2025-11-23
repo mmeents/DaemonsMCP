@@ -1,6 +1,6 @@
 ﻿using DaemonsMCP.Domain.Entities;
 using DaemonsMCP.Domain.Repositories;
-using DaemonsMCP.Infrastructure.Persistance.Configurations;
+using DaemonsMCP.Infrastructure.Persistence.Configurations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
@@ -105,15 +105,13 @@ public class IndexingService : IIndexingService {
         return; // Skip directories
       }
 
-      // Build full path
       var project = await _projectRepository.GetByIdAsync(queueItem.ProjectId, cancellationToken);
       if (project == null) {
         throw new InvalidOperationException($"Project {queueItem.ProjectId} not found");
       }
 
       var fullPath = Path.GetFullPath( Path.Combine(project.RootPath, fileSystemNode.RelativePath));
-      if (!File.Exists(fullPath)) {
-        // File deleted, clean up hierarchy
+      if (!File.Exists(fullPath)) { // File deleted, clean up hierarchy
         await _objectHierarchyRepository.DeleteByFileSystemNodeIdAsync(fileSystemNode.Id, cancellationToken);
         await _objectHierarchyRepository.SaveChangesAsync(cancellationToken);
         queueItem.MarkCompleted();
@@ -165,6 +163,7 @@ public class IndexingService : IIndexingService {
 
     try {
       var fileContent = await File.ReadAllTextAsync(filePath, Encoding.UTF8, cancellationToken);
+      var lines = fileContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
       if (string.IsNullOrWhiteSpace(fileContent)) {
         return touchedIds;
       }
@@ -183,7 +182,7 @@ public class IndexingService : IIndexingService {
         var namespaceId = await GetOrCreateHierarchyAsync(
             fileSystemNodeId, projectId, namespaceName,
             (int)IdentifierTypeEnum.Namespace, parentId: null,
-            namespaceDecl, touchedIds, cancellationToken);
+            namespaceDecl, touchedIds, null, cancellationToken);
 
         // Process classes in namespace
         var classDecls = namespaceDecl.DescendantNodes().OfType<ClassDeclarationSyntax>();
@@ -192,7 +191,7 @@ public class IndexingService : IIndexingService {
           var classId = await GetOrCreateHierarchyAsync(
               fileSystemNodeId, projectId, className,
               (int)IdentifierTypeEnum.Class, parentId: namespaceId,
-              classDecl, touchedIds, cancellationToken);
+              classDecl, touchedIds, lines, cancellationToken);
 
           // Process methods in class
           var methodDecls = classDecl.DescendantNodes().OfType<MethodDeclarationSyntax>();
@@ -201,7 +200,7 @@ public class IndexingService : IIndexingService {
             var methodId = await GetOrCreateHierarchyAsync(
                 fileSystemNodeId, projectId, methodName,
                 (int)IdentifierTypeEnum.Method, parentId: classId,
-                methodDecl, touchedIds, cancellationToken);
+                methodDecl, touchedIds, null, cancellationToken);
 
             // Process method parameters
             foreach (var param in methodDecl.ParameterList.Parameters) {
@@ -209,7 +208,7 @@ public class IndexingService : IIndexingService {
               await GetOrCreateHierarchyAsync(
                   fileSystemNodeId, projectId, paramName,
                   (int)IdentifierTypeEnum.MethodParameter, parentId: methodId,
-                  param, touchedIds, cancellationToken);
+                  param, touchedIds, null, cancellationToken);
             }
           }
 
@@ -220,7 +219,7 @@ public class IndexingService : IIndexingService {
             await GetOrCreateHierarchyAsync(
                 fileSystemNodeId, projectId, propName,
                 (int)IdentifierTypeEnum.Property, parentId: classId,
-                propDecl, touchedIds, cancellationToken);
+                propDecl, touchedIds, null, cancellationToken);
           }
         }
 
@@ -231,7 +230,7 @@ public class IndexingService : IIndexingService {
           var interfaceId = await GetOrCreateHierarchyAsync(
               fileSystemNodeId, projectId, interfaceName,
               (int)IdentifierTypeEnum.Interface, parentId: namespaceId,
-              interfaceDecl, touchedIds, cancellationToken);
+              interfaceDecl, touchedIds, null, cancellationToken);
 
           // Process methods in interface
           var methodDecls = interfaceDecl.DescendantNodes().OfType<MethodDeclarationSyntax>();
@@ -240,7 +239,7 @@ public class IndexingService : IIndexingService {
             var methodId = await GetOrCreateHierarchyAsync(
                 fileSystemNodeId, projectId, methodName,
                 (int)IdentifierTypeEnum.Method, parentId: interfaceId,
-                methodDecl, touchedIds, cancellationToken);
+                methodDecl, touchedIds, null, cancellationToken);
 
             // Process method parameters
             foreach (var param in methodDecl.ParameterList.Parameters) {
@@ -248,7 +247,7 @@ public class IndexingService : IIndexingService {
               await GetOrCreateHierarchyAsync(
                   fileSystemNodeId, projectId, paramName,
                   (int)IdentifierTypeEnum.MethodParameter, parentId: methodId,
-                  param, touchedIds, cancellationToken);
+                  param, touchedIds, null, cancellationToken);
             }
           }
 
@@ -259,7 +258,7 @@ public class IndexingService : IIndexingService {
             await GetOrCreateHierarchyAsync(
                 fileSystemNodeId, projectId, propName,
                 (int)IdentifierTypeEnum.Property, parentId: interfaceId,
-                propDecl, touchedIds, cancellationToken);
+                propDecl, touchedIds, null, cancellationToken);
           }
         }
       }
@@ -275,15 +274,16 @@ public class IndexingService : IIndexingService {
   /// Get or create ObjectHierarchy node. Returns the node ID and adds to touchedIds set.
   /// </summary>
   private async Task<int> GetOrCreateHierarchyAsync(
-      int fileSystemNodeId,
-      int projectId,
-      string identifierName,
-      int identifierTypeId,
-      int? parentId,
-      dynamic syntaxNode,  // ClassDeclarationSyntax, MethodDeclarationSyntax, etc.
-      HashSet<int> touchedIds,
-      CancellationToken cancellationToken) {
-
+    int fileSystemNodeId,
+    int projectId,
+    string identifierName,
+    int identifierTypeId,
+    int? parentId,
+    dynamic syntaxNode,  // ClassDeclarationSyntax, MethodDeclarationSyntax, etc.
+    HashSet<int> touchedIds,
+    string[]? lines,
+    CancellationToken cancellationToken) 
+  {
     // Get or create Identifier
     var identifier = await _identifierRepository.GetOrCreateAsync(identifierName, cancellationToken);
 
@@ -293,15 +293,19 @@ public class IndexingService : IIndexingService {
     var lineStart = lineSpan.StartLinePosition.Line;
     var lineEnd = lineSpan.EndLinePosition.Line;
 
+    if (lines != null && identifierTypeId == (int)IdentifierTypeEnum.Class) {     
+      lineStart = FindClassStartCutLine(lines, lineStart);
+    }
+
     // Build ObjectHierarchy to upsert
     var hierarchy = ObjectHierarchy.Create(
-        parentId: parentId, 
-        projectId: projectId,
-        fileSystemNodeId: fileSystemNodeId,
-        identifierId: identifier.Id,
-        identifierTypeId: identifierTypeId,
-        lineStart: lineStart,
-        lineEnd: lineEnd);
+      parentId: parentId, 
+      projectId: projectId,
+      fileSystemNodeId: fileSystemNodeId,
+      identifierId: identifier.Id,
+      identifierTypeId: identifierTypeId,
+      lineStart: lineStart,
+      lineEnd: lineEnd);
 
     // Upsert via repo
     var result = await _objectHierarchyRepository.GetOrCreateAsync(hierarchy, cancellationToken);
@@ -309,6 +313,65 @@ public class IndexingService : IIndexingService {
 
     return result.Id;
   }
+
+  private int FindClassStartCutLine(string[]? lines, int reportedStartLine) {
+    // sanity check is a bit more. reported class is inside start line but attributes or comments pushes that back. 
+    // so we backtrack to find the line to cut from to include those.
+    if (lines == null || lines.Length == 0) return reportedStartLine;
+    bool ClassFound = false;
+    int classLine = -1;
+    int startLine = reportedStartLine;
+
+    if (startLine > 0) {
+      var line = lines[startLine].Trim();
+      if (line.StartsWith("class ") || line.Contains(" class ")) {
+        ClassFound = true;
+        classLine = startLine;
+      } else {
+        if (startLine + 1 < lines.Length) {
+          line = lines[startLine + 1].Trim();
+          if (line.StartsWith("class ") || line.Contains(" class ")) {
+            ClassFound = true;
+            classLine = startLine + 1;
+          } else if (startLine - 1 >= 0) {
+            line = lines[startLine - 1].Trim();
+            if (line.StartsWith("class ") || line.Contains(" class ")) {
+              ClassFound = true;
+              classLine = startLine - 1;
+            }
+          }
+        }
+        if (!ClassFound && startLine + 2 < lines.Length) {
+          line = lines[startLine + 2].Trim();
+          if (line.StartsWith("class ") || line.Contains(" class ")) {
+            ClassFound = true;
+            classLine = startLine + 2;
+          } else if (startLine - 2 >= 0) {
+            line = lines[startLine - 2].Trim();
+            if (line.StartsWith("class ") || line.Contains(" class ")) {
+              ClassFound = true;
+              classLine = startLine - 2;
+            }
+          }
+        }
+      }
+    }
+
+    if (ClassFound) {
+      startLine = classLine;
+      while (startLine > 0 && startLine - 1 > 0) {
+        var line = lines[startLine - 1].Trim();
+        if (line.Contains("}") || line.Contains("{") || line == "" || line.Contains("namespace")) {  // Stop at block boundaries or empty lines
+          break; // Found the class declaration line
+        }
+        startLine--;
+      }
+    }
+
+    return startLine;
+  }
+
+  
 }
 
 /// <summary>

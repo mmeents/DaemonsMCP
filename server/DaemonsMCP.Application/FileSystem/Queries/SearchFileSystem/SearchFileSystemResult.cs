@@ -17,6 +17,7 @@ namespace DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem {
   public class FileSystemNodeDto {
     public int Id { get; set; }
     public int? ParentId { get; set; }
+    public int ProjectId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string RelativePath { get; set; } = string.Empty;
     public bool IsDirectory { get; set; }

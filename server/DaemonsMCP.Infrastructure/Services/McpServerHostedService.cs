@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DaemonsMCP.Infrastructure.Extensions;
+using DaemonsMCP.Domain.Extensions;
 using DaemonsMCP.Infrastructure.Tools;
 using DaemonsMCP.Domain.Constants;
 
@@ -36,6 +36,8 @@ namespace DaemonsMCP.Infrastructure.Services {
       MCPServer.Register<ProjectTools>();
       MCPServer.Register<FileSystemTools>();
       MCPServer.Register<ObjectHierarchyTools>();
+      MCPServer.Register<ItemTools>();
+      MCPServer.Register<ItemTypeTools>();
 
       // Start MCPSharp server - blocks until cancellation
       await MCPServer.StartAsync(Cx.AppName, Cx.AppVersion);

@@ -11,9 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DaemonsMCP.Infrastructure;
 
 public static class DependencyInjection {
-  public static IServiceCollection AddInfrastructure(
-      this IServiceCollection services,
-      IConfiguration configuration) {
+  public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration) {
 
     // Add DbContext
     services.AddDbContext<DaemonsMcpDbContext>(options =>
@@ -28,19 +26,25 @@ public static class DependencyInjection {
     services.AddScoped<IIdentifierRepository, IdentifierRepository>();
     services.AddScoped<IIdentifierTypeRepository, IdentifierTypeRepository>();
     services.AddScoped<IIndexQueueRepository, IndexQueueRepository>();
-    services.AddScoped<IIndexingService, IndexingService>();
+    services.AddScoped<IItemRepository, ItemRepository>();
+    services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
 
     // Register Services
+    services.AddScoped<IIndexingService, IndexingService>();
+    services.AddScoped<IValidationService, ValidationService>();
     services.AddScoped<IFileSystemSyncService, FileSystemSyncService>();
+    services.AddScoped<IDatabaseManagementService,  DatabaseManagementService >();
 
     // Register file watching
     services.AddSingleton<IProjectFileWatcherFactory, ProjectFileWatcherFactory>();
-    services.AddHostedService<FileWatcherCoordinatorService>();
+    services.AddHostedService<FileWatcherHostedService>();
 
     // Register Mcp Tools
     services.AddSingleton<IProjectToolsHandler, ProjectToolsHandler>();
     services.AddSingleton<IFileSystemToolsHandler, FileSystemToolsHandler>();
     services.AddSingleton<IObjectHierarchyToolsHandler, ObjectHierarchyToolsHandler>();
+    services.AddSingleton<IItemToolsHandler, ItemToolsHandler>();
+    services.AddSingleton<IItemTypeToolsHandler, ItemTypeToolsHandler>();
 
     services.AddHostedService<McpServerHostedService>();
 
