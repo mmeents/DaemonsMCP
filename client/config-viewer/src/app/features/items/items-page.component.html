@@ -12,12 +12,46 @@
       <div class="tree-content">
         <app-items-tree
           [items]="items"
+          (itemAdd)="onNewItem($event)"
+          (itemEdit)="onEditItem($event)"
           [loading]="loading"
           [selectedItemId]="selectedItem?.id"
           (itemSelected)="onItemSelected($event)"
           (itemMoved)="onItemMoved($event)"
+          (itemDelete)="onDeleteItem($event)"
         >
         </app-items-tree>
+        <p-dialog 
+          header="Confirm Delete" 
+          [(visible)]="showDeleteDialog" 
+          [modal]="true"
+          [style]="{width: '450px'}"
+          [draggable]="false"
+          [resizable]="false">
+          
+          <div class="delete-dialog-content">
+            <p><i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: var(--orange-500); margin-right: 1rem;"></i>
+              Delete "{{ itemToDelete?.name }}"?</p>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+              <label for="deleteStrategy">Delete Strategy</label>
+              <p-select
+                id="deleteStrategy"
+                [options]="deleteStrategies"
+                [(ngModel)]="selectedDeleteStrategy"
+                optionLabel="label"
+                optionValue="value"
+                [style]="{width: '100%'}"
+              ></p-select>
+            </div>
+          </div>
+          <br/><br/><br/><br/><br/><br/><br/>
+          
+          <ng-template pTemplate="footer">
+            <button class="btn-secondary" (click)="cancelDelete()">Cancel</button>
+            <button class="btn-primary" (click)="confirmDelete()">Delete</button>
+          </ng-template>
+        </p-dialog>
       </div>
     </div>
 
@@ -33,11 +67,11 @@
       <div class="details-content">
         <!-- VIEW MODE -->
         <div *ngIf="!isEditing && selectedItem" class="view-mode">
-          <p><strong>Id: {{ selectedItem.id}};  {{ selectedItem.name }}</strong></p>
-          <p><strong>Details:</strong><br/>{{ selectedItem.details || '(none)' }}</p>
+          <p><strong>Id: {{ selectedItem.id}};  {{ selectedItem.name }}</strong></p>          
           <p><strong>Type:</strong> {{ selectedItem.itemTypeName }};
           <strong>Status:</strong> {{ selectedItem.statusTypeName }}; 
-          <strong>Modified:</strong> {{ selectedItem.modified | date:'medium' }}</p>          
+          <strong>Modified:</strong> {{ selectedItem.modified | date:'medium' }}</p>
+          <p><strong>Details:</strong><br/><span [innerHTML]="selectedItem.details || '(none)' "></span> </p>      
         </div>
 
         <!-- EDIT MODE -->
@@ -70,7 +104,7 @@
           <div class="form-group">
             <label for="itemDetails">Details</label>
             <textarea 
-              id="itemDetails" 
+              id="itemDetails"               
               [(ngModel)]="editForm.details" 
               rows="4"
               placeholder="Enter details..."
@@ -82,13 +116,13 @@
             <label for="itemParent">Parent</label>
             <p-treeSelect
               id="itemParent"
+              [filter]="true"
               [options]="parentTreeOptions"
               [(ngModel)]="selectedParentNode"
               placeholder="Select parent (or none for root)"
               [disabled]="isSaving"
               [showClear]="true"
-              containerStyleClass="w-full"
-            ></p-treeSelect>
+              ></p-treeSelect>
           </div>
 
           <div class="form-actions">

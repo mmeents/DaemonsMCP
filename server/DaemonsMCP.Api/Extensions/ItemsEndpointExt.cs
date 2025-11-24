@@ -1,6 +1,8 @@
-﻿using MediatR;
+﻿using DaemonsMCP.Application.Items.Commands.AddUpdateItem;
+using DaemonsMCP.Application.Items.Commands.DeleteItem;
+using DaemonsMCP.Domain.Enums;
 using DaemonsMCP.Domain.Models;
-using DaemonsMCP.Application.Items.Commands.AddUpdateItem;
+using MediatR;
 
 namespace DaemonsMCP.Api.Extensions {
   public static class ItemsEndpointExt {
@@ -87,6 +89,22 @@ namespace DaemonsMCP.Api.Extensions {
           }
         })
       .WithName("AddUpdateItem");
+
+      app.MapDelete("/api/items/{itemId}", async (
+        IMediator mediator,
+        int itemId,
+         DeleteStrategy strategy = DeleteStrategy.DeleteCascade) => {
+          try {
+            var command = new DeleteItemCommand(itemId, strategy);
+            var result = await mediator.Send(command);
+            return Results.Ok(result);
+          } catch (Exception ex) {
+            return Results.BadRequest(new {
+              Success = false,
+              Error = ex.Message
+            });
+          }
+        });
 
       // Get all item types
       app.MapGet("/api/items/types/all", async (

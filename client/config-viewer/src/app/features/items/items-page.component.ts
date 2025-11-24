@@ -6,15 +6,19 @@ import { TreeNode } from 'primeng/api';
 import { ItemsTreeComponent } from '../../shared/components/items-tree/items-tree.component';
 import { ItemsService } from '../../core/services/items.service';
 import { ItemDto, AddUpdateItemRequest, ItemTypeDto } from '../../shared/models/api.models';
+import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
+import { DeleteStrategy } from '../../shared/models/api.models';
 
 @Component({
   selector: 'app-items-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, ItemsTreeComponent, TreeSelectModule],
+  imports: [CommonModule, FormsModule, ItemsTreeComponent, TreeSelectModule, DialogModule, SelectModule],
   templateUrl: './items-page.component.html',
   styleUrl: './items-page.component.scss',
 })
 export class ItemsPageComponent implements OnInit {
+  [x: string]: any;
   items: ItemDto[] = [];
   selectedItem?: ItemDto;
   loading = false;
@@ -28,6 +32,16 @@ export class ItemsPageComponent implements OnInit {
 
   parentTreeOptions: TreeNode[] = [];
   selectedParentNode: TreeNode | null = null;
+
+  showDeleteDialog = false;
+  itemToDelete?: ItemDto;
+  deleteStrategies = [
+    { label: 'Delete with all children', value: DeleteStrategy.DeleteCascade },
+    { label: 'Prevent if has children', value: DeleteStrategy.PreventIfHasChildren },
+    { label: 'Move children to root', value: DeleteStrategy.OrphanChildren },
+    { label: 'Move children to parent', value: DeleteStrategy.ReparentToGrandparent }
+  ];
+  selectedDeleteStrategy = DeleteStrategy.DeleteCascade;
 
   constructor(private itemsService: ItemsService) {}
 
@@ -111,9 +125,9 @@ export class ItemsPageComponent implements OnInit {
     });
   }
 
-  onNewItem() {
+  onNewItem(parent?: ItemDto | null) {
     // Pre-select parent if an item is selected, otherwise root
-    const parentId = this.selectedItem?.id;
+    const parentId = parent?.id ?? this.selectedItem?.id;
     this.editForm = this.createEmptyForm(parentId);
     
     // Default to first available type/status if available
@@ -128,24 +142,58 @@ export class ItemsPageComponent implements OnInit {
     this.isEditing = true;
   }
 
-  onEditItem() {
-    if (!this.selectedItem) return;
+  onEditItem(item?: ItemDto) {
+    const itemToEdit = item ?? this.selectedItem;
+    if (!itemToEdit) return;
     
     // Populate form from selected item
     this.editForm = {
-      id: this.selectedItem.id,
-      parentId: this.selectedItem.parentId,
-      itemTypeId: this.selectedItem.itemTypeId,
-      statusTypeId: this.selectedItem.statusTypeId,
-      rank: this.selectedItem.rank,
-      name: this.selectedItem.name,
-      details: this.selectedItem.details,
-      referenceFileSystemId: this.selectedItem.referenceFileSystemId,
-      referenceObjectHierarchyId: this.selectedItem.referenceObjectHierarchyId
+      id: itemToEdit.id,
+      parentId: itemToEdit.parentId,
+      itemTypeId: itemToEdit.itemTypeId,
+      statusTypeId: itemToEdit.statusTypeId,
+      rank: itemToEdit.rank,
+      name: itemToEdit.name,
+      details: itemToEdit.details,
+      referenceFileSystemId: itemToEdit.referenceFileSystemId,
+      referenceObjectHierarchyId: itemToEdit.referenceObjectHierarchyId
     };
 
-    this.buildParentTreeOptions();
+    this.buildParentTreeOptions(this.editForm.id);
     this.isEditing = true;
+  }
+
+  onDeleteItem(item: ItemDto) {
+    if (item.id > 2){
+      this.itemToDelete = item;
+      this.selectedDeleteStrategy = DeleteStrategy.DeleteCascade; // Reset to default
+      this.showDeleteDialog = true;
+    } else {
+      alert("reserved nodes can't be deleted.");
+    }
+  }
+
+  confirmDelete() {
+    if (!this.itemToDelete) return;
+    
+    this.itemsService.deleteItem(this.itemToDelete.id, this.selectedDeleteStrategy).subscribe({
+      next: () => {
+        console.log('Item deleted successfully');
+        this.selectedItem = undefined;
+        this.showDeleteDialog = false;
+        this.loadItems();
+      },
+      error: (err) => {
+        console.error('Failed to delete item:', err);
+        alert('Failed to delete item. ' + (err.error || 'Check console for details.'));
+        this.showDeleteDialog = false;
+      }
+    });
+  }
+
+  cancelDelete() {
+    this.showDeleteDialog = false;
+    this.itemToDelete = undefined;
   }
 
   onSaveItem() {

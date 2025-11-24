@@ -3,79 +3,15 @@ import { CommonModule } from '@angular/common';
 import { TreeModule } from 'primeng/tree';
 import { TreeNode } from 'primeng/api';
 import { ItemDto } from '../../models/api.models';
+import { ContextMenuModule } from 'primeng/contextmenu';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-items-tree',
   standalone: true,
-  imports: [CommonModule, TreeModule],
-  template: `
-    <div class="tree-wrapper">
-      <p-tree
-        [value]="treeNodes"
-        [filter]="true"
-        [filterInputAutoFocus]="true"
-        [draggableNodes]="enableDragDrop"
-        [droppableNodes]="enableDragDrop"
-        (onNodeDrop)="onNodeDrop($event)"
-        selectionMode="single"
-        [(selection)]="selectedNode"
-        (onNodeSelect)="onSelect($event)"
-        [loading]="loading"
-        [style]="{ width: '100%' }"
-      >
-      </p-tree>
-      <div *ngIf="treeNodes.length === 0 && !loading" class="empty-state">
-        <p>No items found. Click "+ New Item" to create one.</p>
-      </div>
-    </div>
-  `,
-  styles: [`
-    :host {
-      display: block;
-      height: 100%;
-    }
-    
-    .tree-wrapper {
-      height: 100%;
-      overflow: auto;
-    }
-
-    .empty-state {
-      padding: 2rem;
-      text-align: center;
-      color: #6c757d;
-    }
-    
-    /* Custom status styling */
-    :host ::ng-deep .status-not-started {
-      color: #6c757d;
-    }
-    
-    :host ::ng-deep .status-in-progress {
-      color: #0d6efd;
-      font-weight: 500;
-    }
-    
-    :host ::ng-deep .status-complete {
-      color: #02331cff;      
-    }
-    
-    :host ::ng-deep .status-cancelled {
-      color: #dc3545;
-      text-decoration: line-through;
-    }
-
-    :host ::ng-deep .p-tree-node-label {
-      margin-left: 0.5rem;
-    }
-    :host ::ng-deep .p-tree-node-selected {
-      background-color: #e2e2ffff;
-      border-radius: 4px;
-    }
-    :host ::ng-deep .p-tree-node-children {
-      padding-left: 1.0rem; 
-    }
-  `]
+  imports: [CommonModule, TreeModule, ContextMenuModule],
+  styleUrl: './items-tree.component.scss',
+  templateUrl: './items-tree.component.html'  
 })
 export class ItemsTreeComponent implements OnInit, OnChanges {
   @Input() items: ItemDto[] = [];
@@ -83,11 +19,16 @@ export class ItemsTreeComponent implements OnInit, OnChanges {
   @Input() selectedItemId?: number;
   @Output() itemSelected = new EventEmitter<ItemDto>();
   @Output() itemMoved = new EventEmitter<{ item: ItemDto; newParentId?: number }>();
+  @Output() itemAdd = new EventEmitter<ItemDto | null>();
+  @Output() itemEdit = new EventEmitter<ItemDto>();
+  @Output() itemDelete = new EventEmitter<ItemDto>();
 
   treeNodes: TreeNode[] = [];
   selectedNode?: TreeNode;
   expandedKeys: {[key: string]: boolean } = {};
   enableDragDrop = false;
+  contextMenuItems: MenuItem[] = [];
+  selectedNodeForContext?: TreeNode;
 
   ngOnInit() {
     this.buildTree();
@@ -97,7 +38,6 @@ export class ItemsTreeComponent implements OnInit, OnChanges {
       if (changes['items']) {
       this.buildTree();
     } else if (changes['selectedItemId'] && this.selectedItemId) {
-      // Just update selection without rebuilding
       this.selectedNode = this.findNodeById(this.treeNodes, this.selectedItemId);
     }
   }
@@ -105,8 +45,7 @@ export class ItemsTreeComponent implements OnInit, OnChanges {
   private buildTree() {
     this.treeNodes = this.convertToTreeNodes(this.items);
     this.enableDragDrop = false;
-    
-    // Restore selection after rebuild
+
     if (this.selectedItemId) {
       this.selectedNode = this.findNodeById(this.treeNodes, this.selectedItemId);
     }
@@ -153,8 +92,54 @@ export class ItemsTreeComponent implements OnInit, OnChanges {
     }));
   }
 
-  private getIconForType(typeName: string): string {
-    // Map your item types to PrimeIcons
+  onContextMenu(event: any) {
+    this.selectedNodeForContext = event.node;
+    const item = event.node.data as ItemDto;
+  
+    this.contextMenuItems = [
+      {
+        label: 'Add Child',
+        icon: 'pi pi-plus',
+        command: () => this.onAddChild()
+      },
+      {
+        label: 'Edit',
+        icon: 'pi pi-pencil',
+        command: () => this.onEdit()
+      },
+      {
+        separator: true
+      },
+      {
+        label: 'Delete',
+        icon: 'pi pi-trash',
+        command: () => this.onDelete()
+      }
+    ];
+  }
+
+  private onAddChild() {
+    if (this.selectedNodeForContext) {
+      const parentItem = this.selectedNodeForContext.data as ItemDto;
+      this.itemAdd.emit(parentItem);
+    }
+  }
+
+  private onEdit() {
+    if (this.selectedNodeForContext) {
+      const item = this.selectedNodeForContext.data as ItemDto;
+      this.itemEdit.emit(item);
+    }
+  }
+
+  private onDelete(){
+    if (this.selectedNodeForContext) {
+      const item = this.selectedNodeForContext.data as ItemDto;
+      this.itemDelete.emit(item);
+    }
+  }
+
+  private getIconForType(typeName: string): string {    
     const iconMap: { [key: string]: string } = {
       Task: 'pi pi-check-square',
       Todo: 'pi pi-list',
@@ -167,8 +152,7 @@ export class ItemsTreeComponent implements OnInit, OnChanges {
     return iconMap[typeName] || 'pi pi-circle';
   }
 
-  private getStyleClassForStatus(statusName: string): string {
-    // Add custom classes based on status - normalize to lowercase with hyphens
+  private getStyleClassForStatus(statusName: string): string {    
     const normalized = statusName.toLowerCase().replace(/\s+/g, '-');
     return `status-${normalized}`;
   }
@@ -183,7 +167,6 @@ export class ItemsTreeComponent implements OnInit, OnChanges {
     const droppedItem = event.dragNode.data as ItemDto;
     const newParentId = event.dropNode?.data?.id;
     
-    // Emit the move event - parent component will handle the API call
     this.itemMoved.emit({ item: droppedItem, newParentId });
   }
 }

@@ -1,0 +1,24 @@
+<div class="file-viewer">
+  @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <span>Loading file...</span>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+        <span class="error-icon">⚠️</span>
+        <p>{{ error() }}</p>
+    </div>
+  } @else if (!fileName()) {
+    <div class="empty-state">
+        <span class="empty-icon">📄</span>
+        <p>Select a file to view its contents</p>
+    </div>
+  } @else {
+    <div class="file-header">
+        <span class="file-name">Id:{{ fileSystemId()}}  {{ fileName() }}</span>
+        <span class="file-path">{{ filePath() }}</span>
+    </div>
+    <div #editorContainer class="editor-container"></div>
+  }
+</div>

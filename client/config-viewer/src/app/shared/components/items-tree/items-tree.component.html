@@ -1,0 +1,22 @@
+<div class="tree-wrapper">
+  <p-tree #treeRef
+    [value]="treeNodes"
+    [filter]="true"
+    [filterInputAutoFocus]="true"
+    [draggableNodes]="enableDragDrop"
+    [droppableNodes]="enableDragDrop"
+    (onNodeDrop)="onNodeDrop($event)"
+    selectionMode="single"
+    [(selection)]="selectedNode"
+    (onNodeSelect)="onSelect($event)"
+    (onNodeContextMenuSelect)="onContextMenu($event)"
+    [contextMenu]="cm"
+    [loading]="loading"
+    [style]="{ width: '100%' }"
+    >
+  </p-tree>
+  <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
+  <div *ngIf="treeNodes.length === 0 && !loading" class="empty-state">
+    <p>No items found. Click "+ New Item" to create one.</p>
+  </div>
+</div>

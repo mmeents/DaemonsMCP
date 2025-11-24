@@ -159,3 +159,10 @@ export interface SearchItemsParams {
   statusId?: number;
   maxDepth?: number;
 }
+
+export enum DeleteStrategy {
+  PreventIfHasChildren = 0,
+  DeleteCascade = 1,
+  OrphanChildren = 2,
+  ReparentToGrandparent = 3
+}

@@ -14,14 +14,6 @@ public record AddUpdateItemCommand(
   int? ReferenceObjectHierarchyId = null
 ) : IRequest<ItemDto>;
 
-public record DeleteItemCommand(
-  int ItemId,
-  DeleteStrategy Strategy = DeleteStrategy.PreventIfHasChildren
-) : IRequest<bool>;
 
-public enum DeleteStrategy {
-  PreventIfHasChildren,
-  DeleteCascade,
-  OrphanChildren,
-  ReparentToGrandparent
-}
+
+
