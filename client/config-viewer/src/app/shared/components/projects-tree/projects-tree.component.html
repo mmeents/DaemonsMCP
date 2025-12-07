@@ -1,0 +1,39 @@
+<p-table 
+  [value]="projects" 
+  [loading]="loading"
+  [(selection)]="selectedProject"
+  selectionMode="single"
+  (onRowSelect)="onRowSelect($event)"
+  dataKey="id"
+  [tableStyle]="{'min-width': '100%'}"
+  styleClass="p-datatable-sm">
+  
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 60px">ID</th>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Root Path</th>
+    </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="body" let-project>
+    <tr 
+      [pSelectableRow]="project"
+      [pContextMenuRow]="project"
+      (contextmenu)="onContextMenu($event, project)">
+      <td>{{ project.id }}</td>
+      <td>{{ project.name }}</td>
+      <td>{{ project.description }}</td>
+      <td class="path-cell">{{ project.rootPath }}</td>
+    </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="4" class="text-center">No projects found</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>

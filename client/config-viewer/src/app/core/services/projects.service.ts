@@ -19,6 +19,14 @@ export class ProjectsService extends ApiService {
   createProject(command: CreateProjectCommand): Observable<Project> {
     return this.post<Project>('/api/projects', command);
   }
+  
+  updateProject(id: number, command: CreateProjectCommand): Observable<Project> {
+    return this.put<Project>(`/api/projects/${id}`, command);
+  }
+
+  deleteProject(id: number): Observable<void> {
+    return this.delete<void>(`/api/projects/${id}`);
+  }
 
   getReadme(): Observable<any> {
     return this.get<any>('/api/readme');

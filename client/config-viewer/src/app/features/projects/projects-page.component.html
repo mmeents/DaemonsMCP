@@ -1,0 +1,123 @@
+<div class="projects-page">
+  <div class="toolbar">
+    <h2>Projects</h2>
+    <div class="actions">
+      <button 
+        pButton 
+        icon="pi pi-plus" 
+        label="New Project" 
+        (click)="onNewProject()"
+        class="p-button-success">
+      </button>
+      <button 
+        pButton 
+        icon="pi pi-pencil" 
+        label="Edit" 
+        [disabled]="!selectedProject"
+        (click)="onEditProject()"
+        class="p-button-secondary">
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <app-projects-tree
+      [projects]="projects"
+      [loading]="loading"
+      [selectedProjectId]="selectedProject?.id"
+      (projectSelected)="onProjectSelected($event)"
+      (projectAdd)="onNewProject()"
+      (projectEdit)="onEditProject($event)"
+      (projectDelete)="onDeleteProject($event)">
+    </app-projects-tree>
+  </div>
+</div>
+
+<!-- Edit Dialog -->
+<p-dialog 
+  [(visible)]="isEditing" 
+  [header]="editForm.id ? 'Edit Project' : 'New Project'"
+  [modal]="true"
+  [style]="{width: '600px'}"
+  [draggable]="false"
+  [resizable]="false">
+  
+  <div class="edit-form">
+    <div class="form-field">
+      <label for="projectName">Name *</label>
+      <input 
+        pInputText 
+        id="projectName" 
+        [(ngModel)]="editForm.name"
+        placeholder="Enter project name"
+        class="w-full" />
+    </div>
+
+    <div class="form-field">
+      <label for="projectDesc">Description</label>
+      <textarea 
+        pInputTextarea 
+        id="projectDesc" 
+        [(ngModel)]="editForm.description"
+        placeholder="Enter project description"
+        rows="3"
+        class="w-full">
+      </textarea>
+    </div>
+
+    <div class="form-field">
+      <label for="projectPath">Root Path *</label>
+      <input 
+        pInputText 
+        id="projectPath" 
+        [(ngModel)]="editForm.rootPath"
+        placeholder="C:\path\to\project"
+        class="w-full" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button 
+      pButton 
+      label="Cancel" 
+      icon="pi pi-times" 
+      (click)="onCancelEdit()"
+      class="p-button-text">
+    </button>
+    <button 
+      pButton 
+      label="Save" 
+      icon="pi pi-check" 
+      (click)="onSaveProject()"
+      [loading]="isSaving">
+    </button>
+  </ng-template>
+</p-dialog>
+
+<!-- Delete Confirmation Dialog -->
+<p-dialog 
+  [(visible)]="showDeleteDialog" 
+  header="Confirm Delete"
+  [modal]="true"
+  [style]="{width: '450px'}">
+  
+  <p>Are you sure you want to delete project "{{ projectToDelete?.name }}"?</p>
+  <p class="warning-text">This action cannot be undone.</p>
+
+  <ng-template pTemplate="footer">
+    <button 
+      pButton 
+      label="Cancel" 
+      icon="pi pi-times" 
+      (click)="cancelDelete()"
+      class="p-button-text">
+    </button>
+    <button 
+      pButton 
+      label="Delete" 
+      icon="pi pi-trash" 
+      (click)="confirmDelete()"
+      class="p-button-danger">
+    </button>
+  </ng-template>
+</p-dialog>
