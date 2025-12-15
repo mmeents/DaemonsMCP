@@ -73,7 +73,8 @@
       <!-- Full-width Monaco editor -->
       <div class="editor-area">
         <app-file-viewer     
-          [fileSystemId]="selectedFileId"     
+          [fileSystemId]="selectedFileId" 
+          [projectId]="selectedProject()?.id ?? null"    
           [fileName]="selectedFileName"
           [filePath]="selectedFilePath"
           [fileContent]="fileContent"

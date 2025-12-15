@@ -4,3 +4,4 @@
 
 DaemonsMCP is a comprehensive C# MCP (Model Context Protocol) service that provides LLMs with secure, full-featured access to explore, read, and **write** to local codebases. Built on MCPSharp for reliable transport and JSON-RPC communication, it gives your AI assistant the ability to see, navigate, understand, and **modify** your project files just like a developer would.
 
+check out the Wiki for [Installation Instructions.](https://github.com/mmeents/DaemonsMCP/wiki/V3-Installation)

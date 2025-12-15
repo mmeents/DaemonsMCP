@@ -22,6 +22,75 @@ namespace DaemonsMCP.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.AccessToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevokedChain")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("IssuedTo")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasDefaultValue("unknown");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("Used")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UsedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("UsedUrl")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("UsedUrlNextToken")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Expires");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("Used");
+
+                    b.HasIndex("UsedBy");
+
+                    b.HasIndex("UsedUrl");
+
+                    b.HasIndex("Expires", "UsedUrl");
+
+                    b.ToTable("AccessTokens");
+                });
+
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.FileSystemNode", b =>
                 {
                     b.Property<int>("Id")
@@ -593,6 +662,16 @@ namespace DaemonsMCP.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.AccessToken", b =>
+                {
+                    b.HasOne("DaemonsMCP.Domain.Entities.AccessToken", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.FileSystemNode", b =>
                 {
                     b.HasOne("DaemonsMCP.Domain.Entities.FileSystemNode", "Parent")
@@ -724,6 +803,11 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.Navigation("Parent");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.AccessToken", b =>
+                {
+                    b.Navigation("Children");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.FileSystemNode", b =>

@@ -1,116 +1,32 @@
 import { Component, Input, signal, effect, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { AccessTokensService } from '../../../core/services/access-token.service';
+import { CreateAccessTokenCommand } from '../../models/api.models';
 
 declare const monaco: any;
 
 @Component({
   selector: 'app-file-viewer',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="file-viewer">
-      @if (loading()) {
-        <div class="loading-state">
-          <div class="spinner"></div>
-          <span>Loading file...</span>
-        </div>
-      } @else if (error()) {
-        <div class="error-state">
-          <span class="error-icon">⚠️</span>
-          <p>{{ error() }}</p>
-        </div>
-      } @else if (!fileName()) {
-        <div class="empty-state">
-          <span class="empty-icon">📄</span>
-          <p>Select a file to view its contents</p>
-        </div>
-      } @else {
-        <div class="file-header">
-          <span class="file-name">Id:{{ fileSystemId()}}  {{ fileName() }}</span>
-          <span class="file-path">{{ filePath() }}</span>
-        </div>
-        <div #editorContainer class="editor-container"></div>
-      }
-    </div>
-  `,
-  styles: [`
-    .file-viewer {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      background: #1e1e1e;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .file-header {
-      display: flex;
-      flex-direction: column;
-      padding: 12px 16px;
-      background: #2d2d30;
-      border-bottom: 1px solid #3e3e42;
-      color: #cccccc;
-
-      .file-name {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 4px;
-      }
-
-      .file-path {
-        font-size: 12px;
-        color: #858585;
-      }
-    }
-
-    .editor-container {
-      flex: 1;
-      width: 100%;
-      height: 100%;
-    }
-
-    .loading-state, .error-state, .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: #cccccc;
-      gap: 12px;
-
-      .spinner {
-        width: 32px;
-        height: 32px;
-        border: 3px solid #3e3e42;
-        border-top-color: #0e639c;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-      }
-
-      .empty-icon, .error-icon {
-        font-size: 48px;
-        opacity: 0.5;
-      }
-
-      p {
-        margin: 0;
-        font-size: 14px;
-      }
-    }
-
-    .error-state {
-      color: #f48771;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  `]
+  imports: [    
+    CommonModule, 
+    ButtonModule, 
+    DialogModule, 
+    TooltipModule,
+    ToastModule],
+  styleUrl: './file-viewer.component.scss',
+  templateUrl: 'file-viewer.component.html' ,
+  providers: [MessageService]
 })
 export class FileViewerComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editorContainer', { static: false }) editorContainer?: ElementRef;
   @Input() fileSystemId = signal<number | null>(null);
+  @Input() projectId: number | null = null;
   @Input() fileName = signal<string>('');
   @Input() filePath = signal<string>('');
   @Input() fileContent = signal<string>('');
@@ -120,7 +36,17 @@ export class FileViewerComponent implements AfterViewInit, OnDestroy {
   private editor: any = null;
   private monacoLoaded = false;
 
-  constructor() {
+  // API Link generation properties
+  showApiLinkDialog = false;
+  generatedApiUrl: string = '';
+  generatedToken: string = '';
+  tokenExpiresIn: number = 60;
+  private baseApiUrl = 'https://daemonsmcp.app/';
+
+  constructor(
+    private tokensService: AccessTokensService,
+    private messageService: MessageService
+  ) {
     // Watch for content changes - this will trigger when a file is selected
     effect(() => {
       const content = this.fileContent();
@@ -148,6 +74,60 @@ export class FileViewerComponent implements AfterViewInit, OnDestroy {
     if (this.editor) {
       this.editor.dispose();
     }
+  }
+
+  onCopyApiLink() {
+    const fileId = this.fileSystemId();
+    const projId = this.projectId
+    
+    if (!fileId || !projId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Missing file or project information'
+      });
+      return;
+    }
+
+    // Generate a new token
+    const command: CreateAccessTokenCommand = {
+      issuedTo: 'API Link - ' + this.fileName(),
+      expiresInMinutes: this.tokenExpiresIn
+    };
+
+    this.tokensService.createToken(command).subscribe({
+      next: (tokenDto) => {
+        this.generatedToken = tokenDto.token;
+        this.generatedApiUrl = 
+          `${this.baseApiUrl}api/files/get?token=${tokenDto.token}&fileSystemNodeId=${fileId}&projectId=${projId}`;
+        this.showApiLinkDialog = true;
+      },
+      error: (err) => {
+        console.error('Failed to generate token:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to generate API token'
+        });
+      }
+    });
+  }
+
+  copyApiUrl() {
+    navigator.clipboard.writeText(this.generatedApiUrl).then(() => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Copied',
+        detail: 'API URL copied to clipboard'
+      });
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to copy to clipboard'
+      });
+    });
   }
 
   private async ensureEditorReady(): Promise<void> {

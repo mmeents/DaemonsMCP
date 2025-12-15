@@ -1,13 +1,14 @@
-﻿using DaemonsMCP.Api.Extensions;
+﻿using Daemons.Api.Extensions;
+using DaemonsMCP.Api.Extensions;
 using DaemonsMCP.Application;
 using DaemonsMCP.Application.FileSystem.Commands.SyncProjectFileSystem;
 using DaemonsMCP.Application.Projects.Commands.CreateProject;
 using DaemonsMCP.Application.Projects.Queries.GetAllProjects;
+using DaemonsMCP.Domain.Constants;
+using DaemonsMCP.Domain.Extensions;
 using DaemonsMCP.Domain.Repositories;
 using DaemonsMCP.Infrastructure;
 using DaemonsMCP.Infrastructure.Services;
-using DaemonsMCP.Domain.Constants;
-using DaemonsMCP.Domain.Extensions;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -80,7 +81,8 @@ namespace DaemonsMCP.Api
                .MapFileSystemEndpoints()
                .MapIndexingEndpoints()
                .MapItemsEndpoints()
-               .MapObjectHierarchyEndpoints();
+               .MapObjectHierarchyEndpoints()
+         .MapAccessTokenEndpoints();
 
             app.Run();
         }

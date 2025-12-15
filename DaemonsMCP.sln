@@ -20,6 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Infrastructure",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.Api", "server\DaemonsMCP.Api\DaemonsMCP.Api.csproj", "{FFC5AB4B-C483-3857-0D8A-50178B8E28DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaemonsMCP.xUnit.Tests", "DaemonsMCP.xUnit.Tests\DaemonsMCP.xUnit.Tests.csproj", "{E59B3D6E-B13B-40A4-A936-7243CC840E30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daemons.Web", "Daemons.Web\Daemons.Web.csproj", "{7188E0A5-4360-414C-A5E2-C48958F13FB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +50,14 @@ Global
 		{FFC5AB4B-C483-3857-0D8A-50178B8E28DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFC5AB4B-C483-3857-0D8A-50178B8E28DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFC5AB4B-C483-3857-0D8A-50178B8E28DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E59B3D6E-B13B-40A4-A936-7243CC840E30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E59B3D6E-B13B-40A4-A936-7243CC840E30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E59B3D6E-B13B-40A4-A936-7243CC840E30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E59B3D6E-B13B-40A4-A936-7243CC840E30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7188E0A5-4360-414C-A5E2-C48958F13FB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7188E0A5-4360-414C-A5E2-C48958F13FB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7188E0A5-4360-414C-A5E2-C48958F13FB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7188E0A5-4360-414C-A5E2-C48958F13FB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

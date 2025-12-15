@@ -7,7 +7,8 @@ import {
   ItemTypeDto, 
   AddUpdateItemRequest, 
   AddUpdateItemTypeRequest, 
-  SearchItemsParams 
+  SearchItemsParams,
+  DeleteStrategy
 } from '../../shared/models/api.models';
 
 @Injectable({
@@ -57,5 +58,9 @@ export class ItemsService extends ApiService {
   // Add or update item type
   addUpdateItemType(request: AddUpdateItemTypeRequest): Observable<ItemTypeDto> {
     return this.post<ItemTypeDto>('/api/items/types', request);
+  }
+
+  deleteItem(itemId: number, strategy: DeleteStrategy = DeleteStrategy.DeleteCascade): Observable<void> {
+    return this.delete<void>(`/api/items/${itemId}?strategy=${strategy}`);
   }
 }
