@@ -166,3 +166,32 @@ export enum DeleteStrategy {
   OrphanChildren = 2,
   ReparentToGrandparent = 3
 }
+
+// Access Token Models
+export interface AccessTokenDto {
+  id: number;
+  parentId?: number;
+  token: string;
+  issuedTo: string;
+  created: string;  // ISO date string
+  expires: string;  // ISO date string
+  used?: string;    // ISO date string
+  usedUrl?: string;
+  usedBy?: string;
+  isValid: boolean;
+  isExpired: boolean;
+  usedUrlNextToken?: string;
+}
+
+export interface AccessTokenSearchParams {
+  issuedTo?: string;
+  includeExpired?: boolean;
+  includeUsed?: boolean;
+  pageNo?: number;
+  pageSize?: number;
+}
+
+export interface CreateAccessTokenCommand {
+  issuedTo: string;
+  expiresInMinutes: number;
+}

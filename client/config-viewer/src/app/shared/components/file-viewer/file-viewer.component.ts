@@ -1,18 +1,32 @@
 import { Component, Input, signal, effect, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { AccessTokensService } from '../../../core/services/access-token.service';
+import { CreateAccessTokenCommand } from '../../models/api.models';
 
 declare const monaco: any;
 
 @Component({
   selector: 'app-file-viewer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [    
+    CommonModule, 
+    ButtonModule, 
+    DialogModule, 
+    TooltipModule,
+    ToastModule],
   styleUrl: './file-viewer.component.scss',
-  templateUrl: 'file-viewer.component.html' 
+  templateUrl: 'file-viewer.component.html' ,
+  providers: [MessageService]
 })
 export class FileViewerComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editorContainer', { static: false }) editorContainer?: ElementRef;
   @Input() fileSystemId = signal<number | null>(null);
+  @Input() projectId: number | null = null;
   @Input() fileName = signal<string>('');
   @Input() filePath = signal<string>('');
   @Input() fileContent = signal<string>('');
@@ -22,7 +36,17 @@ export class FileViewerComponent implements AfterViewInit, OnDestroy {
   private editor: any = null;
   private monacoLoaded = false;
 
-  constructor() {
+  // API Link generation properties
+  showApiLinkDialog = false;
+  generatedApiUrl: string = '';
+  generatedToken: string = '';
+  tokenExpiresIn: number = 60;
+  private baseApiUrl = 'https://daemonsmcp.app/';
+
+  constructor(
+    private tokensService: AccessTokensService,
+    private messageService: MessageService
+  ) {
     // Watch for content changes - this will trigger when a file is selected
     effect(() => {
       const content = this.fileContent();
@@ -50,6 +74,60 @@ export class FileViewerComponent implements AfterViewInit, OnDestroy {
     if (this.editor) {
       this.editor.dispose();
     }
+  }
+
+  onCopyApiLink() {
+    const fileId = this.fileSystemId();
+    const projId = this.projectId
+    
+    if (!fileId || !projId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Missing file or project information'
+      });
+      return;
+    }
+
+    // Generate a new token
+    const command: CreateAccessTokenCommand = {
+      issuedTo: 'API Link - ' + this.fileName(),
+      expiresInMinutes: this.tokenExpiresIn
+    };
+
+    this.tokensService.createToken(command).subscribe({
+      next: (tokenDto) => {
+        this.generatedToken = tokenDto.token;
+        this.generatedApiUrl = 
+          `${this.baseApiUrl}api/files/get?token=${tokenDto.token}&fileSystemNodeId=${fileId}&projectId=${projId}`;
+        this.showApiLinkDialog = true;
+      },
+      error: (err) => {
+        console.error('Failed to generate token:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to generate API token'
+        });
+      }
+    });
+  }
+
+  copyApiUrl() {
+    navigator.clipboard.writeText(this.generatedApiUrl).then(() => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Copied',
+        detail: 'API URL copied to clipboard'
+      });
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to copy to clipboard'
+      });
+    });
   }
 
   private async ensureEditorReady(): Promise<void> {

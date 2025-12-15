@@ -1,0 +1,181 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  padding: 1rem;
+}
+
+.access-tokens-page {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
+
+  h2 {
+    margin: 0;
+    color: #495057;
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+
+  .filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 600;
+      font-size: 0.9em;
+      color: #495057;
+    }
+  }
+}
+
+.content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.pagination {
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 600;
+      color: #495057;
+    }
+  }
+
+  .info-box {
+    background-color: #e3f2fd;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #90caf9;
+
+    .token-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+
+      code {
+        flex: 1;
+        background-color: white;
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        word-break: break-all;
+      }
+    }
+
+    small {
+      color: #1976d2;
+      font-weight: 500;
+    }
+  }
+}
+
+.warning-text {
+  color: #dc3545;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+.checkbox-field {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem;
+
+  label {
+    font-weight: normal !important;
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+.detail-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+
+  .detail-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1rem;
+    align-items: start;
+
+    label {
+      font-weight: 600;
+      color: #495057;
+      padding-top: 0.25rem;
+    }
+
+    .badge {
+      background-color: #e3f2fd;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-weight: 600;
+      color: #1976d2;
+      display: inline-block;
+    }
+
+    .token-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      code {
+        flex: 1;
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        word-break: break-all;
+        font-size: 0.9em;
+      }
+    }
+
+    .url-code {
+      background-color: #f8f9fa;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85em;
+      word-break: break-all;
+      display: block;
+    }
+  }
+}

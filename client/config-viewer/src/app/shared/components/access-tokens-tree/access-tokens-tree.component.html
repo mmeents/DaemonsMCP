@@ -1,0 +1,49 @@
+<p-table 
+  [value]="tokens" 
+  [loading]="loading"
+  [(selection)]="selectedToken"
+  selectionMode="single"
+  (onRowSelect)="onRowSelect($event)"
+  dataKey="id"
+  [tableStyle]="{'min-width': '100%'}"
+  styleClass="p-datatable-sm">
+  
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 60px">ID</th>
+      <th style="width: 150px">Token (Short)</th>
+      <th>Issued To</th>
+      <th style="width: 180px">Created</th>
+      <th style="width: 180px">Expires</th>
+      <th style="width: 100px">Status</th>
+      <th>Used By</th>
+    </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="body" let-token>
+    <tr 
+      [pSelectableRow]="token"
+      [pContextMenuRow]="token"
+      (contextmenu)="onContextMenu($event, token)">
+      <td>{{ token.id }}</td>
+      <td class="token-cell">{{ token.token }}</td>
+      <td>{{ token.issuedTo }}</td>
+      <td>{{ token.created | date:'short' }}</td>
+      <td>{{ token.expires | date:'short' }}</td>
+      <td>
+        <span class="status-badge" [ngClass]="getStatusClass(token)">
+          {{ getStatus(token) }}
+        </span>
+      </td>
+      <td>{{ token.usedBy || '-' }}</td>
+    </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="7" class="text-center">No tokens found</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>

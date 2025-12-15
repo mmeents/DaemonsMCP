@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DaemonsMCP - AI Code Intelligence API</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 DaemonsMCP</h1>
+            <p class="tagline">Native C# Code Intelligence for AI Assistants</p>
+        </header>
+
+        <main>
+            <section class="intro">
+                <p>
+                    DaemonsMCP is a sophisticated code intelligence system that provides AI assistants with 
+                    native visibility into C# codebases through REST API and Model Context Protocol (MCP).
+                </p>
+                <p class="highlight">
+                    <strong>Search for the needle in the haystack, then explain why.</strong>
+                </p>
+            </section>
+
+            <section class="links">
+                <div class="link-card">
+                    <h2>📚 API Documentation</h2>
+                    <p>Interactive Swagger UI for exploring and testing endpoints</p>
+                    <a href="/swagger" class="btn btn-primary">Open Swagger UI</a>
+                    <p class="note">Note: Write operations require authentication tokens. Read the API documentation below for details.</p>
+                </div>
+
+                <div class="link-card">
+                    <h2>🚀 Getting Started</h2>
+                    <p>Begin by prompting your ai to call the <code>/api/readme</code> endpoint to discover available operations and documentation</p>                    
+                </div>
+            </section>
+
+            <section class="features">
+                <h2>✨ Key Features</h2>
+                <ul>
+                    <li><strong>File System Intelligence</strong> - Search and navigate C# project structures</li>
+                    <li><strong>Object Hierarchy</strong> - Deep analysis of namespaces, classes, methods, and more</li>
+                    <li><strong>Rotating Token Authentication</strong> - Secure AI-to-AI communication with one-time-use tokens</li>
+                    <li><strong>Real-time Indexing</strong> - File watching with automatic code analysis</li>
+                    <li><strong>AI-Optimized Design</strong> - Large context "book report" responses for efficient AI consumption</li>
+                </ul>
+            </section>
+
+            <section class="authentication">
+                <h2>🔐 Authentication</h2>
+                <p>
+                    DaemonsMCP uses an innovative <strong>rotating token chain</strong> authentication pattern designed 
+                    specifically for AI assistants:
+                </p>
+                <ul>
+                    <li>Each API response includes a one-time-use token for the next request</li>
+                    <li>Tokens are passed as URL query parameters (<code>?token=...</code>)</li>
+                    <li>IP address tracking ensures tokens can't be hijacked mid-chain</li>
+                    <li>Read operations are generally public; write operations require tokens</li>
+                </ul>
+                <p class="note">
+                    This design accommodates AI assistants' limited HTTP header capabilities while maintaining security.
+                </p>
+            </section>
+
+            <section class="endpoints">
+                <h2>📡 Available Endpoints</h2>
+                <div class="endpoint-list">
+                    <div class="endpoint">
+                        <code>GET /api/readme</code>
+                        <p>Comprehensive API documentation and discovery</p>
+                    </div>
+                    <div class="endpoint">
+                        <code>GET /api/file-system/search</code>
+                        <p>Search for files and directories by name or path</p>
+                    </div>
+                    <div class="endpoint">
+                        <code>GET /api/file-system/file/{id}</code>
+                        <p>Retrieve file contents by FileSystemNodeId</p>
+                    </div>
+                    <div class="endpoint">
+                        <code>POST /api/file-system/file</code>
+                        <p>Create new files (requires token)</p>
+                    </div>
+                    <div class="endpoint">
+                        <code>PUT /api/file-system/file/{id}</code>
+                        <p>Update existing files (requires token)</p>
+                    </div>
+                    <div class="endpoint">
+                        <code>GET /health</code>
+                        <p>Health check endpoint</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="vision">
+                <h2>🌐 Vision: MomentoMCP</h2>
+                <p>
+                    DaemonsMCP is part of a broader vision for <strong>MomentoMCP</strong> - a decentralized 
+                    AI social network where AI assistants can access code intelligence and share structured 
+                    memory through REST APIs, enabling true AI-to-AI collaboration.
+                </p>
+            </section>
+        </main>
+
+        <footer>
+            <p>
+                <strong>Status:</strong> <span class="status-badge">Public Beta</span>
+            </p>
+            <p>
+                Questions or feedback? Check out the 
+                <a href="/swagger">Swagger documentation</a> or explore the API.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

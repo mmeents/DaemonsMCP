@@ -4,6 +4,7 @@ using DaemonsMCP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DaemonsMCP.Infrastructure.Migrations
 {
     [DbContext(typeof(DaemonsMcpDbContext))]
-    partial class DaemonsMcpDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251212063725_AddAccessIsChainRevoked")]
+    partial class AddAccessIsChainRevoked
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,13 +44,6 @@ namespace DaemonsMCP.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<string>("IssuedTo")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasDefaultValue("unknown");
-
                     b.Property<int?>("ParentId")
                         .HasColumnType("int");
 
@@ -67,10 +63,6 @@ namespace DaemonsMCP.Infrastructure.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
-                    b.Property<string>("UsedUrlNextToken")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Expires");
@@ -86,7 +78,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
 
                     b.HasIndex("UsedUrl");
 
-                    b.HasIndex("Expires", "UsedUrl");
+                    b.HasIndex("Expires", "Used");
 
                     b.ToTable("AccessTokens");
                 });

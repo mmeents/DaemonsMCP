@@ -1,0 +1,241 @@
+<div class="access-tokens-page">
+  <div class="toolbar">
+    <h2>Access Tokens</h2>
+    <div class="actions">
+      <button 
+        pButton 
+        icon="pi pi-plus" 
+        label="Generate Token" 
+        (click)="onGenerateToken()"
+        class="p-button-success">
+      </button>
+      <button 
+        pButton 
+        icon="pi pi-refresh" 
+        label="Refresh" 
+        (click)="loadTokens()"
+        class="p-button-secondary">
+      </button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-field">
+      <label for="issuedToFilter">Issued To:</label>
+      <input 
+        pInputText 
+        id="issuedToFilter" 
+        [(ngModel)]="searchParams.issuedTo"
+        placeholder="Filter by issued to..."
+        (keyup.enter)="onSearch()"
+        class="w-full" />
+    </div>
+    <div class="filter-field checkbox-field">
+      <p-checkbox 
+        [(ngModel)]="searchParams.includeExpired" 
+        [binary]="true"
+        inputId="includeExpired"
+        (onChange)="onSearch()">
+      </p-checkbox>
+      <label for="includeExpired">Include Expired</label>
+    </div>
+    <div class="filter-field checkbox-field">
+      <p-checkbox 
+        [(ngModel)]="searchParams.includeUsed" 
+        [binary]="true"
+        inputId="includeUsed"
+        (onChange)="onSearch()">
+      </p-checkbox>
+      <label for="includeUsed">Include Used</label>
+    </div>
+    <button 
+      pButton 
+      icon="pi pi-search" 
+      label="Search" 
+      (click)="onSearch()">
+    </button>
+  </div>
+
+  <div class="content">
+    <app-access-tokens-tree
+      [tokens]="tokens"
+      [loading]="loading"
+      [selectedTokenId]="selectedToken?.id"
+      (tokenSelected)="onTokenSelected($event)"
+      (tokenCopy)="onCopyToken($event)"
+      (tokenRevoke)="onRevokeToken($event)">
+    </app-access-tokens-tree>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <p-paginator
+      [first]="(searchParams.pageNo! - 1) * searchParams.pageSize!"
+      [rows]="searchParams.pageSize!"
+      [totalRecords]="totalCount"
+      (onPageChange)="onPageChange($event)">
+    </p-paginator>
+  </div>
+</div>
+
+<!-- Generate Token Dialog -->
+<p-dialog 
+  [(visible)]="isGenerating" 
+  header="Generate Access Token"
+  [modal]="true"
+  [style]="{width: '500px'}"
+  [draggable]="false"
+  [resizable]="false">
+  
+  <div class="edit-form">
+    <div class="form-field">
+      <label for="issuedTo">Issued To *</label>
+      <input 
+        pInputText 
+        id="issuedTo" 
+        [(ngModel)]="generateForm.issuedTo"
+        placeholder="e.g., Groq, Gemini, Claude"
+        class="w-full" />
+    </div>
+
+    <div class="form-field">
+      <label for="expiresIn">Expires In (Minutes) *</label>
+      <input 
+        pInputText 
+        type="number"
+        id="expiresIn" 
+        [(ngModel)]="generateForm.expiresInMinutes"
+        placeholder="60"
+        class="w-full" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button 
+      pButton 
+      label="Cancel" 
+      icon="pi pi-times" 
+      (click)="onCancelGenerate()"
+      class="p-button-text">
+    </button>
+    <button 
+      pButton 
+      label="Generate" 
+      icon="pi pi-check" 
+      (click)="onSaveToken()"
+      [loading]="isSaving">
+    </button>
+  </ng-template>
+</p-dialog>
+
+<!-- Revoke Confirmation Dialog -->
+<p-dialog 
+  [(visible)]="showRevokeDialog" 
+  header="Confirm Revoke"
+  [modal]="true"
+  [style]="{width: '450px'}">
+  
+  <p>Are you sure you want to revoke this token?</p>
+  <p class="warning-text">This will invalidate the entire token chain.</p>
+
+  <ng-template pTemplate="footer">
+    <button 
+      pButton 
+      label="Cancel" 
+      icon="pi pi-times" 
+      (click)="cancelRevoke()"
+      class="p-button-text">
+    </button>
+    <button 
+      pButton 
+      label="Revoke" 
+      icon="pi pi-ban" 
+      (click)="confirmRevoke()"
+      class="p-button-danger">
+    </button>
+  </ng-template>
+</p-dialog>
+
+<!-- Token Detail Dialog -->
+<p-dialog 
+  [(visible)]="showDetailDialog" 
+  [header]="tokenToShow ? 'Token Details - ' + tokenToShow.issuedTo : 'Token Details'"
+  [modal]="true"
+  [style]="{width: '600px'}"
+  [draggable]="false"
+  [resizable]="false">
+  
+  <div class="detail-view" *ngIf="tokenToShow">
+    <div class="detail-row">
+      <label>ID:</label>
+      <span>{{ tokenToShow.id }}</span>
+    </div>
+
+    <div class="detail-row">
+      <label>Issued To:</label>
+      <span class="badge">{{ tokenToShow.issuedTo }}</span>
+    </div>
+
+    <div class="detail-row">
+      <label>Status:</label>
+      <span class="status-badge" [ngClass]="getStatusClass(tokenToShow)">
+        {{ getStatus(tokenToShow) }}
+      </span>
+    </div>
+
+    <div class="detail-row">
+      <label>Created:</label>
+      <span>{{ tokenToShow.created | date:'medium' }}</span>
+    </div>
+
+    <div class="detail-row">
+      <label>Expires:</label>
+      <span>{{ tokenToShow.expires | date:'medium' }}</span>
+    </div>
+
+    <div class="detail-row" *ngIf="tokenToShow.used">
+      <label>Used:</label>
+      <span>{{ tokenToShow.used | date:'medium' }}</span>
+    </div>
+
+    <div class="detail-row" *ngIf="tokenToShow.usedBy">
+      <label>Used By:</label>
+      <span>{{ tokenToShow.usedBy }}</span>
+    </div>
+
+    <div class="detail-row">
+      <label>Token:</label>
+      <div class="token-display">
+        <code>{{ tokenToShow.token }}</code>
+        <button 
+          pButton 
+          icon="pi pi-copy" 
+          (click)="copyToClipboard(tokenToShow.token)"
+          class="p-button-sm p-button-text"
+          pTooltip="Copy to clipboard">
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-row" *ngIf="tokenToShow.usedUrl">
+      <label>Used URL:</label>
+      <code class="url-code">{{ tokenToShow.usedUrl }}</code>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+  <button 
+    pButton 
+    label="Close" 
+    icon="pi pi-times" 
+    (click)="showDetailDialog = false"
+    class="p-button-text">
+  </button>
+  <p-splitButton 
+    label="Copy Token" 
+    icon="pi pi-copy" 
+    (onClick)="copyToClipboard(tokenToShow!.token)"
+    [model]="copyMenuItems"
+    styleClass="p-button-secondary">
+  </p-splitButton>
+</ng-template>
+</p-dialog>

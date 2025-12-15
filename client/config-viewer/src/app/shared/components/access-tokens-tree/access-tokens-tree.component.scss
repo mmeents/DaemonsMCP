@@ -1,0 +1,57 @@
+:host {
+  display: block;
+  height: 100%;
+  
+  ::ng-deep {
+    .p-datatable {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      
+      .p-datatable-wrapper {
+        flex: 1;
+        overflow: auto;
+      }
+    }
+    
+    .token-cell {
+      font-family: 'Courier New', monospace;
+      font-size: 0.85em;
+      color: #666;
+    }
+    
+    .status-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-weight: 600;
+      
+      &.status-valid {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      
+      &.status-used {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+      
+      &.status-expired {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+    }
+    
+    .p-datatable-tbody > tr {
+      cursor: pointer;
+      
+      &:hover {
+        background-color: #f8f9fa;
+      }
+      
+      &.p-highlight {
+        background-color: #e3f2fd;
+      }
+    }
+  }
+}

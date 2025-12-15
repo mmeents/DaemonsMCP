@@ -16,9 +16,71 @@
     </div>
   } @else {
     <div class="file-header">
-        <span class="file-name">Id:{{ fileSystemId()}}  {{ fileName() }}</span>
+      <div class="file-info">
+        <span class="file-name">Id:{{ fileSystemId()}} {{ fileName() }}</span>
         <span class="file-path">{{ filePath() }}</span>
+      </div>
+      <div class="file-info-right">
+        <button 
+          pButton 
+          icon="pi pi-link" 
+          label="Copy API Link"
+          (click)="onCopyApiLink()"
+          class="p-button-sm p-button-secondary"
+          pTooltip="Generate token and copy API URL"
+          *ngIf="fileSystemId() && projectId">
+        </button>
+      </div>
     </div>
     <div #editorContainer class="editor-container"></div>
   }
+  <!-- API Link Dialog -->
+  <p-dialog 
+    [(visible)]="showApiLinkDialog" 
+    header="API Link Generated"
+    [modal]="true"
+    [style]="{width: '700px'}"
+    [draggable]="false"
+    [resizable]="false">
+    
+    <div class="api-link-content" *ngIf="generatedApiUrl">
+      <div class="info-message">
+        <i class="pi pi-info-circle"></i>
+        <p>A new access token has been generated. This link will expire in {{ tokenExpiresIn }} minutes.</p>
+      </div>
+
+      <div class="url-section">
+        <label>API URL:</label>
+        <div class="url-display">
+          <code>{{ generatedApiUrl }}</code>
+        </div>
+      </div>
+
+      <div class="token-section">
+        <label>Token:</label>
+        <div class="token-display">
+          <code>{{ generatedToken }}</code>
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button 
+        pButton 
+        label="Close" 
+        icon="pi pi-times" 
+        (click)="showApiLinkDialog = false"
+        class="p-button-text">
+      </button>
+      <button 
+        pButton 
+        label="Copy URL" 
+        icon="pi pi-copy" 
+        (click)="copyApiUrl()"
+        class="p-button-primary">
+      </button>
+    </ng-template>
+  </p-dialog>
+
+  <p-toast></p-toast>
 </div>
