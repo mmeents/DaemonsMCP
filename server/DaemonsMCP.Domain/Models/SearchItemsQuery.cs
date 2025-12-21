@@ -2,7 +2,6 @@
 
 namespace DaemonsMCP.Domain.Models;
 
-public record GetReadmeQuery() : IRequest<List<ItemDto>>;
 
 public record SearchItemsQuery(
   int? ParentId = null,

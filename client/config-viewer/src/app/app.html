@@ -1,11 +1,37 @@
 ﻿<div class="app-container">
   <header class="app-header">
-    <h1>{{ title() }}</h1>
+    <a routerLink="" routerLinkActive="active" class="logo-link">{{ title() }}</a>
+    
+    <div class="user-menu" *ngIf="currentUser">
+      <span class="user-name">{{ currentUser.displayName }}</span>
+      <p-button 
+        icon="pi pi-sign-out" 
+        label="Logout" 
+        (onClick)="logout()"
+        severity="secondary"
+        [text]="true"
+      ></p-button>
+    </div>
+
+    <!-- Show login button when not authenticated -->
+    <div class="auth-buttons" *ngIf="!currentUser">
+      <p-button 
+        label="Login" 
+        icon="pi pi-sign-in"
+        (onClick)="goToLogin()"
+        severity="secondary"
+        [text]="true"
+      ></p-button>
+    </div>
   </header>
 
   <div class="app-body">
-    <!-- Left sidebar navigation -->
-    <nav class="app-nav">
+    <!-- Only show nav when logged in -->
+    <nav class="app-nav" *ngIf="currentUser">
+      <a routerLink="/projects" routerLinkActive="active" class="nav-link">
+        <span class="nav-icon"><i class="pi pi-home"></i></span>
+        <span class="nav-label">Projects</span>
+      </a>
       <a routerLink="/files" routerLinkActive="active" class="nav-link">
         <span class="nav-icon"><i class="pi pi-file-check"></i></span>
         <span class="nav-label">Files</span>
@@ -13,10 +39,10 @@
       <a routerLink="/items" routerLinkActive="active" class="nav-link">
         <span class="nav-icon"><i class="pi pi-palette"></i></span>
         <span class="nav-label">Items</span>
-      </a>
-      <a routerLink="/projects" routerLinkActive="active" class="nav-link">
-        <span class="nav-icon"><i class="pi pi-home"></i></span>
-        <span class="nav-label">Projects</span>
+      </a>            
+      <a routerLink="/users" routerLinkActive="active" class="nav-link">
+        <span class="nav-icon"><i class="pi pi-eye"></i></span>
+        <span class="nav-label">Users</span>
       </a>
       <a routerLink="/access-tokens" routerLinkActive="active" class="nav-link">
         <span class="nav-icon"><i class="pi pi-shield"></i></span>
@@ -24,9 +50,8 @@
       </a>
     </nav>
     
-
-    <!-- Main content area -->
-    <main class="app-main"> 
+    <!-- Main content area - full width when not logged in -->
+    <main class="app-main" [class.full-width]="!currentUser"> 
       <router-outlet />     
     </main>
   </div>

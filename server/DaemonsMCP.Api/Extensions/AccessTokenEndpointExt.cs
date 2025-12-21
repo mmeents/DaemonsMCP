@@ -28,8 +28,7 @@ namespace Daemons.Api.Extensions {
           var result = await mediator.Send(query);
           return Results.Ok(new { success = true, data = result });
         }).WithName("SearchAccessTokens");
-
-      // Get access token by ID
+            
       app.MapGet("/api/tokens/{id}", async (
         int id,
         IMediator mediator) => {
@@ -41,8 +40,8 @@ namespace Daemons.Api.Extensions {
             ? Results.Ok(new { success = true, data = token })
             : Results.NotFound(new { success = false, errorMessage = "Token not found" });
         }).WithName("GetAccessTokenById");
-
-      // Create a new access token
+      
+      
       app.MapPost("/api/tokens", async (
         CreateAccessTokenCommand command,
         IMediator mediator) => {
@@ -51,7 +50,7 @@ namespace Daemons.Api.Extensions {
           return Results.Created($"/api/tokens/{result.Id}", new { success = true, data = result });
         }).WithName("CreateAccessToken");
 
-      // Revoke access token (and its chain)
+      
       app.MapPost("/api/tokens/{id}/revoke", async (
         int id,
         IMediator mediator) => {

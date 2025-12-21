@@ -167,6 +167,30 @@ export enum DeleteStrategy {
   ReparentToGrandparent = 3
 }
 
+// User Models
+export interface UserDto {
+  id: number;
+  email: string;
+  displayName: string;
+  hasPassword: boolean;
+  hasGoogleAuth: boolean;
+  hasGitHubAuth: boolean;
+  createdAt: Date;
+  lastLoginAt?: Date;
+  isActive: boolean;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  displayName: string;
+  password: string;
+}
+
 // Access Token Models
 export interface AccessTokenDto {
   id: number;
@@ -194,4 +218,38 @@ export interface AccessTokenSearchParams {
 export interface CreateAccessTokenCommand {
   issuedTo: string;
   expiresInMinutes: number;
+}
+
+// Invitation Token Models
+export interface InvitationTokenDto {
+  id: number;
+  token: string;
+  invitedEmail?: string;
+  createdByUserId: number;
+  createdAt: string;  // ISO date string
+  expiresAt: string;  // ISO date string
+  isUsed: boolean;
+  usedAt?: string;    // ISO date string
+  usedByUserId?: number;
+}
+
+export interface InvitationTokenSearchParams {
+  invitedEmail?: string;
+  includeExpired?: boolean;
+  includeUsed?: boolean;
+  pageNo?: number;
+  pageSize?: number;
+}
+
+export interface CreateInvitationCommand {
+  createdByUserId: number;
+  invitedEmail?: string;
+  expiresInHours?: number; // Default 168 (7 days)
+}
+
+export interface RegisterWithInvitationCommand {
+  invitationToken: string;
+  email: string;
+  displayName: string;
+  password: string;
 }

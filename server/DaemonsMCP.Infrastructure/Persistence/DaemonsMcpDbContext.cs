@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using DaemonsMCP.Domain.Entities;
+﻿using DaemonsMCP.Domain.Entities;
+using DaemonsMCP.Infrastructure.Persistence.Configurations;
+using Microsoft.EntityFrameworkCore;
 
 namespace DaemonsMCP.Infrastructure.Persistence;
 
@@ -21,11 +22,14 @@ public class DaemonsMcpDbContext : DbContext {
   public DbSet<ItemType> ItemTypes => Set<ItemType>();
 
   public DbSet<AccessToken> AccessTokens => Set<AccessToken>();
+  public DbSet<User> Users => Set<User>();
+  public DbSet<InvitationToken> InvitationTokens => Set<InvitationToken>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     base.OnModelCreating(modelBuilder);
 
     // Apply configurations
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(DaemonsMcpDbContext).Assembly);
+    modelBuilder.ApplyConfiguration(new UserConfiguration());
   }
 }

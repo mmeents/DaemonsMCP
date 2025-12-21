@@ -280,6 +280,53 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.ToTable("IndexQueues");
                 });
 
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.InvitationToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InvitedEmail")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UsedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UsedByUserId");
+
+                    b.ToTable("InvitationTokens", (string)null);
+                });
+
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.Item", b =>
                 {
                     b.Property<int>("Id")
@@ -662,6 +709,65 @@ namespace DaemonsMCP.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("GitHubId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("GoogleId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PasswordHash")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("GitHubId")
+                        .IsUnique()
+                        .HasFilter("[GitHubId] IS NOT NULL");
+
+                    b.HasIndex("GoogleId")
+                        .IsUnique()
+                        .HasFilter("[GoogleId] IS NOT NULL");
+
+                    b.HasIndex("IsActive");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.AccessToken", b =>
                 {
                     b.HasOne("DaemonsMCP.Domain.Entities.AccessToken", "Parent")
@@ -707,6 +813,24 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.Navigation("FileSystemNode");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.InvitationToken", b =>
+                {
+                    b.HasOne("DaemonsMCP.Domain.Entities.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DaemonsMCP.Domain.Entities.User", "UsedBy")
+                        .WithMany()
+                        .HasForeignKey("UsedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("UsedBy");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.Item", b =>

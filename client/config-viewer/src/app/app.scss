@@ -4,6 +4,8 @@
   flex-direction: column;
   overflow: hidden;
   height: 100vh;
+  padding: 0px;
+  margin: 0px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -15,11 +17,71 @@
   background: #212529;
   color: white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  
 
-  h1 {
+  .logo-link {
     margin: 0;
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 600;    
+    color: white !important;
+    text-decoration: none !important;   
+    &:hover {
+      color: white !important;
+      text-decoration: none !important; // Keep it off on hover too
+    }
+    
+    &:visited {
+      color: white !important; // Keep white even after clicking
+    }
+    
+    &:active {
+      color: white !important;
+    }
+  }
+
+  // Add user-menu styles here
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .user-name {
+      font-size: 14px;
+      color: #e9ecef;
+      font-weight: 500;
+    }
+
+    ::ng-deep {
+      .p-button {
+        color: #e9ecef !important;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.1) !important;
+          color: white !important;
+        }
+
+        .p-button-label {
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    ::ng-deep {
+      .p-button {
+        color: #e9ecef !important;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.1) !important;
+          color: white !important;
+        }
+      }
+    }
   }
 
   .project-selector {
@@ -52,6 +114,9 @@
   overflow: hidden;
   background: #f8f9fa;
 
+  &.full-width {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  }
 }
 
 .split-pane {

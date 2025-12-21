@@ -28,6 +28,8 @@ public static class DependencyInjection {
     services.AddScoped<IItemRepository, ItemRepository>();
     services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
     services.AddScoped<IAccessTokenRepository, AccessTokenRepository>();
+    services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<IInvitationTokenRepository, InvitationTokenRepository>();
 
     // Register Services
     services.AddScoped<IIndexingService, IndexingService>();
@@ -59,6 +61,8 @@ public static class DependencyInjection {
     services.AddScoped<IItemRepository, ItemRepository>();
     services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
     services.AddScoped<IAccessTokenRepository, AccessTokenRepository>();
+    services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<IInvitationTokenRepository, InvitationTokenRepository>();
 
     // Register Services
     services.AddScoped<IIndexingService, IndexingService>();

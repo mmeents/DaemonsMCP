@@ -1,5 +1,7 @@
-﻿using DaemonsMCP.Domain.Models;
+﻿using DaemonsMCP.Application.Projects.Queries.GetAllProjects;
+using DaemonsMCP.Application.Readme.Queries.GetReadme;
 using DaemonsMCP.Domain.Constants;
+using DaemonsMCP.Domain.Models;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,6 +20,23 @@ public class ItemToolsHandler : IItemToolsHandler {
     _scopeFactory = scopeFactory;
   }
 
+  public async Task<string> GetReadme() {
+    try {
+      using var scope = _scopeFactory.CreateScope();
+      var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+      // Get readme items
+      var readmeQuery = new GetReadmeQuery();
+      var readmeResponse = await mediator.Send(readmeQuery);            
+
+      var opResult = McpOpResult.CreateSuccess("readme", "README retrieved successfully", readmeResponse);
+      return JsonSerializer.Serialize(opResult);
+    } catch (Exception ex) {
+      _logger.LogError(ex, "Error getting README");
+      var opResult = McpOpResult.CreateFailure("readme", $"Readme retrieval failed.", null);
+      return JsonSerializer.Serialize(opResult);
+    }
+  }
 
 
   public async Task<string> SearchItems(
@@ -131,6 +150,8 @@ public class ItemToolsHandler : IItemToolsHandler {
 }
 
 public interface IItemToolsHandler {
+
+  Task<string> GetReadme();
   Task<string> GetItemById(int itemId, int maxDepth = 1);
 
   Task<string> SearchItems(

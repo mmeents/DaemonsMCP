@@ -1,0 +1,90 @@
+<div class="register-container">
+  <p-card header="Create Account">
+    <!-- Show loading spinner while validating -->
+    <div *ngIf="validatingToken" class="validation-loading">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      <p>Validating invitation...</p>
+    </div>
+
+    <!-- Show error if token is invalid -->
+    <p-message 
+      *ngIf="errorMessage && !validatingToken" 
+      severity="error" 
+      [text]="errorMessage"
+    ></p-message>
+
+    <!-- Show form only if token is valid -->
+    <form *ngIf="tokenIsValid && !validatingToken" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="p-fluid">
+        <div class="p-field">
+          <label for="email">Email</label>
+          <input 
+            id="email" 
+            type="email" 
+            pInputText 
+            formControlName="email" 
+            placeholder="Enter your email"
+          />
+          <small *ngIf="invitedEmail" class="p-info">
+            This invitation is for: {{ invitedEmail }}
+          </small>
+        </div>
+        
+        <div class="p-field">
+          <label for="displayName">Display Name</label>
+          <input 
+            id="displayName" 
+            type="text" 
+            pInputText 
+            formControlName="displayName" 
+            placeholder="Enter your name"
+          />
+        </div>
+        
+        <div class="p-field">
+          <label for="password">Password</label>
+          <input 
+            id="password" 
+            type="password" 
+            pInputText 
+            formControlName="password" 
+            placeholder="At least 8 characters"
+          />
+        </div>
+        
+        <div class="p-field">
+          <label for="confirmPassword">Confirm Password</label>
+          <input 
+            id="confirmPassword" 
+            type="password" 
+            pInputText 
+            formControlName="confirmPassword" 
+            placeholder="Re-enter your password"
+          />
+          <small *ngIf="registerForm.errors?.['mismatch'] && registerForm.get('confirmPassword')?.touched" 
+                 class="p-error">
+            Passwords do not match
+          </small>
+        </div>
+        
+        <p-message 
+          *ngIf="successMessage" 
+          severity="success" 
+          [text]="successMessage"
+        ></p-message>
+        
+        <p-button 
+          label="Create Account" 
+          icon="pi pi-user-plus" 
+          [loading]="loading"
+          type="submit"
+          [disabled]="!registerForm.valid"
+        ></p-button>
+        
+        <div class="login-link">
+          Already have an account? <a routerLink="/login">Login here</a>
+        </div>
+      </div>
+    </form>
+  </p-card>
+</div>

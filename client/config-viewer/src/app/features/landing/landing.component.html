@@ -1,0 +1,75 @@
+<div class="landing-container">
+  <div class="landing-content">
+    <header class="landing-header">
+      <h1>🔍 DaemonsMCP</h1>
+      <p class="tagline">Native C# Code Intelligence for AI Assistants</p>
+    </header>
+
+    <section class="intro">
+      <p>
+        DaemonsMCP is a sophisticated code intelligence system that provides AI assistants with 
+        native visibility into C# codebases through REST API and Model Context Protocol (MCP).
+      </p>
+      <p class="highlight">
+        <strong>Search for the needle in the haystack, then explain why.</strong>
+      </p>
+    </section>
+
+    <section class="action-cards">
+      <p-card styleClass="link-card">
+        <ng-template pTemplate="header">
+          <h2>📚 API Documentation</h2>
+        </ng-template>
+        <p>Interactive Swagger UI for exploring and testing endpoints</p>
+        <ng-template pTemplate="footer">
+          <p-button 
+            label="Open Swagger UI" 
+            icon="pi pi-external-link"
+            (onClick)="goToSwagger()"
+            styleClass="p-button-primary"
+          ></p-button>
+          <small class="note">Note: all operations require access tokens.</small>
+        </ng-template>
+      </p-card>
+
+      <p-card styleClass="link-card" *ngIf="currentUser">
+        <ng-template pTemplate="header">
+          <h2>🚀 Config Viewer</h2>
+        </ng-template>
+        <p>Manage projects, access tokens, and system configuration</p>
+        <ng-template pTemplate="footer">
+          <p-button 
+            label="Login to Dashboard" 
+            icon="pi pi-sign-in"
+            (onClick)="goToLogin()"
+            styleClass="p-button-success"
+          ></p-button>
+        </ng-template>
+      </p-card>
+    </section>
+
+    <section class="features">
+      <h2>✨ Key Features</h2>
+      <ul>
+        <li><strong>File System Intelligence</strong> - Search and navigate C# project structures</li>
+        <li><strong>Object Hierarchy</strong> - Deep analysis of namespaces, classes, methods, and more</li>
+        <li><strong>Rotating Token Authentication</strong> - Secure AI-to-AI communication</li>
+        <li><strong>Real-time Indexing</strong> - File watching with automatic code analysis</li>
+        <li><strong>AI-Optimized Design</strong> - Large context responses for efficient AI consumption</li>
+      </ul>
+    </section>
+
+    <section class="vision">
+      <h2>🌐 Vision: Giving LLMs eyes into your code bases</h2>
+      <p>
+        DaemonsMCP gives AI assistants native visibility into your file system and C# codebase through the Model Context Protocol, enabling intelligent code navigation, dependency analysis, and structured memory        
+      </p>
+    </section>
+
+    <footer class="landing-footer">
+      <p>
+        <strong>Status:</strong> <span class="status-badge">Public Beta</span>
+      </p>
+    </footer>
+  </div>
+</div>

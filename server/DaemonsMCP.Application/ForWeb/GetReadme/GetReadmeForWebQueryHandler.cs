@@ -1,4 +1,6 @@
 ﻿using DaemonsMCP.Application.Projects.Queries.GetAllProjects;
+using DaemonsMCP.Application.Items.Queries.GetReadmeItems;
+using DaemonsMCP.Domain.Constants;
 using DaemonsMCP.Domain.Models;
 using DaemonsMCP.Domain.Repositories;
 using MediatR;
@@ -34,12 +36,12 @@ namespace DaemonsMCP.Application.ForWeb.GetReadme {
     public async Task<ReadmeWebResponse> Handle(GetReadmeForWebQuery request, CancellationToken cancellationToken) {
 
       // 1. Get README content from Items system via mcp route
-      var readmequery = new GetReadmeQuery();
+      var readmequery = new GetReadmeItemsQuery();
       var readmeDtos = await _mediator.Send(readmequery, cancellationToken);
       
       var readmeContent = new ReadmeContentDto {        
         Content = readmeDtos,
-        Version = "3.0.0",
+        Version = Cx.AppVersion,
         LastUpdated = readmeDtos.Max(r => r.Modified)
       };
 

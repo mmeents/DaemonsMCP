@@ -1,5 +1,6 @@
 ﻿using DaemonsMCP.Application.Projects.Commands.CreateProject;
 using DaemonsMCP.Application.Projects.Queries.GetAllProjects;
+using DaemonsMCP.Application.Readme.Queries.GetReadme;
 using DaemonsMCP.Domain.Repositories;
 using DaemonsMCP.Domain.Models;
 using MediatR;

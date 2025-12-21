@@ -7,30 +7,83 @@
 }
 
 .page-header {
-  padding: 12px 24px;
-  background: white;
-  border-bottom: 1px solid #dee2e6;
-  box-sizing: border-box; // Include padding in width calculation
-
-  .project-selector {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-color);
+  
+  .header-controls {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 1.5rem;
+    flex-wrap: nowrap; // Prevent wrapping
+    width: 100%;
 
-    label {
-      font-size: 14px;
-      color: #495057;
-      font-weight: 600;
+    .project-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      label {
+        font-weight: 500;
+        white-space: nowrap;
+        flex-shrink: 0;
+        gap: 0.5rem;
+      }
+
+      select {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--input-bg);
+        color: var(--text-color);
+        min-width: 150px;
+        gap: 0.5rem;
+        &:focus {
+          outline: 2px solid var(--primary-color);
+          outline-offset: -1px;
+        }
+      }
     }
 
-    select {
-      padding: 6px 32px 6px 12px;
-      background: white;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      font-size: 14px;
-      cursor: pointer;
-      min-width: 200px;
+    .id-jump {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      label {
+        font-weight: 500;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .id-input {
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--input-bg);
+        color: var(--text-color);
+        font-family: 'Consolas', 'Monaco', monospace;
+        gap: 0.5rem;
+
+        &:focus {
+          outline: 2px solid var(--primary-color);
+          outline-offset: -1px;
+          border-color: var(--primary-color);
+        }
+
+        // Remove spinner arrows for cleaner look
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        
+        // Firefox
+        -moz-appearance: textfield;
+      }
     }
   }
 }

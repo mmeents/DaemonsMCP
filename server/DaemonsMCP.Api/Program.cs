@@ -82,7 +82,9 @@ namespace DaemonsMCP.Api
                .MapIndexingEndpoints()
                .MapItemsEndpoints()
                .MapObjectHierarchyEndpoints()
-         .MapAccessTokenEndpoints();
+               .MapAccessTokenEndpoints()
+               .MapUserEndpoints()
+               .MapInvitationTokenEndpoints();
 
             app.Run();
         }

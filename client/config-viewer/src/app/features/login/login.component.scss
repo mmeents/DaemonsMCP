@@ -1,0 +1,132 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+
+  p-card {
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+    ::ng-deep {
+      .p-card {
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .p-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .p-card-body {
+        padding: 2rem;
+      }
+
+      .p-card-content {
+        padding: 0;
+      }
+    }
+  }
+
+  form {
+    .p-field {
+      margin-bottom: 1.5rem;
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #495057;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.2s;
+
+        &:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+          outline: none;
+        }
+
+        &::placeholder {
+          color: #adb5bd;
+        }
+      }
+    }
+
+    p-message {
+      display: block;
+      margin-bottom: 1.5rem;
+
+      ::ng-deep .p-message {
+        border-radius: 6px;
+      }
+    }
+
+    p-button {
+      width: 100%;
+
+      ::ng-deep {
+        .p-button {
+          width: 100%;
+          padding: 0.75rem 1.5rem;
+          font-size: 1rem;
+          font-weight: 600;
+          border-radius: 6px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border: none;
+          transition: all 0.3s ease;
+
+          &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0);
+          }
+
+          &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 576px) {
+  .login-container {
+    padding: 1rem;
+
+    p-card ::ng-deep {
+      .p-card-header {
+        padding: 1.5rem;
+        font-size: 1.25rem;
+      }
+
+      .p-card-body {
+        padding: 1.5rem;
+      }
+    }
+
+    form .p-field {
+      margin-bottom: 1rem;
+    }
+  }
+}

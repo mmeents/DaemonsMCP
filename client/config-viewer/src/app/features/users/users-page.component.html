@@ -1,0 +1,398 @@
+<div class="users-page">
+  <p-toast></p-toast>
+  
+  <div class="page-header">
+    <h1>Users & Invitations</h1>
+    <p class="page-description">Manage system users and invitation tokens</p>
+  </div>
+
+  <!-- ============ USERS SECTION ============ -->
+  <div class="section users-section">
+    <div class="section-header">
+      <h2>Users</h2>
+      <div class="search-bar">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="userSearchEmail"
+            (keyup.enter)="onUserSearch()"
+            placeholder="Search by email..."
+            class="search-input" />
+        </span>
+        <p-button 
+          label="Search" 
+          icon="pi pi-search"
+          (onClick)="onUserSearch()"
+          [loading]="loadingUsers">
+        </p-button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <p-table 
+        [value]="users" 
+        [loading]="loadingUsers"
+        selectionMode="single"
+        [(selection)]="selectedUser" 
+        dataKey="id"
+        styleClass="p-datatable-sm p-datatable-striped">
+        
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem">#</th>
+            <th>Email</th>
+            <th>Display Name</th>
+            <th>Auth Methods</th>
+            <th>Created</th>
+            <th>Last Login</th>
+            <th>Status</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-user let-i="rowIndex">
+          <tr [pSelectableRow]="user">
+            <td>{{ i + 1 }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.displayName }}</td>
+            <td>
+              <div class="auth-methods">
+                <i *ngIf="user.hasPassword" class="pi pi-key" title="Password"></i>
+                <i *ngIf="user.hasGoogleAuth" class="pi pi-google" title="Google"></i>
+                <i *ngIf="user.hasGitHubAuth" class="pi pi-github" title="GitHub"></i>
+              </div>
+            </td>
+            <td>{{ user.createdAt | date:'short' }}</td>
+            <td>{{ user.lastLoginAt ? (user.lastLoginAt | date:'short') : 'Never' }}</td>
+            <td>
+              <p-tag 
+                [value]="getUserStatus(user)"
+                [severity]="user.isActive ? 'success' : 'danger'">
+              </p-tag>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="empty-message">No users found</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+
+  <!-- ============ INVITATIONS SECTION ============ -->
+  <div class="section invitations-section">
+    <div class="section-header">
+      <h2>Invitation Tokens</h2>
+      <p-button 
+        label="Create Invitation" 
+        icon="pi pi-plus"
+        (onClick)="onCreateInvitation()">
+      </p-button>
+    </div>
+
+    <div class="filters-bar">
+      <div class="filter-group">
+        <span class="p-input-icon-left">
+          <i class="pi pi-envelope"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="invitationSearchParams.invitedEmail"
+            placeholder="Filter by email..."
+            class="filter-input" />
+        </span>
+      </div>
+
+      <div class="filter-group">
+        <p-checkbox 
+          [(ngModel)]="invitationSearchParams.includeExpired" 
+          [binary]="true"
+          label="Include Expired"
+          inputId="includeExpired">
+        </p-checkbox>
+      </div>
+
+      <div class="filter-group">
+        <p-checkbox 
+          [(ngModel)]="invitationSearchParams.includeUsed" 
+          [binary]="true"
+          label="Include Used"
+          inputId="includeUsed">
+        </p-checkbox>
+      </div>
+
+      <div class="filter-group">
+        <p-button 
+          label="Search" 
+          icon="pi pi-search"
+          (onClick)="onInvitationSearch()"
+          [loading]="loadingInvitations">
+        </p-button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <p-table 
+        [value]="invitations" 
+        [loading]="loadingInvitations"
+        selectionMode="single"
+        [(selection)]="selectedInvitation"        
+        dataKey="id"
+        styleClass="p-datatable-sm p-datatable-striped">
+        
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem">#</th>
+            <th>Token</th>
+            <th>Invited Email</th>
+            <th>Created</th>
+            <th>Expires</th>
+            <th>Status</th>
+            <th style="width: 8rem">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-invitation let-i="rowIndex">
+          <tr [pSelectableRow]="invitation">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <code class="token-preview">{{ invitation.token }}</code>
+            </td>
+            <td>{{ invitation.invitedEmail || '(Any)' }}</td>
+            <td>{{ invitation.createdAt | date:'short' }}</td>
+            <td>{{ invitation.expiresAt | date:'short' }}</td>
+            <td>
+              <p-tag 
+                [value]="getInvitationStatus(invitation)" >
+              </p-tag>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <p-button 
+                  icon="pi pi-eye"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="info"
+                  (onClick)="showInvitationDetail(invitation)"
+                  pTooltip="View Details">
+                </p-button>
+                <p-button 
+                  icon="pi pi-copy"
+                  [rounded]="true"
+                  [text]="true"
+                  (onClick)="onCopyInvitationToken(invitation)"
+                  pTooltip="Copy Token">
+                </p-button>
+                <p-button 
+                  *ngIf="!invitation.isUsed"
+                  icon="pi pi-times"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="danger"
+                  (onClick)="onRevokeInvitation(invitation)"
+                  pTooltip="Revoke">
+                </p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="empty-message">No invitations found</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <p-paginator
+      *ngIf="totalInvitationCount > invitationSearchParams.pageSize!"
+      [rows]="invitationSearchParams.pageSize!"
+      [totalRecords]="totalInvitationCount"
+      [first]="(invitationSearchParams.pageNo! - 1) * invitationSearchParams.pageSize!"
+      (onPageChange)="onInvitationPageChange($event)">
+    </p-paginator>
+  </div>
+</div>
+
+<!-- ============ CREATE INVITATION DIALOG ============ -->
+<p-dialog 
+  header="Create Invitation" 
+  [(visible)]="showCreateDialog"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+  [draggable]="false"
+  [resizable]="false">
+  
+  <form [formGroup]="createInvitationForm" class="dialog-content">
+    <div class="field">
+      <label for="invitedEmail">Invited Email (Optional)</label>
+      <input 
+        id="invitedEmail"
+        type="email" 
+        pInputText 
+        formControlName="invitedEmail"
+        placeholder="leave blank for any email"
+        [class.ng-invalid]="invitedEmailControl?.invalid && invitedEmailControl?.touched"
+        [class.ng-dirty]="invitedEmailControl?.touched"
+        class="w-full" />
+      <small 
+        *ngIf="invitedEmailControl?.hasError('email') && invitedEmailControl?.touched"
+        class="error-text">
+        Please enter a valid email address
+      </small>
+      <small 
+        *ngIf="!invitedEmailControl?.hasError('email')"
+        class="field-hint">
+        If specified, only this email can use the invitation
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="expiresInHours">Expires In (Hours) *</label>
+      <p-inputNumber
+        id="expiresInHours"
+        formControlName="expiresInHours"
+        [min]="1"
+        [max]="8760"
+        [showButtons]="true"
+        class="w-full">
+      </p-inputNumber>
+      <small 
+        *ngIf="expiresInHoursControl?.hasError('min') && expiresInHoursControl?.touched"
+        class="error-text">
+        Must be at least 1 hour
+      </small>
+      <small 
+        *ngIf="expiresInHoursControl?.hasError('max') && expiresInHoursControl?.touched"
+        class="error-text">
+        Cannot exceed 8760 hours (1 year)
+      </small>
+      <small 
+        *ngIf="!expiresInHoursControl?.hasError('min') && !expiresInHoursControl?.hasError('max')"
+        class="field-hint">
+        Default: 168 hours (7 days)
+      </small>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cancel" 
+      severity="secondary"
+      (onClick)="onCancelCreate()">
+    </p-button>
+    <p-button 
+      label="Create" 
+      icon="pi pi-check"
+      (onClick)="onSaveInvitation()"
+      [disabled]="!createInvitationForm.valid"
+      [loading]="isCreating">
+    </p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- ============ INVITATION DETAIL DIALOG ============ -->
+<p-dialog 
+  header="Invitation Details" 
+  [(visible)]="showDetailDialog"
+  [modal]="true"
+  [style]="{ width: '600px' }"
+  [draggable]="false"
+  [resizable]="false">
+  
+  <div class="dialog-content" *ngIf="invitationToShow">
+    <div class="detail-row">
+      <label>Token:</label>
+      <div class="token-display">
+        <code>{{ invitationToShow.token }}</code>
+        <p-button 
+          icon="pi pi-copy"
+          [text]="true"
+          [rounded]="true"
+          (onClick)="onCopyInvitationToken(invitationToShow)">
+        </p-button>
+      </div>
+    </div>
+
+    <div class="detail-row">
+      <label>Invitation URL:</label>
+      <div class="url-display">
+        <code>{{ getInvitationUrl(invitationToShow.token) }}</code>
+        <p-splitButton 
+          icon="pi pi-copy"
+          [text]="true"
+          [rounded]="true"
+          (onClick)="copyInvitationUrl(invitationToShow.token)"
+          [model]="copyMenuItems">
+        </p-splitButton>
+      </div>
+    </div>
+
+    <div class="detail-row">
+      <label>Invited Email:</label>
+      <span>{{ invitationToShow.invitedEmail || '(Any email)' }}</span>
+    </div>
+
+    <div class="detail-row">
+      <label>Created:</label>
+      <span>{{ invitationToShow.createdAt | date:'full' }}</span>
+    </div>
+
+    <div class="detail-row">
+      <label>Expires:</label>
+      <span>{{ invitationToShow.expiresAt | date:'full' }}</span>
+    </div>
+
+    <div class="detail-row">
+      <label>Status:</label>
+      <p-tag [value]="getInvitationStatus(invitationToShow)">        
+      </p-tag>
+    </div>
+
+    <div class="detail-row" *ngIf="invitationToShow.isUsed">
+      <label>Used At:</label>
+      <span>{{ invitationToShow.usedAt | date:'full' }}</span>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Close" 
+      (onClick)="showDetailDialog = false">
+    </p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- ============ REVOKE CONFIRMATION DIALOG ============ -->
+<p-dialog 
+  header="Revoke Invitation" 
+  [(visible)]="showRevokeDialog"
+  [modal]="true"
+  [style]="{ width: '400px' }"
+  [draggable]="false"
+  [resizable]="false">
+  
+  <div class="dialog-content">
+    <p>Are you sure you want to revoke this invitation?</p>
+    <p class="warning-text">This action cannot be undone.</p>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cancel" 
+      severity="secondary"
+      (onClick)="cancelRevoke()">
+    </p-button>
+    <p-button 
+      label="Revoke" 
+      severity="danger"
+      icon="pi pi-times"
+      (onClick)="confirmRevoke()">
+    </p-button>
+  </ng-template>
+</p-dialog>
