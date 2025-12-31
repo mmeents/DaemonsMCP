@@ -24,12 +24,14 @@ public class DaemonsMcpDbContext : DbContext {
   public DbSet<AccessToken> AccessTokens => Set<AccessToken>();
   public DbSet<User> Users => Set<User>();
   public DbSet<InvitationToken> InvitationTokens => Set<InvitationToken>();
+  public DbSet<UserCredential> UserCredentials => Set<UserCredential>();
+  public DbSet<GitRepository> GitRepositories => Set<GitRepository>();
+  public DbSet<GitBranch> GitBranches => Set<GitBranch>();
+
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     base.OnModelCreating(modelBuilder);
 
-    // Apply configurations
-    modelBuilder.ApplyConfigurationsFromAssembly(typeof(DaemonsMcpDbContext).Assembly);
-    modelBuilder.ApplyConfiguration(new UserConfiguration());
+    modelBuilder.ApplyConfigurationsFromAssembly(typeof(DaemonsMcpDbContext).Assembly);    
   }
 }

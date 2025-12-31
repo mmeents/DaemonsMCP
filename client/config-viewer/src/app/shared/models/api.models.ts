@@ -253,3 +253,80 @@ export interface RegisterWithInvitationCommand {
   displayName: string;
   password: string;
 }
+
+export interface GitRepositoryDto {
+  id: number;
+  projectId: number;
+  localPath: string;
+  remoteUrl: string;
+  remoteName: string;
+  currentBranchName: string;
+  isDirty: boolean;
+  modifiedFileCount?: number;
+  untrackedFileCount?: number;
+  lastFetchedAt?: string;  // ISO date string
+  lastSyncedAt?: string;   // ISO date string
+  createdAt: string;       // ISO date string
+  updatedAt: string;       // ISO date string
+}
+
+export interface GitBranchDto {
+  id: number;
+  gitRepositoryId: number;
+  name: string;
+  isRemote: boolean;
+  isHead: boolean;
+  upstreamBranchName?: string;
+  aheadBy?: number;
+  behindBy?: number;
+  lastCommitSha?: string;
+  lastCommitMessage?: string;
+  lastCommitAuthor?: string;
+  lastCommitDate?: string;  // ISO date string
+  createdAt: string;        // ISO date string
+  updatedAt: string;        // ISO date string
+}
+
+// User Credentials Models
+export interface UserCredentialDto {
+  id: number;
+  userId: number;
+  name: string;
+  providerType: ProviderType;
+  credentialType: CredentialType;
+  hasUsername: boolean;  // Security: Never expose encrypted values
+  hasSecret: boolean;    // Just indicate if set
+  createdDate: string;   // ISO date string
+  lastUsedDate?: string; // ISO date string
+  isActive: boolean;
+}
+
+export interface CreateUserCredentialCommand {
+  userId: number;
+  name: string;
+  providerType: ProviderType;
+  credentialType: CredentialType;
+  username: string;
+  secret: string;  // PAT, password, etc.
+}
+
+export interface UpdateUserCredentialCommand {
+  id: number;
+  name?: string;
+  username?: string;  // Null = don't update
+  secret?: string;    // Null = don't update
+  isActive?: boolean; // Null = don't update
+}
+
+export enum ProviderType {
+  GitHub = 1,
+  AzureDevOps = 2,
+  Bitbucket = 3,
+  GitLab = 4
+}
+
+export enum CredentialType {
+  PersonalAccessToken = 1,
+  UsernamePassword = 2,
+  SshKey = 3
+}

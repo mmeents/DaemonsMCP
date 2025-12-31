@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 namespace DaemonsMCP.Domain.Constants {
   public static class Cx {
     public const string AppName = "Daemons3MCP";
-    public const string AppVersion = "3.0.0";        
+    public const string AppVersion = "3.0.0";   
+
+    public const int KeyLifetimeDays = 90;
+    public const string CredentialProtectorName = "DaemonsMCP.GitCredentials";
 
     // Tools Names
     public const string ListProjectsCmd = "list-projects";

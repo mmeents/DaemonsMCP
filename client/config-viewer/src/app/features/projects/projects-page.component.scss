@@ -1,28 +1,29 @@
 :host {
-  display: block;
-  height: 100%;
+  display: flex;
   width: 100%;
-  padding: 1rem;
+  height: 100%;
 }
 
 .projects-page {
-  height: 100%;
-  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  height: 100%;
+  width: 100%;
 }
 
 .toolbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-bottom: 1rem;
+  justify-content: space-between;
+  padding: 16px 24px;
   border-bottom: 1px solid #dee2e6;
+  background: #f8f9fa;
 
   h2 {
     margin: 0;
-    color: #495057;
+    font-size: 20px;
+    font-weight: 600;
+    color: #212529;
   }
 
   .actions {
@@ -31,31 +32,261 @@
   }
 }
 
-.content {
+.split-pane {
+  display: flex;
   flex: 1;
+  height: 100%;
+  width: 100%;
   overflow: hidden;
 }
 
+.projects-pane {
+  width: 30%;
+  min-width: 250px;
+  max-width: 400px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #dee2e6;
+  background: white;
+  overflow: auto;
+}
+
+.details-pane {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  overflow: hidden;
+}
+
+.details-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  ::ng-deep .p-tabview {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .p-tabview-panels {
+      flex: 1;
+      overflow: auto;
+    }
+  }
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6c757d;
+  font-style: italic;
+}
+
+// Overview Tab Styles
+.overview-section {
+  padding: 1.5rem;
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    color: #212529;
+  }
+
+  .project-description {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    label {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #495057;
+    }
+
+    span {
+      color: #212529;
+    }
+
+    .code-text {
+      font-family: 'Courier New', monospace;
+      background: #f8f9fa;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// Git Repositories Tab Styles
+.git-section {
+  padding: 1.5rem;
+}
+
+.git-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  color: #6c757d;
+
+  p {
+    margin: 0.5rem 0;
+  }
+
+  .hint {
+    font-size: 0.875rem;
+    color: #adb5bd;
+  }
+}
+
+.repo-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+}
+
+.repo-card {
+  ::ng-deep .p-card-body {
+    padding: 0;
+  }
+
+  ::ng-deep .p-card-content {
+    padding: 1rem;
+  }
+
+  ::ng-deep .p-card-footer {
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+  }
+}
+
+.repo-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+
+  .repo-path {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #212529;
+  }
+}
+
+.repo-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.repo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  label {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .code-text {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: #212529;
+    word-break: break-all;
+  }
+
+  .branch-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #0e639c;
+
+    i {
+      font-size: 0.875rem;
+    }
+  }
+
+  .repo-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+
+    i {
+      font-size: 1rem;
+    }
+
+    &.status-clean {
+      color: #28a745;
+    }
+
+    &.status-dirty {
+      color: #ffc107;
+    }
+  }
+}
+
+.repo-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+// Form Styles
 .edit-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 1rem 0;
+}
 
-  .form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 
-    label {
-      font-weight: 600;
-      color: #495057;
-    }
+  label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #495057;
   }
 }
 
 .warning-text {
   color: #dc3545;
-  font-weight: 600;
+  font-weight: 500;
   margin-top: 0.5rem;
 }

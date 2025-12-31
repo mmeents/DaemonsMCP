@@ -20,18 +20,168 @@
     </div>
   </div>
 
-  <div class="content">
-    <app-projects-tree
-      [projects]="projects"
-      [loading]="loading"
-      [selectedProjectId]="selectedProject?.id"
-      (projectSelected)="onProjectSelected($event)"
-      (projectAdd)="onNewProject()"
-      (projectEdit)="onEditProject($event)"
-      (projectDelete)="onDeleteProject($event)">
-    </app-projects-tree>
+  <div class="split-pane">
+    <!-- Left: Projects Grid (30%) -->
+    <div class="projects-pane">
+      <app-projects-tree
+        [projects]="projects"
+        [loading]="loading"
+        [selectedProjectId]="selectedProject?.id"
+        (projectSelected)="onProjectSelected($event)"
+        (projectAdd)="onNewProject()"
+        (projectEdit)="onEditProject($event)"
+        (projectDelete)="onDeleteProject($event)">
+      </app-projects-tree>
+    </div>
+
+    <!-- Right: Project Details with Tabs (70%) -->
+    <div class="details-pane">
+      <div *ngIf="!selectedProject" class="placeholder">
+        <p>Select a project to view details</p>
+      </div>
+
+      <div *ngIf="selectedProject" class="details-content">
+        <p-tabs value="overview">
+          <!-- 1. Header Navigation List -->
+          <p-tablist>
+            <p-tab value="overview">Overview</p-tab>
+            <p-tab value="git">Git Repositories</p-tab>
+            <p-tab value="fs">File System</p-tab>
+          </p-tablist>
+
+          <!-- 2. Content Panels Container -->
+          <p-tabpanels>
+            
+            <!-- Overview Tab Panel -->
+            <p-tabpanel value="overview">
+              <div class="overview-section">
+                <h3>{{ selectedProject.name }}</h3>
+                <p class="project-description">{{ selectedProject.description || '(No description)' }}</p>
+                
+                <div class="info-grid">
+                  <div class="info-item">
+                    <label>Project ID:</label>
+                    <span>{{ selectedProject.id }}</span>
+                  </div>
+                  <div class="info-item">
+                    <label>Root Path:</label>
+                    <span class="code-text">{{ selectedProject.rootPath }}</span>
+                  </div>
+                </div>
+              </div>
+            </p-tabpanel>
+
+            <!-- Git Repositories Tab Panel -->
+            <p-tabpanel value="git">
+              <div class="git-section">
+                <!-- Header Actions -->
+                <div class="git-actions">
+                  <button 
+                    pButton 
+                    icon="pi pi-search" 
+                    label="Scan for Git Repos" 
+                    (click)="onScanForGitRepos()"
+                    [loading]="scanningGitRepos"
+                    class="p-button-primary">
+                  </button>
+                  <!-- ... remaining buttons ... -->
+                </div>
+
+                <!-- Loading / Empty / Grid States (Keep your logic as is) -->
+                <div *ngIf="loadingGitRepos" class="loading-state">
+                  <p-progressSpinner [style]="{width: '50px', height: '50px'}"></p-progressSpinner>
+                </div>
+
+                <div *ngIf="!loadingGitRepos && gitRepos.length === 0" class="empty-state">
+                  <p>No Git repositories found.</p>
+                </div>
+
+                <div *ngIf="!loadingGitRepos && gitRepos.length > 0" class="repo-grid">
+                  <p-card *ngFor="let repo of gitRepos" class="repo-card">
+                    <ng-template pTemplate="header">
+                      <div class="repo-header">
+                        <i class="pi pi-folder" style="font-size: 1.5rem; color: #6c757d;"></i>
+                        <span class="repo-path">{{ repo.localPath }}</span>
+                      </div>
+                    </ng-template>
+
+                    <div class="repo-details">
+                      <div class="repo-field">
+                        <label>Remote:</label>
+                        <span class="code-text">{{ repo.remoteName }} ({{ repo.remoteUrl }})</span>
+                      </div>
+
+                      <div class="repo-field">
+                        <label>Current Branch:</label>
+                        <span class="branch-name">
+                          <i class="pi pi-code-branch"></i>
+                          {{ repo.currentBranchName }}
+                        </span>
+                      </div>
+
+                      <div class="repo-field">
+                        <label>Status:</label>
+                        <span [class]="getStatusClass(repo)" class="repo-status">
+                          <i [class]="getStatusIcon(repo)"></i>
+                          {{ getStatusText(repo) }}
+                        </span>
+                      </div>
+
+                      <div class="repo-field" *ngIf="repo.lastSyncedAt">
+                        <label>Last Synced:</label>
+                        <span>{{ repo.lastSyncedAt | date:'medium' }}</span>
+                      </div>
+                    </div>
+
+                    <ng-template pTemplate="footer">
+                      <div class="repo-actions">
+                        <button 
+                          pButton 
+                          icon="pi pi-cloud-download" 
+                          label="Fetch" 
+                          class="p-button-sm p-button-secondary"
+                          [disabled]="true"
+                          pTooltip="Coming Soon">
+                        </button>
+                        <button 
+                          pButton 
+                          icon="pi pi-sync" 
+                          label="Sync FS" 
+                          class="p-button-sm p-button-secondary"
+                          [disabled]="true"
+                          pTooltip="Coming Soon">
+                        </button>
+                        <button 
+                          pButton 
+                          icon="pi pi-list" 
+                          label="View Branches" 
+                          class="p-button-sm p-button-secondary"
+                          [disabled]="true"
+                          pTooltip="Coming Soon">
+                        </button>
+                      </div>
+                    </ng-template>
+                  </p-card>
+                </div>
+              </div>
+            </p-tabpanel>
+
+            <!-- File System Tab Panel -->
+            <p-tabpanel value="fs">
+              <div class="placeholder">
+                <p>File system browser coming soon...</p>
+              </div>
+            </p-tabpanel>
+
+          </p-tabpanels>
+        </p-tabs>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- Toast for notifications -->
+<p-toast></p-toast>
 
 <!-- Edit Dialog -->
 <p-dialog 

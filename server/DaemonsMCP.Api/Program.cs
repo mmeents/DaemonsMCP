@@ -77,14 +77,16 @@ namespace DaemonsMCP.Api
                 return Results.Ok("Healthy");
             });
 
-            app.MapProjectEndpoints()
-               .MapFileSystemEndpoints()
-               .MapIndexingEndpoints()
-               .MapItemsEndpoints()
+            app.MapFileSystemEndpoints()
+               .MapGitEndpoints()
                .MapObjectHierarchyEndpoints()
+               .MapIndexingEndpoints()
+               .MapInvitationTokenEndpoints()
+               .MapItemsEndpoints()               
+               .MapProjectEndpoints()
                .MapAccessTokenEndpoints()
                .MapUserEndpoints()
-               .MapInvitationTokenEndpoints();
+               .MapUserCredentialsEndpoints();
 
             app.Run();
         }

@@ -3,7 +3,10 @@
     <a routerLink="" routerLinkActive="active" class="logo-link">{{ title() }}</a>
     
     <div class="user-menu" *ngIf="currentUser">
-      <span class="user-name">{{ currentUser.displayName }}</span>
+      <a routerLink="/settings" class="user-name-link">
+        <i class="pi pi-user"></i>
+        <span class="user-name">{{ currentUser.displayName }}</span>
+      </a>
       <p-button 
         icon="pi pi-sign-out" 
         label="Logout" 

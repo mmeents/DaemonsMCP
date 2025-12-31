@@ -148,6 +148,176 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.ToTable("FileSystemNodes");
                 });
 
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.GitBranch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BranchName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("GitRepositoryId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsCurrentBranch")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsRemote")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsTracking")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("LastCommitAuthor")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("LastCommitDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastCommitMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("LastCommitSha")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("TrackingBranchName")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GitRepositoryId")
+                        .HasDatabaseName("IX_GitBranches_GitRepositoryId");
+
+                    b.HasIndex("GitRepositoryId", "FullName")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_GitBranches_UniqueName");
+
+                    b.HasIndex("GitRepositoryId", "IsCurrentBranch")
+                        .HasDatabaseName("IX_GitBranches_IsCurrentBranch")
+                        .HasFilter("[IsCurrentBranch] = 1");
+
+                    b.ToTable("GitBranches", (string)null);
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.GitRepository", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CurrentBranchName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDirty")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("LastFetchedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastSyncError")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("LastSyncStatus")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("LastSyncedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LocalPath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("ModifiedFileCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RemoteName")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasDefaultValue("origin");
+
+                    b.Property<string>("RemoteUrl")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("UntrackedFileCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int?>("UserCredentialId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("IX_GitRepositories_ProjectId");
+
+                    b.HasIndex("UserCredentialId")
+                        .HasDatabaseName("IX_GitRepositories_UserCredentialId");
+
+                    b.HasIndex("ProjectId", "LocalPath")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_GitRepositories_ProjectPath");
+
+                    b.ToTable("GitRepositories", (string)null);
+                });
+
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.Identifier", b =>
                 {
                     b.Property<int>("Id")
@@ -768,6 +938,59 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.UserCredential", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int>("CredentialType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EncryptedSecret")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("EncryptedUsername")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime?>("LastUsedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("ProviderType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "IsActive");
+
+                    b.ToTable("UserCredentials", (string)null);
+                });
+
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.AccessToken", b =>
                 {
                     b.HasOne("DaemonsMCP.Domain.Entities.AccessToken", "Parent")
@@ -794,6 +1017,35 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.Navigation("Parent");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.GitBranch", b =>
+                {
+                    b.HasOne("DaemonsMCP.Domain.Entities.GitRepository", "GitRepository")
+                        .WithMany("Branches")
+                        .HasForeignKey("GitRepositoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GitRepository");
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.GitRepository", b =>
+                {
+                    b.HasOne("DaemonsMCP.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DaemonsMCP.Domain.Entities.UserCredential", "UserCredential")
+                        .WithMany("GitRepositories")
+                        .HasForeignKey("UserCredentialId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Project");
+
+                    b.Navigation("UserCredential");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.IndexQueue", b =>
@@ -929,6 +1181,17 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.UserCredential", b =>
+                {
+                    b.HasOne("DaemonsMCP.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.AccessToken", b =>
                 {
                     b.Navigation("Children");
@@ -937,6 +1200,11 @@ namespace DaemonsMCP.Infrastructure.Migrations
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.FileSystemNode", b =>
                 {
                     b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.GitRepository", b =>
+                {
+                    b.Navigation("Branches");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.Item", b =>
@@ -954,6 +1222,11 @@ namespace DaemonsMCP.Infrastructure.Migrations
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.ObjectHierarchy", b =>
                 {
                     b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("DaemonsMCP.Domain.Entities.UserCredential", b =>
+                {
+                    b.Navigation("GitRepositories");
                 });
 #pragma warning restore 612, 618
         }

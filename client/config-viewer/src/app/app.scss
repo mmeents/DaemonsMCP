@@ -51,6 +51,29 @@
       font-weight: 500;
     }
 
+    .user-name-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: inherit;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      i {
+        font-size: 1rem;
+      }
+
+      .user-name {
+        font-weight: 500;
+      }
+    }
+
     ::ng-deep {
       .p-button {
         color: #e9ecef !important;

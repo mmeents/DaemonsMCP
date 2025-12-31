@@ -10,6 +10,25 @@ namespace DaemonsMCP.Api.Extensions {
   public static class FileSystemEndpointExt {
     public static WebApplication MapFileSystemEndpoints(this WebApplication app) {
 
+      app.MapPost("/api/filesystem/sync/{projectId}",
+       async (int projectId, IMediator mediator) => {
+         try {
+           var command = new SyncProjectFileSystemCommand(projectId);
+           var result = await mediator.Send(command);
+           return Results.Ok(new {
+             Success = true,
+             ProjectId = projectId,
+             Result = result
+           });
+         } catch (Exception ex) {
+           return Results.BadRequest(new {
+             Success = false,
+             Error = ex.Message
+           });
+         }
+       }).WithDisplayName("SyncFileSystem")
+         .WithDescription("Synchronizes the files in the file system by project with db table which search depends on.");
+
       // Search file system 
       app.MapGet("/api/filesystem/search", async (
         IMediator mediator,
@@ -30,7 +49,8 @@ namespace DaemonsMCP.Api.Extensions {
           var result = await mediator.Send(query);
           return Results.Ok(result);
         })
-      .WithName("SearchFileSystem");
+      .WithName("SearchFileSystem")
+      .WithDescription("Searches the file system for items matching the specified criteria.");
 
       // Get file system Item by project ID
       app.MapGet("/api/filesystem/{projectId}", async (
