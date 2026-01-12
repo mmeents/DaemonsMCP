@@ -1,0 +1,65 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
+.tree-wrapper {
+    height: 100%;
+    overflow: auto;
+}
+
+.empty-state {
+    padding: 2rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+:host ::ng-deep .status-not-started {
+    color: #6c757d;
+}
+
+:host ::ng-deep .status-in-progress {
+    color: #0d6efd;
+    font-weight: 500;
+}
+
+:host ::ng-deep .status-complete {
+    color: #02331cff;      
+}
+
+:host ::ng-deep .status-cancelled {
+    color: #dc3545;
+    text-decoration: line-through;
+}
+
+:host ::ng-deep .p-tree-node-label {
+    margin-left: 0.5rem;
+}
+:host ::ng-deep .p-tree-node-selected {
+    background-color: #e2e2ffff;
+    border-radius: 4px;
+}
+:host ::ng-deep .p-tree-node-children {
+    padding-left: 1.0rem; 
+}
+
+.tree-content {
+  height: 100%;
+  min-height: 200px;
+}
+
+.empty-tree-message {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-color-secondary);
+  
+  p {
+    margin: 0.5rem 0;
+  }
+  
+  .hint {
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--text-color-secondary);
+  }
+}

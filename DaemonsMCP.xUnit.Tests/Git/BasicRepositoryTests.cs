@@ -74,6 +74,7 @@ namespace DaemonsMCP.xUnit.Tests.Git {
 
     public void Dispose() {
       if (!Directory.Exists(_testRepoPath)) {
+        GC.SuppressFinalize(this);
         return;
       }
 
@@ -86,6 +87,7 @@ namespace DaemonsMCP.xUnit.Tests.Git {
         DeleteDirectory(_testRepoPath);
       }
 
+      GC.SuppressFinalize(this);
     }
 
     private static void DeleteDirectory(string path) {

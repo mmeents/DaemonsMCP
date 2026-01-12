@@ -5,12 +5,8 @@ using MediatR;
 
 namespace DaemonsMCP.Application.ItemTypes.Commands.AddUpdateItemType;
 
-public class AddUpdateItemTypeCommandHandler : IRequestHandler<AddUpdateItemTypeCommand, ItemTypeDto> {
-  private readonly IItemTypeRepository _repository;
-
-  public AddUpdateItemTypeCommandHandler(IItemTypeRepository repository) {
-    _repository = repository;
-  }
+public class AddUpdateItemTypeCommandHandler(IItemTypeRepository repository) : IRequestHandler<AddUpdateItemTypeCommand, ItemTypeDto> {
+  private readonly IItemTypeRepository _repository = repository;
 
   public async Task<ItemTypeDto> Handle(AddUpdateItemTypeCommand request, CancellationToken cancellationToken) {
     ItemType itemType;
@@ -21,10 +17,8 @@ public class AddUpdateItemTypeCommandHandler : IRequestHandler<AddUpdateItemType
       await _repository.AddAsync(itemType, cancellationToken);
     } else {
       // Update existing item type
-      itemType = await _repository.GetByIdAsync(request.Id, cancellationToken);
-      if (itemType == null) {
-        throw new InvalidOperationException($"ItemType with id {request.Id} not found");
-      }
+      itemType = await _repository.GetByIdAsync(request.Id, cancellationToken) 
+        ?? throw new InvalidOperationException($"ItemType with id {request.Id} not found");      
 
       itemType.Update(request.Name, request.Description, request.Rank, request.ParentId);
       await _repository.UpdateAsync(itemType, cancellationToken);
@@ -38,7 +32,7 @@ public class AddUpdateItemTypeCommandHandler : IRequestHandler<AddUpdateItemType
       Rank = itemType.Rank,
       Name = itemType.Name,
       Description = itemType.Description,
-      Children = new List<ItemTypeDto>()
+      Children = []
     };
   }
 }

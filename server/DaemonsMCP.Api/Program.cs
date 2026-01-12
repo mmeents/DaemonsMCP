@@ -82,8 +82,10 @@ namespace DaemonsMCP.Api
                .MapObjectHierarchyEndpoints()
                .MapIndexingEndpoints()
                .MapInvitationTokenEndpoints()
-               .MapItemsEndpoints()               
+               .MapItemsEndpoints()
+               .MapModelsEndpoints()
                .MapProjectEndpoints()
+               .MapTemplatesEndpoints()
                .MapAccessTokenEndpoints()
                .MapUserEndpoints()
                .MapUserCredentialsEndpoints();

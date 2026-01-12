@@ -61,14 +61,14 @@ namespace DaemonsMCP.Api.Extensions {
       }).WithName("CreateInvitationToken");
 
       app.MapPost("/api/invitations/register", async (
-        IMediator mediator,
+        IMediator mediator,        
         [FromBody] RegisterWithInvitationCommand command) => {
         try {
           var result = await mediator.Send(command);
           return Results.Ok(new { success = true, data = result });
-        } catch (UnauthorizedAccessException ex) {
+        } catch (UnauthorizedAccessException) {
           return Results.Unauthorized();
-        } catch (Exception ex) {
+        } catch (Exception) {
           return Results.BadRequest(new { success = false, errorMessage = "Error occured." });
         }
       }).WithName("RegisterWithInvitationToken");
@@ -79,9 +79,9 @@ namespace DaemonsMCP.Api.Extensions {
         try {
           var result = await mediator.Send(new RevokeInvitationCommand(id));
           return Results.Ok(new { success = true, data = result });
-        } catch (UnauthorizedAccessException ex) {
+        } catch (UnauthorizedAccessException) {
           return Results.Unauthorized();
-        } catch (Exception ex) {
+        } catch (Exception) {
           return Results.BadRequest(new { success = false, errorMessage = "Error occured." });
         }
       }).WithName("RevokeInvitationToken");

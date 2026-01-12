@@ -57,8 +57,8 @@ namespace Daemons.Web {
         {
           diagnosticContext.Set("RemoteIP", httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
           diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].ToString());
-          diagnosticContext.Set("QueryString", httpContext.Request.QueryString.Value);
-          diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+          diagnosticContext.Set("QueryString", httpContext.Request.QueryString.Value ?? "");
+          diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value ?? "");
 
           // Token tracking (don't log actual token value for security!)
           var hasToken = httpContext.Request.Query.ContainsKey("token");

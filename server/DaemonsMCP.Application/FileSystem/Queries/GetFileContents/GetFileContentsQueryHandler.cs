@@ -1,16 +1,8 @@
-﻿using DaemonsMCP.Application.FileSystem.Commands.SyncProjectFileSystem;
-using DaemonsMCP.Application.FileSystem.Services;
-using DaemonsMCP.Domain.Entities;
-using DaemonsMCP.Domain.Repositories;
+﻿using DaemonsMCP.Domain.Repositories;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+
 
 namespace DaemonsMCP.Application.FileSystem.Queries.GetFileContents {
   public class GetFileContentsQueryHandler (
@@ -52,7 +44,7 @@ namespace DaemonsMCP.Application.FileSystem.Queries.GetFileContents {
 
       // 5. Read file
       if (!File.Exists(fullPath)) {
-        _logger.LogWarning($"file not found {fullPath}");
+        _logger.LogWarning("file not found {fullPath}", fullPath);
         throw new FileNotFoundException($"Physical file not found: {fullPath}");
       }
 

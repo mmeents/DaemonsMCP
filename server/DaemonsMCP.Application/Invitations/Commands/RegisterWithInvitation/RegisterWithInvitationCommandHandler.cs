@@ -12,18 +12,15 @@ namespace DaemonsMCP.Application.Invitations.Commands.RegisterWithInvitation {
     string Email,
     string DisplayName,
     string Password
-  ) : IRequest<UserDto>;
+  ) : IRequest<UserDto?>;
 
-  public class RegisterWithInvitationCommandHandler : IRequestHandler<RegisterWithInvitationCommand, UserDto> {
-    private readonly IInvitationTokenRepository _repository;
-    private readonly IUserRepository _userRepository; 
+  public class RegisterWithInvitationCommandHandler(
+    IInvitationTokenRepository repository, 
+    IUserRepository userRepository) : IRequestHandler<RegisterWithInvitationCommand, UserDto?> {
+    private readonly IInvitationTokenRepository _repository = repository;
+    private readonly IUserRepository _userRepository = userRepository;
 
-    public RegisterWithInvitationCommandHandler(IInvitationTokenRepository repository, IUserRepository userRepository) {
-      _repository = repository;
-      _userRepository = userRepository;
-    }
-
-    public async Task<UserDto> Handle(RegisterWithInvitationCommand request, CancellationToken cancellationToken) {
+    public async Task<UserDto?> Handle(RegisterWithInvitationCommand request, CancellationToken cancellationToken) {
 
       var token = await _repository.GetByTokenAsync(request.InvitationToken, cancellationToken);
       if (token == null || !token.IsValid()) {
@@ -60,7 +57,7 @@ namespace DaemonsMCP.Application.Invitations.Commands.RegisterWithInvitation {
         await transaction.CommitAsync(cancellationToken);
         return user.ToDto();
 
-      } catch (Exception e) { 
+      } catch (Exception) { 
         await transaction.RollbackAsync(cancellationToken);
         throw;
       }

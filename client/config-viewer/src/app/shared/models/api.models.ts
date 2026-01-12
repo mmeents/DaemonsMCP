@@ -330,3 +330,82 @@ export enum CredentialType {
   UsernamePassword = 2,
   SshKey = 3
 }
+
+export interface ModelDto {
+  id: number;
+  projectId: number;
+  parentId?: number;
+  modelTypeId: number;
+  modelTypeName: string;
+  name: string;
+  rank: number;
+  code?: string;
+  createdDate: string;  // ISO date string
+  modifiedDate: string; // ISO date string
+  properties: ModelPropertyDto[];
+  children: ModelDto[];
+}
+
+export interface ModelPropertyDto {
+  id: number;
+  modelId: number;
+  propertyKey: string;
+  propertyValue?: string;
+  propertyValueTypeId?: number;
+  propertyValueTypeName?: string;
+}
+
+export interface ModelTypeDto {
+  id: number;
+  ownerTypeId?: number;
+  categoryTypeId?: number;
+  editorTypeId?: number;
+  typeRank: number;
+  name: string;
+  description: string;
+  isVisible: boolean;
+  isReadonly: boolean;
+  iconName: string;
+  children: ModelTypeDto[];
+}
+
+export interface AddUpdateModelRequest {
+  id: number;
+  projectId: number;
+  parentId?: number;
+  modelTypeId: number;
+  name: string;
+  rank: number;
+  code?: string;
+}
+
+export interface AddUpdateModelPropertyRequest {
+  id: number;
+  modelId: number;
+  propertyKey: string;
+  propertyValue?: string;
+  propertyValueTypeId?: number;
+}
+
+export interface SearchModelsParams {
+  projectId: number;
+  parentId?: number;
+  modelTypeId?: number;
+  nameFilter?: string;
+  maxDepth?: number;
+  includeProperties?: boolean;
+}
+
+export interface ExecuteTemplateCommand {
+  templateId: number;
+  targetModelId?: number;
+  saveToFile?: boolean;
+}
+
+export interface TemplateExecutionResult {
+  success: boolean;
+  renderedCode: string;
+  relativeFileName: string;
+  errorMessage?: string;
+  generatedFiles: string[];
+}

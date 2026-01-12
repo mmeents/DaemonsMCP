@@ -15,14 +15,14 @@ namespace DaemonsMCP.Api.Extensions {
           try {
             var result = await indexingService.RunAsync(projectId);
             return Results.Ok(new {
-              Success = result.Success,
-              FilesProcessed = result.FilesProcessed,
-              FilesFailed = result.FilesFailed,
+              result.Success,
+              result.FilesProcessed,
+              result.FilesFailed,
               DurationSeconds = result.Duration.TotalSeconds,
-              ErrorMessage = result.ErrorMessage
+              result.ErrorMessage
             });
-          } catch (Exception ex) {
-            return Results.Problem(ex.Message);
+          } catch (Exception) {
+            return Results.Problem("An error occurred while processing the request.");
           }
         })
       .WithName("RunIndexing")

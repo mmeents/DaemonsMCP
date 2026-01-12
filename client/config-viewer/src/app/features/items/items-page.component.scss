@@ -84,23 +84,6 @@
   box-sizing: border-box;
 }
 
-.placeholder {
-  color: #6c757d;
-  font-style: italic;
-  text-align: center;
-  margin-top: 40px;
-}
-
-.pane-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
 
 /* Form styles */
 .edit-mode {
@@ -204,7 +187,20 @@
 }
 
 .placeholder {
-  color: #6b7280;
+  color: #6c757d;
+  font-style: italic;
   text-align: center;
-  padding: 2rem;
+  margin-top: 40px;
 }
+
+.pane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+

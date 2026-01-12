@@ -40,7 +40,7 @@ namespace DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem{
 
         // Build the WHERE clause for database filtering
         // We'll do simple contains for AND logic.
-        if (searchTerms.Any()) {
+        if (searchTerms.Count != 0) {
           foreach (var term in searchTerms) {
             var termCopy = term; // Avoid closure issues
             query = query.Where(f =>
@@ -66,9 +66,9 @@ namespace DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem{
         if (!string.IsNullOrWhiteSpace(request.Filter)) {
           var searchTerms = GetSearchTerms(request.Filter);
 
-          if (searchTerms.Any()) {
+          if (searchTerms.Count != 0) {
             var parameter = Expression.Parameter(typeof(FileSystemNode), "f");
-            Expression body = null;
+            Expression? body = null;
 
             foreach (var term in searchTerms) {
               var likeExpr = Expression.Call(
@@ -83,7 +83,7 @@ namespace DaemonsMCP.Application.FileSystem.Queries.SearchFileSystem{
               body = body == null ? likeExpr : Expression.OrElse(body, likeExpr);
             }
 
-            var lambda = Expression.Lambda<Func<FileSystemNode, bool>>(body, parameter);
+            var lambda = Expression.Lambda<Func<FileSystemNode, bool>>(body!, parameter);
             query = query.Where(lambda);
           }
         }

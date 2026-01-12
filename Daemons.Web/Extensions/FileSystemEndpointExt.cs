@@ -51,7 +51,7 @@ namespace Daemons.Web.Extensions {
             WebOpResult r2 = WebOpResult.CreateSuccess(
               "SearchFileSystem",
               $"Search completed for project {projectId} with filter '{filter}'",
-              nextToken.Token,
+              nextToken?.Token ?? "",
               result);
 
             return Results.Ok(r2.ToString());

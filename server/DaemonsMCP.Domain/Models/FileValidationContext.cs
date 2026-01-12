@@ -10,7 +10,7 @@ namespace DaemonsMCP.Domain.Models {
     public Project Project { get; set; } = null!;
     public string RelativePath { get; set; } = string.Empty;
     public string FullPath { get; set; } = string.Empty;
-    public FileSystemFilters Filters { get; set; }
+    public required FileSystemFilters Filters { get; set; }
   }
 
 }

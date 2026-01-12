@@ -36,6 +36,9 @@ public static class DependencyInjection {
     services.AddScoped<IInvitationTokenRepository, InvitationTokenRepository>();
     services.AddScoped<IGitBranchRepository, GitBranchRepository>();
     services.AddScoped<IGitRepositoryRepository, GitRepositoryRepository>();
+    services.AddScoped<IModelRepository, ModelRepository>();
+    services.AddScoped<IModelTypeRepository, ModelTypeRepository>();
+    services.AddScoped<IModelPropertyRepository, ModelPropertyRepository>();
 
     // Register Services
     services.AddScoped<IIndexingService, IndexingService>();
@@ -80,6 +83,10 @@ public static class DependencyInjection {
     services.AddScoped<IInvitationTokenRepository, InvitationTokenRepository>();
     services.AddScoped<IGitBranchRepository, GitBranchRepository>();
     services.AddScoped<IGitRepositoryRepository, GitRepositoryRepository>();
+    services.AddScoped<IModelRepository, ModelRepository>();
+    services.AddScoped<IModelTypeRepository, ModelTypeRepository>();
+    services.AddScoped<IModelPropertyRepository, ModelPropertyRepository>();
+
 
     // Register Services
     services.AddScoped<IIndexingService, IndexingService>();

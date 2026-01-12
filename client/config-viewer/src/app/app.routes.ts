@@ -7,6 +7,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { loginGuard } from './core/guards/login.guard';
 import { UsersPageComponent } from './features/users/users-page.component';
 import { SettingsPageComponent } from './features/settings/settings-page.component';
+import { ModelsPageComponent } from './features/models/models-page.component';
 
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent) },
@@ -22,7 +23,8 @@ export const routes: Routes = [
     { path: 'projects', component: ProjectsPageComponent },
     { path: 'access-tokens',  component: AccessTokensPageComponent },  
     { path: 'users', component: UsersPageComponent },
-    { path: 'settings', component: SettingsPageComponent }
+    { path: 'settings', component: SettingsPageComponent },
+    { path: 'models', component: ModelsPageComponent }
   ]},
   { path: '**', redirectTo: '' }
 ];
