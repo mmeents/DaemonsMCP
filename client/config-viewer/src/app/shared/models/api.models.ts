@@ -167,6 +167,30 @@ export enum DeleteStrategy {
   ReparentToGrandparent = 3
 }
 
+// User Models
+export interface UserDto {
+  id: number;
+  email: string;
+  displayName: string;
+  hasPassword: boolean;
+  hasGoogleAuth: boolean;
+  hasGitHubAuth: boolean;
+  createdAt: Date;
+  lastLoginAt?: Date;
+  isActive: boolean;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  displayName: string;
+  password: string;
+}
+
 // Access Token Models
 export interface AccessTokenDto {
   id: number;
@@ -194,4 +218,194 @@ export interface AccessTokenSearchParams {
 export interface CreateAccessTokenCommand {
   issuedTo: string;
   expiresInMinutes: number;
+}
+
+// Invitation Token Models
+export interface InvitationTokenDto {
+  id: number;
+  token: string;
+  invitedEmail?: string;
+  createdByUserId: number;
+  createdAt: string;  // ISO date string
+  expiresAt: string;  // ISO date string
+  isUsed: boolean;
+  usedAt?: string;    // ISO date string
+  usedByUserId?: number;
+}
+
+export interface InvitationTokenSearchParams {
+  invitedEmail?: string;
+  includeExpired?: boolean;
+  includeUsed?: boolean;
+  pageNo?: number;
+  pageSize?: number;
+}
+
+export interface CreateInvitationCommand {
+  createdByUserId: number;
+  invitedEmail?: string;
+  expiresInHours?: number; // Default 168 (7 days)
+}
+
+export interface RegisterWithInvitationCommand {
+  invitationToken: string;
+  email: string;
+  displayName: string;
+  password: string;
+}
+
+export interface GitRepositoryDto {
+  id: number;
+  projectId: number;
+  localPath: string;
+  remoteUrl: string;
+  remoteName: string;
+  currentBranchName: string;
+  isDirty: boolean;
+  modifiedFileCount?: number;
+  untrackedFileCount?: number;
+  lastFetchedAt?: string;  // ISO date string
+  lastSyncedAt?: string;   // ISO date string
+  createdAt: string;       // ISO date string
+  updatedAt: string;       // ISO date string
+}
+
+export interface GitBranchDto {
+  id: number;
+  gitRepositoryId: number;
+  name: string;
+  isRemote: boolean;
+  isHead: boolean;
+  upstreamBranchName?: string;
+  aheadBy?: number;
+  behindBy?: number;
+  lastCommitSha?: string;
+  lastCommitMessage?: string;
+  lastCommitAuthor?: string;
+  lastCommitDate?: string;  // ISO date string
+  createdAt: string;        // ISO date string
+  updatedAt: string;        // ISO date string
+}
+
+// User Credentials Models
+export interface UserCredentialDto {
+  id: number;
+  userId: number;
+  name: string;
+  providerType: ProviderType;
+  credentialType: CredentialType;
+  hasUsername: boolean;  // Security: Never expose encrypted values
+  hasSecret: boolean;    // Just indicate if set
+  createdDate: string;   // ISO date string
+  lastUsedDate?: string; // ISO date string
+  isActive: boolean;
+}
+
+export interface CreateUserCredentialCommand {
+  userId: number;
+  name: string;
+  providerType: ProviderType;
+  credentialType: CredentialType;
+  username: string;
+  secret: string;  // PAT, password, etc.
+}
+
+export interface UpdateUserCredentialCommand {
+  id: number;
+  name?: string;
+  username?: string;  // Null = don't update
+  secret?: string;    // Null = don't update
+  isActive?: boolean; // Null = don't update
+}
+
+export enum ProviderType {
+  GitHub = 1,
+  AzureDevOps = 2,
+  Bitbucket = 3,
+  GitLab = 4
+}
+
+export enum CredentialType {
+  PersonalAccessToken = 1,
+  UsernamePassword = 2,
+  SshKey = 3
+}
+
+export interface ModelDto {
+  id: number;
+  projectId: number;
+  parentId?: number;
+  modelTypeId: number;
+  modelTypeName: string;
+  name: string;
+  rank: number;
+  code?: string;
+  createdDate: string;  // ISO date string
+  modifiedDate: string; // ISO date string
+  properties: ModelPropertyDto[];
+  children: ModelDto[];
+}
+
+export interface ModelPropertyDto {
+  id: number;
+  modelId: number;
+  propertyKey: string;
+  propertyValue?: string;
+  propertyValueTypeId?: number;
+  propertyValueTypeName?: string;
+}
+
+export interface ModelTypeDto {
+  id: number;
+  ownerTypeId?: number;
+  categoryTypeId?: number;
+  editorTypeId?: number;
+  typeRank: number;
+  name: string;
+  description: string;
+  isVisible: boolean;
+  isReadonly: boolean;
+  iconName: string;
+  children: ModelTypeDto[];
+}
+
+export interface AddUpdateModelRequest {
+  id: number;
+  projectId: number;
+  parentId?: number;
+  modelTypeId: number;
+  name: string;
+  rank: number;
+  code?: string;
+}
+
+export interface AddUpdateModelPropertyRequest {
+  id: number;
+  modelId: number;
+  propertyKey: string;
+  propertyValue?: string;
+  propertyValueTypeId?: number;
+}
+
+export interface SearchModelsParams {
+  projectId: number;
+  parentId?: number;
+  modelTypeId?: number;
+  nameFilter?: string;
+  maxDepth?: number;
+  includeProperties?: boolean;
+}
+
+export interface ExecuteTemplateCommand {
+  templateId: number;
+  targetModelId?: number;
+  saveToFile?: boolean;
+}
+
+export interface TemplateExecutionResult {
+  success: boolean;
+  renderedCode: string;
+  relativeFileName: string;
+  errorMessage?: string;
+  generatedFiles: string[];
 }

@@ -26,3 +26,13 @@ public record ItemTypeDto {
   public string Description { get; init; } = string.Empty;
   public List<ItemTypeDto> Children { get; init; } = new();
 }
+
+public record ReadmeItemDto { 
+    public int Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string Details { get; init; } = string.Empty;
+    public DateTime Modified { get; init; }
+    public List<ReadmeItemDto> Children { get; init; } = new();
+   
+}
+

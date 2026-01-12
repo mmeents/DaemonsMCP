@@ -20,7 +20,7 @@ namespace DaemonsMCP.Application.ForWeb.GetReadme {
   }
 
   public record ReadmeContentDto {
-    public List<ItemDto> Content { get; init; } = new();
+    public List<ReadmeItemDto> Content { get; init; } = new();
     public string Version { get; init; } = string.Empty;
     public DateTime LastUpdated { get; init; }
   }

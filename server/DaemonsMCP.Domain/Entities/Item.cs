@@ -18,7 +18,7 @@
 
     // Navigation properties
     public Item? Parent { get; private set; }
-    public ICollection<Item> Children { get; private set; } = new List<Item>();
+    public ICollection<Item> Children { get; private set; } = [];
     public ItemType ItemType { get; private set; } = null!;
     public ItemType StatusType { get; private set; } = null!;
     public FileSystemNode? ReferenceFileSystem { get; private set; }

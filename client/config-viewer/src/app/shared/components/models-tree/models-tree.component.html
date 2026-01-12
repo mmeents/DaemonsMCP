@@ -1,0 +1,29 @@
+<div class="tree-wrapper" (contextmenu)="onTreeBackgroundContextMenu($event)">
+  @if (models.length === 0 && !loading) {
+    <div class="empty-tree-message">
+      <p>No models yet.</p>
+      <p class="hint">Right-click to add Database or API project</p>
+    </div>
+  }
+  
+<p-tree #treeRef
+  [value]="treeNodes"
+  
+  
+  (onNodeDrop)="onNodeDrop($event)"  
+  selectionMode="single"
+  [(selection)]="selectedNode"    
+  (onNodeSelect)="onSelect($event)"
+  (onContextMenuSelect)="onNodeContextMenu($event)"
+  [contextMenu]="nodeMenu"
+  [loading]="loading"
+  [style]="{'width':'100%'}"
+>
+  </p-tree>
+
+  <!-- Context menu for nodes -->
+  <p-contextMenu #nodeMenu [model]="nodeContextMenuItems"></p-contextMenu>
+  
+  <!-- Context menu for empty space -->
+  <p-contextMenu #cm [model]="rootContextMenuItems"></p-contextMenu>
+</div>

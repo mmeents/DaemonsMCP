@@ -7,8 +7,11 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
     <PackageReference Include="MediatR" Version="12.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
+    <PackageReference Include="Scriban" Version="6.5.2" />
   </ItemGroup>
 
   <ItemGroup>

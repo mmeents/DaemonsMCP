@@ -183,8 +183,16 @@ export class FileViewerComponent implements AfterViewInit, OnDestroy {
     }
 
     console.log('Loading Monaco from CDN...');
+      // Load CSS separately (add this to your component's template or dynamically here)
+    const cssLink = document.createElement('link');
+    cssLink.rel = 'stylesheet';
+    cssLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css';
+    cssLink.crossOrigin = 'anonymous'; // Helps with CORS for CSS
+    document.head.appendChild(cssLink);
+    
     const loaderScript = document.createElement('script');
     loaderScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js';
+    loaderScript.crossOrigin = 'anonymous'; // Add this for better error details
     loaderScript.onload = () => {
       console.log('Monaco loader script loaded');
       (window as any).require.config({ 

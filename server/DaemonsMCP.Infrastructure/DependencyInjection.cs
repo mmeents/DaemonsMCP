@@ -7,6 +7,9 @@ using DaemonsMCP.Infrastructure.Tools;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.DataProtection;
+using DaemonsMCP.Domain.Extensions;
+using DaemonsMCP.Domain.Constants;
 
 namespace DaemonsMCP.Infrastructure;
 
@@ -28,12 +31,28 @@ public static class DependencyInjection {
     services.AddScoped<IItemRepository, ItemRepository>();
     services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
     services.AddScoped<IAccessTokenRepository, AccessTokenRepository>();
+    services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<IUserCredentialRepository, UserCredentialRepository>();
+    services.AddScoped<IInvitationTokenRepository, InvitationTokenRepository>();
+    services.AddScoped<IGitBranchRepository, GitBranchRepository>();
+    services.AddScoped<IGitRepositoryRepository, GitRepositoryRepository>();
+    services.AddScoped<IModelRepository, ModelRepository>();
+    services.AddScoped<IModelTypeRepository, ModelTypeRepository>();
+    services.AddScoped<IModelPropertyRepository, ModelPropertyRepository>();
 
     // Register Services
     services.AddScoped<IIndexingService, IndexingService>();
     services.AddScoped<IValidationService, ValidationService>();
     services.AddScoped<IFileSystemSyncService, FileSystemSyncService>();
     services.AddScoped<IDatabaseManagementService, DatabaseManagementService>();
+
+    // Add Data Protection
+    services.AddDataProtection()
+        .SetApplicationName(Cx.AppName)
+        .PersistKeysToFileSystem(new DirectoryInfo(CommonPath.KeysAppPath)) // or config-driven path
+        .SetDefaultKeyLifetime(TimeSpan.FromDays(Cx.KeyLifetimeDays));
+
+    services.AddScoped<ICredentialEncryptionService, CredentialEncryptionService>();
 
     // Register file watching
     services.AddSingleton<IProjectFileWatcherFactory, ProjectFileWatcherFactory>();
@@ -59,12 +78,29 @@ public static class DependencyInjection {
     services.AddScoped<IItemRepository, ItemRepository>();
     services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
     services.AddScoped<IAccessTokenRepository, AccessTokenRepository>();
+    services.AddScoped<IUserRepository, UserRepository>();
+    services.AddScoped<IUserCredentialRepository, UserCredentialRepository>();
+    services.AddScoped<IInvitationTokenRepository, InvitationTokenRepository>();
+    services.AddScoped<IGitBranchRepository, GitBranchRepository>();
+    services.AddScoped<IGitRepositoryRepository, GitRepositoryRepository>();
+    services.AddScoped<IModelRepository, ModelRepository>();
+    services.AddScoped<IModelTypeRepository, ModelTypeRepository>();
+    services.AddScoped<IModelPropertyRepository, ModelPropertyRepository>();
+
 
     // Register Services
     services.AddScoped<IIndexingService, IndexingService>();
     services.AddScoped<IValidationService, ValidationService>();
     services.AddScoped<IFileSystemSyncService, FileSystemSyncService>();
     services.AddScoped<IDatabaseManagementService,  DatabaseManagementService >();
+
+    // Add Data Protection
+    services.AddDataProtection()
+        .SetApplicationName(Cx.AppName)
+        .PersistKeysToFileSystem(new DirectoryInfo(CommonPath.KeysAppPath)) // or config-driven path
+        .SetDefaultKeyLifetime(TimeSpan.FromDays(Cx.KeyLifetimeDays));
+
+    services.AddScoped<ICredentialEncryptionService, CredentialEncryptionService>();
 
     // Register file watching
     services.AddSingleton<IProjectFileWatcherFactory, ProjectFileWatcherFactory>();

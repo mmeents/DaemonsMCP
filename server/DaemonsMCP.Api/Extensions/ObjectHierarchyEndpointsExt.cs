@@ -40,7 +40,8 @@ namespace DaemonsMCP.Api.Extensions {
           var result = await mediator.Send(query);
           return Results.Ok(result);
         })
-      .WithName("SearchObjectHierarchy");
+      .WithName("SearchObjectHierarchy")
+      .WithDescription("Searches the object hierarchy for items matching the specified criteria.");
 
 
       return app;

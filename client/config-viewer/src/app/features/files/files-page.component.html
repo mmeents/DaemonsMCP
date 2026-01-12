@@ -3,7 +3,7 @@
   <header class="page-header">
     @if (selectedProject()) {
       <div class="project-selector">
-        <label>Project:</label>
+        <label>Project:</label>&nbsp;
         <select 
           [value]="selectedProject()?.id"
           (change)="selectProject(projects()[$any($event.target).selectedIndex])"
@@ -13,7 +13,24 @@
           }
         </select>
       </div>
+      <div class="id-jump">
+        <label for="idInput">File ID:</label>&nbsp;
+        <input 
+          #idInput
+          style="width:60px;"          
+          type="number" 
+          [value]="quickJumpId() ?? ''"
+          (keydown.enter)="onQuickJumpById($any($event.target).value); $any($event.target).blur()"
+          (blur)="onQuickJumpById($any($event.target).value)"
+          placeholder="Jump..."
+          class="id-input"
+        />
+        @if (selectedFileName()) {
+          &nbsp;&nbsp;<span class="current-file-hint">ProjectId:{{selectedProject()?.id}} FileSystemNodeId: {{ quickJumpId()}}</span>
+        }
+      </div>
     }
+      
   </header>
 
   @if (loading()) {

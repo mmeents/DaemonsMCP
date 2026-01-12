@@ -51,7 +51,7 @@ namespace Daemons.Web.Extensions {
             WebOpResult r2 = WebOpResult.CreateSuccess(
               "SearchFileSystem",
               $"Search completed for project {projectId} with filter '{filter}'",
-              nextToken.Token,
+              nextToken?.Token ?? "",
               result);
 
             return Results.Ok(r2.ToString());
@@ -93,14 +93,15 @@ namespace Daemons.Web.Extensions {
             $"Retrieved file contents for project {projectId}, Id: {fileSystemNodeId}",
             nextToken.Token,
             nodes);
+
             return Results.Ok(r2);
 
         } catch (UnauthorizedAccessException ex) {
-            var result = WebOpResult.CreateFailure("SearchFileSystem", token, "Invalid access token.", ex);
-            return Results.Problem(result.ToString());
+            var result = WebOpResult.CreateFailure("GET", token, "Invalid access token.", ex);
+            return Results.Ok(result);
         } catch (Exception ex) {
-          var result = WebOpResult.CreateFailure("GetFile", token, "Error getting file.", ex);
-          return Results.Problem(result.ToString());
+          var result = WebOpResult.CreateFailure("GET", token, "Error getting file.", ex);
+          return Results.Ok(result);
         }
       });
 

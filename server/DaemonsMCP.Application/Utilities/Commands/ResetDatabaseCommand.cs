@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DaemonsMCP.Application.Utilities.Commands {
-  public class ResetDatabaseCommandHandler : IRequestHandler<ResetDatabaseCommand, ResetDatabaseResult> {
-    private readonly IDatabaseManagementService _databaseService;
-    private readonly IMediator _mediator;
+  public class ResetDatabaseCommandHandler(IDatabaseManagementService databaseService) 
+    : IRequestHandler<ResetDatabaseCommand, ResetDatabaseResult> {
+    private readonly IDatabaseManagementService _databaseService = databaseService;
 
     public async Task<ResetDatabaseResult> Handle(ResetDatabaseCommand request, CancellationToken cancellationToken) {
       // Reset database to be used with a manual restart.

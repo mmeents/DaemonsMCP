@@ -11,13 +11,18 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="9.0.8" />
+    <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="System.IO" Version="4.3.0" />
+    <PackageReference Include="Scriban" Version="6.5.2" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\server\DaemonsMCP.Domain\DaemonsMCP.Domain.csproj" />
+    <ProjectReference Include="..\server\DaemonsMCP.Infrastructure\DaemonsMCP.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

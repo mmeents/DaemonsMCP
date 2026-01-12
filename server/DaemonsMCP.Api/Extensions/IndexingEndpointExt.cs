@@ -9,41 +9,24 @@ namespace DaemonsMCP.Api.Extensions {
   public static class IndexingEndpointExt {
 
     public static WebApplication MapIndexingEndpoints(this WebApplication app) {
-
-      app.MapPost("/api/filesystem/sync/{projectId}",
-        async (int projectId, IMediator mediator) => {
-          try {
-            var command = new SyncProjectFileSystemCommand(projectId);
-            var result = await mediator.Send(command);
-            return Results.Ok(new {
-              Success = true,
-              ProjectId = projectId,
-              Result = result
-            });
-          } catch (Exception ex) {
-            return Results.BadRequest(new {
-              Success = false,
-              Error = ex.Message
-            });
-          }
-        });
-
-      app.MapPost("/api/indexing/run",
+      
+      app.MapPost("/api/indexing/sync",
         async (int? projectId, IIndexingService indexingService) => {
           try {
             var result = await indexingService.RunAsync(projectId);
             return Results.Ok(new {
-              Success = result.Success,
-              FilesProcessed = result.FilesProcessed,
-              FilesFailed = result.FilesFailed,
+              result.Success,
+              result.FilesProcessed,
+              result.FilesFailed,
               DurationSeconds = result.Duration.TotalSeconds,
-              ErrorMessage = result.ErrorMessage
+              result.ErrorMessage
             });
-          } catch (Exception ex) {
-            return Results.Problem(ex.Message);
+          } catch (Exception) {
+            return Results.Problem("An error occurred while processing the request.");
           }
         })
-      .WithName("RunIndexing");
+      .WithName("RunIndexing")
+      .WithDescription("Runs the indexing process for items in the IndexQueue.");
 
       app.MapGet("/api/indexing/queue/status",
         async (int? projectId, IIndexQueueRepository queueRepo) => {
@@ -55,7 +38,8 @@ namespace DaemonsMCP.Api.Extensions {
             ProjectId = projectId
           });
         })
-      .WithName("GetIndexingQueueStatus");
+      .WithName("GetIndexingQueueStatus")
+      .WithDescription("Gets the status of the indexing queue, including the number of pending items.");
 
       return app;
     }

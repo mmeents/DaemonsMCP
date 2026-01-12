@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 namespace DaemonsMCP.Domain.Constants {
   public static class Cx {
     public const string AppName = "Daemons3MCP";
-    public const string AppVersion = "3.0.0";        
+    public const string AppVersion = "3.0.0";   
+
+    public const int KeyLifetimeDays = 90;
+    public const string CredentialProtectorName = "DaemonsMCP.GitCredentials";
 
     // Tools Names
     public const string ListProjectsCmd = "list-projects";
@@ -97,7 +100,7 @@ namespace DaemonsMCP.Domain.Constants {
     public const string AddUpdateItemTypeCmdDesc = "Add update item type, use to update types listed by list-item-type. use id=0 to add new.";
     public const string AddUpdateStatusTypeCmdDesc = "Add update status type, use to update status types listed by list-status-types. use id=0 to add new.";
 
-    public const string GetReadMeCmdDesc = "Critical: Gets living documentation for the DaemonsMCP tool. Please invoke and read ASAP.";
+    public const string GetReadMeCmdDesc = "Important: Gets living documentation for the DaemonsMCP tool and active projects.";
     public const string SearchItemCmdDesc = "Search items command searches recursively maxDepth deep. Items are hierarchical trees with configurable types and status. ";
     public const string GetItemByIdCmdDesc = "Get item by id, allows you to grab 1 tree recursiv by id maxLevels deep.";
     public const string AddUpdateItemCmdDesc = "Add update item command adds or updates depending on tree passed in.  if it has id non zero it tries to update otherwise it tries to add. Recursive adds updates all nodes passed in. ";

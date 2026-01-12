@@ -101,11 +101,12 @@ public class FileSystemNodeRepository : IFileSystemNodeRepository {
     if (!string.IsNullOrEmpty(parentPath)) {
       FileSystemNode parent;
       try { 
-        parent = await GetOrCreateAsync(projectId, parentPath, isDirectory: true, cancellationToken: cancellationToken);
-        if (parent == null) {  // If parent path was unsafe, we can't create this node either
+        var aparent = await GetOrCreateAsync(projectId, parentPath, isDirectory: true, cancellationToken: cancellationToken);
+        if (aparent == null) {  // If parent path was unsafe, we can't create this node either
           _logger.LogWarning("Cannot create node {Path} because parent path is unsafe", normalizedPath);
           return null;
         }
+        parent = aparent;
       } catch (Exception ex) {
         _logger.LogError(ex, "Error creating parent directory for path: {Path}", normalizedPath);
         return null;

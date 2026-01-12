@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, signal, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProjectsService } from '../../core/services/projects.service';
 import { FileSystemService } from '../../core/services/filesystem.service';
@@ -29,6 +29,7 @@ export class FilesPageComponent implements OnInit {
   protected searchTerm = signal<string>('');
   protected showResults = signal<boolean>(false);
   protected selectedFileId = signal<number | null>(null);
+  protected quickJumpId = signal<number | null>(null);
 
   private stateService = inject(FilePageStateService);
   private projectsService = inject(ProjectsService);
@@ -59,6 +60,16 @@ export class FilesPageComponent implements OnInit {
       getValue: (file) => file.projectId.toString()
     }
   ];
+
+  constructor() {
+    // Sync the ID input field whenever selectedFileId changes from other sources
+    effect(() => {
+      const fileId = this.selectedFileId();
+      if (fileId !== null && fileId !== this.quickJumpId()) {
+        this.quickJumpId.set(fileId);
+      }
+    });
+  }
 
   ngOnInit() {
     this.loadProjects();
@@ -114,6 +125,7 @@ export class FilesPageComponent implements OnInit {
     this.stateService.setProjectId(project.id);
     this.files.set([]); 
       
+    this.selectedFileId.set(null);
     this.selectedFileId.set(null);
     this.stateService.setSelectedFileId(null);
   }
@@ -184,6 +196,89 @@ export class FilesPageComponent implements OnInit {
     this.showResults.set(false);
   }
 
+  onQuickJumpById(idValue: string) {
+    console.log('=== Quick Jump Called ===');
+    console.log('Input value:', idValue);
+    
+    const trimmed = idValue.trim();
+    
+    if (!trimmed) {
+      console.log('Empty input, clearing');
+      this.quickJumpId.set(null);
+      return;
+    }
+
+    const id = parseInt(trimmed, 10);
+    console.log('Parsed ID:', id);
+    
+    if (isNaN(id) || id <= 0) {
+      console.warn('Invalid ID');
+      this.fileError.set(`Invalid ID: ${idValue}`);
+      return;
+    }
+
+    const project = this.selectedProject();
+    if (!project) {
+      console.warn('No project selected');
+      return;
+    }
+
+    if (id === this.selectedFileId()) {
+      console.log('Already selected, skipping');
+      return;
+    }
+
+    console.log(`Fetching file ${id} from project ${project.id}`);
+    
+    this.quickJumpId.set(id);
+    this.fileLoading.set(true);
+    this.fileError.set(null);
+
+    this.fileSystemService.getFileSystemNode(project.id, id).subscribe({
+      next: (fileNode) => {
+        console.log('=== API Response ===');
+        console.log('Full response:', fileNode);
+        const fileName = this.extractFileName(fileNode.relativePath);
+        console.log('name:', fileName);
+        console.log('relativePath:', fileNode.relativePath);
+        console.log('content length:', fileNode.content?.length);
+        console.log('fileSystemNodeId:', fileNode.fileSystemNodeId);
+        
+        // Set fileName FIRST before content
+        console.log('Setting fileName to:', fileName);
+        this.selectedFileName.set(fileName);
+        
+        console.log('Setting filePath to:', fileNode.relativePath);
+        this.selectedFilePath.set(fileNode.relativePath);
+        
+        console.log('Setting fileId to:', fileNode.fileSystemNodeId);
+        this.selectedFileId.set(fileNode.fileSystemNodeId);
+        this.stateService.setSelectedFileId(fileNode.fileSystemNodeId);
+        
+        // Set content LAST
+        console.log('Setting content, length:', fileNode.content?.length);
+        this.fileContent.set(fileNode.content || '');
+        
+        console.log('Setting loading to false');
+        this.fileLoading.set(false);
+        
+        // Clear search
+        this.searchTerm.set('');
+        this.stateService.setSearchTerm('');
+        this.files.set([]);
+        this.showResults.set(false);
+        
+        console.log('=== Quick Jump Complete ===');
+      },
+      error: (err) => {
+        console.error('=== API Error ===', err);
+        this.fileError.set(`File with ID ${id} not found in project "${project.name}"`);
+        this.fileLoading.set(false);
+        this.quickJumpId.set(null);
+      }
+    });
+  }
+
     // Update onFileSelected:
   onFileSelected(file: any) {
     console.log('Selected file:', file);
@@ -192,6 +287,7 @@ export class FilesPageComponent implements OnInit {
     this.stateService.setSelectedFileId(file.id);
     this.selectedFileName.set(file.name);
     this.selectedFilePath.set(file.relativePath);
+    this.quickJumpId.set(file.id);
     this.fileLoading.set(true);
     this.fileError.set(null);
     this.showResults.set(false); // Hide dropdown after selection
@@ -211,6 +307,12 @@ export class FilesPageComponent implements OnInit {
         this.fileLoading.set(false);
         }
     });
+  }
+
+  private extractFileName(relativePath: string): string {
+    // Handle both forward and back slashes
+    const parts = relativePath.split(/[/\\]/);
+    return parts[parts.length - 1] || 'unknown';
   }
 
   private restoreSelectedFile(fileId: number) {

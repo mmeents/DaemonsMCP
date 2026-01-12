@@ -15,7 +15,7 @@ namespace DaemonsMCP.Infrastructure.Tools {
 
     [McpTool(Cx.GetReadMeCmd, Cx.GetReadMeCmdDesc)]
     public static async Task<object> GetReadMe() {
-      return await GetTool().SearchItems(parentId: null, null, null, Cx.ItemTypeIdReadme, null,  maxDepth: 4);
+      return await GetTool().GetReadme();
     }
 
 

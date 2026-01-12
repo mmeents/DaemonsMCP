@@ -1,0 +1,238 @@
+.users-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .page-description {
+    color: var(--text-color-secondary);
+    font-size: 1rem;
+  }
+}
+
+.section {
+  background: var(--surface-card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-color);
+      margin: 0;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+
+      .search-input {
+        width: 300px;
+      }
+    }
+  }
+}
+
+// Users Section Styles
+.users-section {
+  .auth-methods {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+
+    i {
+      color: var(--primary-color);
+    }
+  }
+}
+
+// Invitations Section Styles
+.invitations-section {
+  .filters-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .filter-input {
+        width: 250px;
+      }
+    }
+  }
+
+  .token-preview {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    background: var(--surface-100);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    color: var(--primary-color);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.25rem;
+  }
+}
+
+// Table Styles
+.table-container {
+  ::ng-deep {
+    .p-datatable {
+      .p-datatable-thead > tr > th {
+        background: var(--surface-100);
+        color: var(--text-color);
+        font-weight: 600;
+        border-bottom: 2px solid var(--surface-border);
+      }
+
+      .p-datatable-tbody > tr {
+        &:hover {
+          background: var(--surface-hover);
+        }
+
+        &.p-highlight {
+          background: var(--primary-100);
+          color: var(--primary-color-text);
+        }
+      }
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-color-secondary);
+      font-style: italic;
+    }
+  }
+}
+
+// Dialog Styles
+.dialog-content {
+  .field {
+    margin-bottom: 1.5rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    .field-hint {
+      display: block;
+      margin-top: 0.5rem;
+      color: var(--text-color-secondary);
+      font-size: 0.875rem;
+    }
+
+    .w-full {
+      width: 100%;
+    }
+  }
+
+  .detail-row {
+    display: flex;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--surface-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    label {
+      font-weight: 600;
+      color: var(--text-color);
+      min-width: 150px;
+    }
+
+    span, code {
+      flex: 1;
+      color: var(--text-color-secondary);
+    }
+
+    .token-display,
+    .url-display {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      code {
+        flex: 1;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        background: var(--surface-100);
+        padding: 0.5rem;
+        border-radius: 4px;
+        word-break: break-all;
+      }
+    }
+  }
+
+  .warning-text {
+    color: var(--red-500);
+    font-weight: 500;
+    margin-top: 0.5rem;
+  }
+}
+
+// Status Tags
+::ng-deep {
+  .status-valid {
+    background-color: var(--green-500) !important;
+  }
+
+  .status-expired {
+    background-color: var(--red-500) !important;
+  }
+
+  .status-used {
+    background-color: var(--gray-500) !important;
+  }
+
+  .status-active {
+    background-color: var(--green-500) !important;
+  }
+
+  .status-inactive {
+    background-color: var(--red-500) !important;
+  }
+
+  .error-text {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--red-500);
+    font-size: 0.875rem;
+  }
+
+  .ng-invalid.ng-dirty,
+  .ng-invalid.ng-touched {
+    border-color: var(--red-500) !important;
+  }
+}

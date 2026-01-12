@@ -1,0 +1,43 @@
+<div class="login-container">
+  <p-card header="Login to DaemonsMCP">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="p-fluid">
+        <div class="p-field">
+          <label for="email">Email</label>
+          <input 
+            id="email" 
+            type="email" 
+            pInputText 
+            formControlName="email" 
+            placeholder="Enter your email"
+          />
+        </div>
+        
+        <div class="p-field">
+          <label for="password">Password</label>
+          <input 
+            id="password" 
+            type="password" 
+            pInputText 
+            formControlName="password" 
+            placeholder="Enter your password"
+          />
+        </div>
+        
+        <p-message 
+          *ngIf="errorMessage" 
+          severity="error" 
+          [text]="errorMessage"
+        ></p-message>
+        
+        <p-button 
+          label="Login" 
+          icon="pi pi-sign-in" 
+          [loading]="loading"
+          type="submit"
+          [disabled]="!loginForm.valid"
+        ></p-button>
+      </div>
+    </form>
+  </p-card>
+</div>

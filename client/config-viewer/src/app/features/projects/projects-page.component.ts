@@ -5,11 +5,19 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProjectsTreeComponent } from '../../shared/components/projects-tree/projects-tree.component';
 import { ProjectsService } from '../../core/services/projects.service';
-import { Project, CreateProjectCommand } from '../../shared/models/api.models';
+import { GitService } from '../../core/services/git.service';
+import { Project, CreateProjectCommand, GitRepositoryDto } from '../../shared/models/api.models';
+
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
+import { TabsModule } from 'primeng/tabs';
+import { CardModule } from 'primeng/card';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { MessageModule } from 'primeng/message';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-projects-page',
@@ -21,8 +29,14 @@ import { TextareaModule } from 'primeng/textarea';
     DialogModule, 
     ButtonModule,
     InputTextModule,
-    TextareaModule
+    TextareaModule,
+    TabsModule,
+    CardModule,
+    ProgressSpinnerModule,
+    MessageModule,
+    ToastModule
   ],
+  providers: [MessageService],
   templateUrl: './projects-page.component.html',
   styleUrl: './projects-page.component.scss',
 })
@@ -37,8 +51,15 @@ export class ProjectsPageComponent implements OnInit {
 
   showDeleteDialog = false;
   projectToDelete?: Project;
+  gitRepos: GitRepositoryDto[] = [];
+  loadingGitRepos = false;
+  scanningGitRepos = false;
 
-  constructor(private projectsService: ProjectsService) {}
+  constructor(
+    private projectsService: ProjectsService,
+    private gitService: GitService,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit() {
     this.loadProjects();
@@ -71,6 +92,83 @@ export class ProjectsPageComponent implements OnInit {
   onProjectSelected(project: Project) {
     this.selectedProject = project;
     console.log('Selected project:', project);
+    this.loadGitRepos();
+  }
+
+  loadGitRepos() {
+    if (!this.selectedProject) {
+      this.gitRepos = [];
+      return;
+    }
+
+    this.loadingGitRepos = true;
+    this.gitService.getGitReposForProject(this.selectedProject.id).subscribe({
+      next: (repos) => {
+        this.gitRepos = repos;
+        this.loadingGitRepos = false;
+        console.log('Loaded Git repos:', repos);
+      },
+      error: (err) => {
+        console.error('Failed to load Git repos:', err);
+        this.loadingGitRepos = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load Git repositories'
+        });
+      }
+    });
+  }
+
+   onScanForGitRepos() {
+    if (!this.selectedProject) return;
+
+    this.scanningGitRepos = true;
+    this.gitService.scanProjectForGitRepos(this.selectedProject.id).subscribe({
+      next: (repos) => {
+        this.gitRepos = repos;
+        this.scanningGitRepos = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Scan Complete',
+          detail: `Found ${repos.length} Git ${repos.length === 1 ? 'repository' : 'repositories'}`
+        });
+        console.log('Scanned Git repos:', repos);
+      },
+      error: (err) => {
+        console.error('Failed to scan for Git repos:', err);
+        this.scanningGitRepos = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Scan Failed',
+          detail: err.error?.errorMessage || 'Failed to scan for Git repositories'
+        });
+      }
+    });
+  }
+
+  getStatusClass(repo: GitRepositoryDto): string {
+    return repo.isDirty ? 'status-dirty' : 'status-clean';
+  }
+
+  getStatusIcon(repo: GitRepositoryDto): string {
+    return repo.isDirty ? 'pi pi-exclamation-triangle' : 'pi pi-check-circle';
+  }
+
+  getStatusText(repo: GitRepositoryDto): string {
+    if (!repo.isDirty) {
+      return 'Clean';
+    }
+    
+    const parts: string[] = [];
+    if (repo.modifiedFileCount && repo.modifiedFileCount > 0) {
+      parts.push(`${repo.modifiedFileCount} modified`);
+    }
+    if (repo.untrackedFileCount && repo.untrackedFileCount > 0) {
+      parts.push(`${repo.untrackedFileCount} untracked`);
+    }
+    
+    return parts.length > 0 ? parts.join(', ') : 'Dirty';
   }
 
   onNewProject() {
