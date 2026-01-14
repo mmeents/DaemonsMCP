@@ -162,8 +162,16 @@
                     <p><strong>Modified:</strong> {{ selectedModel()!.modifiedDate | date:'medium' }}</p>
                     @if (selectedModel()!.code) {
                       <p><strong>Code:</strong></p>
-                      <pre>{{ selectedModel()!.code }}</pre>
+                      <pre>{{ selectedModel()!.code }}</pre>                      
                     }
+                    <div class="template-actions">
+                      <button class="btn-secondary" (click)="onEditModel()">Edit</button> &nbsp;
+                    @if (isTemplateType(selectedModel()!.modelTypeId) && selectedModel()!.code) {
+                      <button class="btn-primary" (click)="onExecuteTemplate(selectedModel()!, true)">
+                        <i class="pi pi-eye"></i> Preview
+                      </button>                        
+                    }
+                    </div>     
                   </div>
                 </p-tabpanel>
 

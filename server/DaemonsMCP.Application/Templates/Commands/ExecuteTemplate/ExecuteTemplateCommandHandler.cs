@@ -30,11 +30,11 @@ namespace DaemonsMCP.Application.Templates.Commands.ExecuteTemplate {
     private readonly IModelRepository _modelRepository = modelRepository;
     public async Task<TemplateExecutionResult> Handle(ExecuteTemplateCommand request, CancellationToken cancellationToken) {
       // 1. Load template with properties
-      var template = await _modelRepository.GetByIdWithPropertiesAsync(request.TemplateId, cancellationToken);
+      var template = await _modelRepository.GetByIdWithChildrenAsync(request.TemplateId, maxDepth: 3, cancellationToken);
 
       // 2. Get target model ID from property or override
       var targetModelId = request.TargetModelId
-        ?? GetTargetModelIdFromProperties(template);
+        ?? GetTargetModelIdFromProperties(template) ?? template?.Id;
 
       if (!targetModelId.HasValue) {
         return new TemplateExecutionResult {
@@ -42,32 +42,27 @@ namespace DaemonsMCP.Application.Templates.Commands.ExecuteTemplate {
           ErrorMessage = "No target model specified"
         };
       }
-
-      // 3. Load target model with full tree
-      var targetModel = await _modelRepository.GetByIdWithChildrenAsync(targetModelId.Value, maxDepth: 3, cancellationToken);
+           
 
       // 4. Execute template (handle children recursively)
-      var outputs = await ExecuteTemplateRecursive(template, targetModel, cancellationToken);
+      var outputs = await ExecuteTemplateRecursive(template, cancellationToken);
 
       // 5. Get filename from properties
+      var project = await _projectRepository.GetByIdAsync(template.ProjectId, cancellationToken);      
       var relativeFileName = template.Properties
         .FirstOrDefault(p => p.PropertyKey == "RelativeFileName")?.PropertyValue
-        ?? $"{targetModel.Name}.txt";
-
-      // Replace tokens in filename
-      relativeFileName = relativeFileName.Replace("{model.name}", targetModel.Name);
+        ?? $"{template.Name}.txt";
+      var projectPath = Path.GetFullPath( Path.Combine(project.RootPath, relativeFileName));
 
       // 6. Optionally save to file system
-      if (request.SaveToFile) {
-        var project = await _projectRepository.GetByIdAsync(template.ProjectId, cancellationToken);
-        var projectPath = Path.Combine(project.RootPath, relativeFileName);
+      if (request.SaveToFile) {        
         await File.WriteAllTextAsync(projectPath, string.Join("\n\n", outputs), cancellationToken);           
       }
 
       return new TemplateExecutionResult {
         Success = true,
         RenderedCode = string.Join("\n\n", outputs),
-        RelativeFileName = relativeFileName,
+        RelativeFileName = projectPath,  //relativeFileName,
         GeneratedFiles = request.SaveToFile ? new List<string> { relativeFileName } : new()
       };
     }
@@ -82,13 +77,21 @@ namespace DaemonsMCP.Application.Templates.Commands.ExecuteTemplate {
       return null;
     }
 
-    private async Task<List<string>> ExecuteTemplateRecursive(Model template, Model targetModel, CancellationToken cancellationToken) {
+    private async Task<List<string>> ExecuteTemplateRecursive(Model template,  CancellationToken cancellationToken) {
       var outputs = new List<string>();
+
+      if (template == null || !template.IsActive()) { // early exit if its not active.
+        return outputs;
+      }
+
+      var targetModelId = GetTargetModelIdFromProperties(template) ?? template.Id;
+
+      var targetModel = await _modelRepository.GetByIdWithChildrenAsync(targetModelId, maxDepth: 3, cancellationToken);
 
       // Execute child templates first (ordered by rank)
       if (template.Children?.Any() == true) {
         foreach (var childTemplate in template.Children.OrderBy(c => c.Rank)) {
-          var childOutputs = await ExecuteTemplateRecursive(childTemplate, targetModel, cancellationToken);
+          var childOutputs = await ExecuteTemplateRecursive(childTemplate, cancellationToken);
           outputs.AddRange(childOutputs);
         }
       }
