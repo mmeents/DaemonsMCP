@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class ModelsPageStateService {
   private readonly STORAGE_KEY = 'models-page-state';
+  private readonly PROPERTIES_EXPANDED_KEY = 'models_page_properties_expanded';
 
   private getState(): any {
     const stored = localStorage.getItem(this.STORAGE_KEY);
@@ -47,5 +48,14 @@ export class ModelsPageStateService {
 
   clear(): void {
     localStorage.removeItem(this.STORAGE_KEY);
+  } 
+
+  getPropertiesExpanded(): boolean {
+    const saved = localStorage.getItem(this.PROPERTIES_EXPANDED_KEY);
+    return saved !== null ? saved === 'true' : true; // Default to true
+  }
+
+  setPropertiesExpanded(expanded: boolean): void {
+    localStorage.setItem(this.PROPERTIES_EXPANDED_KEY, String(expanded));
   }
 }

@@ -14,6 +14,7 @@ import { ProjectsService } from '../../core/services/projects.service';
 import { ModelsService } from '../../core/services/models.service';
 import { ModelsPageStateService } from '../../core/services/models-page-state.service';
 import { ModelTypeService, Mte } from '../../core/services/model-type.service';
+import { FileViewerComponent } from '../../shared/components/file-viewer/file-viewer.component';
 import { 
   Project, 
   ModelDto, 
@@ -32,10 +33,10 @@ import {
     ModelsTreeComponent, 
     TreeSelectModule, 
     DialogModule, 
-    SelectModule,
-    TabsModule,
+    SelectModule,    
     CheckboxModule,
-    DatePickerModule
+    DatePickerModule,
+    FileViewerComponent
   ],
   templateUrl: './models-page.component.html',
   styleUrl: './models-page.component.scss',
@@ -73,6 +74,9 @@ export class ModelsPageComponent implements OnInit {
   protected parentTreeOptions: TreeNode[] = [];
   protected selectedParentNode: TreeNode | null = null;
   protected get Mte() { return this.modelTypeService.Mte; }
+  protected propertiesExpanded = signal(true); // Start expanded by default
+  protected previewLoading = signal(false);
+  protected previewError = signal<string | null>(null);
 
   // Delete dialog
   protected showDeleteDialog = signal(false);
@@ -82,9 +86,13 @@ export class ModelsPageComponent implements OnInit {
     this.loadProjects();
     this.loadModelTypes();
     
-    // Restore active tab
-    const savedTab = this.stateService.getActiveTab();
-    this.activeTab.set(savedTab);
+    // Restore properties panel state
+    const savedExpanded = this.stateService.getPropertiesExpanded();
+    this.propertiesExpanded.set(savedExpanded);
+  }
+
+  protected togglePropertiesPanel() {
+    this.propertiesExpanded.update(v => !v);
   }
 
   private createEmptyForm(projectId?: number, parentId?: number): AddUpdateModelRequest {
@@ -215,6 +223,9 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
     this.selectedModel.set(model);
     this.stateService.setSelectedModelId(model.id);
     this.loadModelProperties();
+    if (this.isTemplateType(model.modelTypeId)&& !this.isEditing() && model.code != null) {
+      this.onExecuteTemplate(model, true)
+    }
     console.log('MODEL SELECTED EVENT RECEIVED:', model);
   }
 
@@ -469,6 +480,11 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
         this.modelProperties.update(props => 
           props.map(p => p.id === updated.id ? updated : p)
         );
+        // 🔥 Auto-refresh the preview
+        const model = this.selectedModel();
+        if (model && this.isTemplateType(model.modelTypeId) && model.code) {
+          this.onExecuteTemplate(model, true);
+        }
       },
       error: (err) => {
         console.error('Failed to update property:', err);

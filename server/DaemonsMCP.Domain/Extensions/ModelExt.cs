@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DaemonsMCP.Domain.Enums;
+using DaemonsMCP.Domain.Entities;
 
 namespace DaemonsMCP.Domain.Extensions {
   public static class ModelExt {
@@ -18,9 +19,9 @@ namespace DaemonsMCP.Domain.Extensions {
         (int)Mte.SqlVarcharType => (int)Mte.CSharpStringType,      // string
         (int)Mte.SqlNVarcharType => (int)Mte.CSharpStringType,     // string
         (int)Mte.SqlUniqueIdentifierType => (int)Mte.CSharpStringType, // string
-    //    (int)Mte.SqlDateTimeType => (int)Mte.CSharpDateTime,   // DateTime
-    //    (int)Mte.SqlDateType => (int)Mte.CSharpDateType,           // Date
-    //    (int)Mte.SqlTimeType => (int)Mte.CSharpTimeType,           // Time
+        (int)Mte.SqlDateTimeType => (int)Mte.CSharpDateTimeType,   // DateTime
+        (int)Mte.SqlDateType => (int)Mte.CSharpDateType,           // Date
+        (int)Mte.SqlTimeType => (int)Mte.CSharpTimeType,           // Time
         _ => (int)Mte.CSharpStringType  // default to string
       };
     }
@@ -132,7 +133,7 @@ namespace DaemonsMCP.Domain.Extensions {
   end}}
 {{end}}
      */
-    public static string GetCSharpFromSqlModelType(int sqlModelTypeId) {
+    public static string GetCSharpFromSqlModelType(int sqlModelTypeId) {      
       return sqlModelTypeId switch {
         (int)Mte.SqlBitType => "bool",
         (int)Mte.SqlSmallIntType => "short",
@@ -151,6 +152,8 @@ namespace DaemonsMCP.Domain.Extensions {
 
     public static Mte TemplateToModel(this Mte model) { 
       return model switch {
+        Mte.RootTemplate => Mte.FolderTemplate,
+        Mte.FolderTemplate => Mte.FolderTemplate,
         Mte.DatabaseTemplate => Mte.DatabaseModel,
         Mte.ApiTemplate => Mte.ApiModel,
         Mte.TablesTemplate => Mte.TablesModel,
@@ -166,6 +169,15 @@ namespace DaemonsMCP.Domain.Extensions {
         Mte.ClassTemplate => Mte.ClassModel,
         _ => model
       };
+    }
+
+    public static bool IsActive(this Model model) { 
+      var activeProperty = model.Properties.FirstOrDefault(p => p.PropertyKey == "IsActive");
+      if (activeProperty == null) { 
+        return false;
+      }
+      var isActive = ((activeProperty?.PropertyValue ?? "0" ) == "1");
+      return isActive;
     }
 
   }
