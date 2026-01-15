@@ -21,47 +21,188 @@
   } @else if (selectedProject()) {
     <div class="split-pane">
       <!-- Left: Models Tree -->
-      <div class="tree-pane">
-        <div class="pane-header">
-          <h2>Models Hierarchy</h2>
-          <button class="btn-primary" (click)="onNewModel()">+ Add</button>
-           <div class="header-actions" *ngIf="!isEditing && selectedModel()">
-             <button class="btn-secondary" (click)="onEditModel()">Edit</button>
-           </div>
+      <div class="left-panel">
+        <!-- Top: Models Tree -->
+        <div class="tree-section">
+          <div class="panel-header">
+            <h2>Models Hierarchy</h2>
+            <button (click)="onNewModel()">+ Add</button>&nbsp;
+            <button *ngIf="selectedModel()" (click)="onEditModel()">Edit</button>
+          </div>
+          <div class="tree-content">
+            <app-models-tree
+              [models]="models()"
+              [loading]="modelsLoading()"
+              [selectedModelId]="selectedModel()?.id"
+              (modelSelected)="onModelSelected($event)"
+              (modelAdd)="onNewModel($event)"
+              (modelEdit)="onEditModel($event)"
+              (modelDelete)="onDeleteModel($event)"
+            >
+            </app-models-tree>
+            
+            <p-dialog 
+              header="Confirm Delete" 
+              [(visible)]="showDeleteDialog" 
+              [modal]="true"
+              [style]="{width: '450px'}"
+              [draggable]="false"
+              [resizable]="false">
+              
+              <div class="delete-dialog-content">
+                <p><i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: var(--orange-500); margin-right: 1rem;"></i>
+                  Delete "{{ modelToDelete?.name }}"?</p>
+                <p>This will permanently delete the model and all its children.</p>
+              </div>
+              
+              <ng-template pTemplate="footer">
+                <button class="btn-secondary" (click)="cancelDelete()">Cancel</button>
+                <button class="btn-primary" (click)="confirmDelete()">Delete</button>
+              </ng-template>
+            </p-dialog>
+          </div>
         </div>
-        <div class="tree-content">
-          <app-models-tree
-            [models]="models()"
-            [loading]="modelsLoading()"
-            [selectedModelId]="selectedModel()?.id"
-            (modelSelected)="onModelSelected($event)"
-            (modelAdd)="onNewModel($event)"
-            (modelEdit)="onEditModel($event)"
-            (modelDelete)="onDeleteModel($event)"
-          >
-          </app-models-tree>
+        <!-- Bottom: Properties (collapsible panel, not tab) -->
+        <div class="properties-section" *ngIf="selectedModel()">
+          <div class="panel-header">
+            <h3>Properties</h3>
+            <button class="btn-icon" (click)="togglePropertiesPanel()">
+              <i [class]="propertiesExpanded() ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"></i>
+            </button>
+          </div>
           
-          <p-dialog 
-            header="Confirm Delete" 
-            [(visible)]="showDeleteDialog" 
-            [modal]="true"
-            [style]="{width: '450px'}"
-            [draggable]="false"
-            [resizable]="false">
-            
-            <div class="delete-dialog-content">
-              <p><i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: var(--orange-500); margin-right: 1rem;"></i>
-                Delete "{{ modelToDelete?.name }}"?</p>
-              <p>This will permanently delete the model and all its children.</p>
-            </div>
-            
-            <ng-template pTemplate="footer">
-              <button class="btn-secondary" (click)="cancelDelete()">Cancel</button>
-              <button class="btn-primary" (click)="confirmDelete()">Delete</button>
-            </ng-template>
-          </p-dialog>
+          <div class="properties-content" *ngIf="propertiesExpanded()">
+            <table class="properties-table">
+              <thead>
+                <tr>
+                  <th style="width: 30%">Key</th>
+                  <th style="width: 50%">Value</th>                  
+                  <th style="width: 10%">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (prop of modelProperties(); track prop.id) {
+                  <tr>
+                    <td>
+                      <input 
+                        type="text" 
+                        [(ngModel)]="prop.propertyKey"
+                        (blur)="onUpdateProperty(prop)"
+                        class="prop-input"
+                      />
+                    </td>
+                    <td>
+                      <!-- REFERENCE TYPE - Dropdown of children -->
+                      @if (getEditorForProperty(prop) === Mte.LookupTypeEditor) {
+                        <select
+                          [(ngModel)]="prop.propertyValue"
+                          (change)="onUpdateProperty(prop)"
+                          class="prop-input"
+                        >
+                          <option value="">-- Select --</option>
+                          @for (child of getTypeChildren(prop.propertyValueTypeId!); track child.id) {
+                            <option [value]="child.id">{{ child.name }}</option>
+                          }
+                        </select>
+                      }
+                      @else if (getEditorForProperty(prop) === Mte.LookupModelEditor) {
+                        <select
+                          [(ngModel)]="prop.propertyValue"
+                          (change)="onUpdateProperty(prop)"
+                          class="prop-input"
+                        >
+                          <option value="">-- Select --</option>
+                          @for (modelOption of getTargetModelOptions(selectedModel()!); track modelOption.id) {
+                            <option [value]="modelOption.id">{{ modelOption.name }}</option>
+                          }
+                        </select>
+                      }
+                      <!-- Boolean (bit) - Checkbox -->
+                      @else if (getEditorForProperty( prop) === Mte.BooleanEditor) {
+                        <p-checkbox
+                          [(ngModel)]="prop.propertyValue"
+                          [binary]="true"
+                          [trueValue]="'1'"
+                          [falseValue]="'0'"
+                          (onChange)="onUpdateProperty(prop)"
+                        />
+                      }
+                      <!-- Integer types - Number input -->
+                      @else if (getEditorForProperty(prop) === Mte.IntegerEditor) {
+                        <input 
+                          type="number"
+                          [(ngModel)]="prop.propertyValue"
+                          (blur)="onUpdateProperty(prop)"
+                          class="prop-input"
+                        />
+                      }
+                      <!-- Date/DateTime - DatePicker (PrimeNG v20) -->
+                      @else if (getEditorForProperty(prop) === Mte.DateEditor || getEditorForProperty(prop) === Mte.DateEditor) {
+                        <p-datepicker
+                          [(ngModel)]="prop.propertyValue"
+                          (onSelect)="onUpdateProperty(prop)"
+                          [showIcon]="true"
+                          dateFormat="yy-mm-dd"
+                        />
+                      }
+                      <!-- Default - Text input -->
+                      @else {
+                        <input 
+                          type="text"
+                          [(ngModel)]="prop.propertyValue"
+                          (blur)="onUpdateProperty(prop)"
+                          class="prop-input"
+                        />
+                      }
+                    </td>                    
+                    <td>
+                      <button 
+                        class="btn-icon-danger" 
+                        (click)="onDeleteProperty(prop)"
+                        title="Delete property"
+                      >
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+                
+                @if (isAddingProperty()) {
+                  <tr class="new-property-row">
+                    <td>
+                      <input 
+                        type="text" 
+                        [(ngModel)]="newProperty.propertyKey"
+                        placeholder="Property key"
+                        class="prop-input"
+                        autofocus
+                      />
+                    </td>
+                    <td>
+                      <input 
+                        type="text" 
+                        [(ngModel)]="newProperty.propertyValue"
+                        placeholder="Property value"
+                        class="prop-input"
+                      />
+                    </td>                    
+                    <td>
+                      <button class="btn-icon-success" (click)="onAddProperty()" title="Save property">
+                        <i class="pi pi-check"></i>
+                      </button>
+                      <button class="btn-icon-secondary" (click)="isAddingProperty.set(false)" title="Cancel">
+                        <i class="pi pi-times"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <button (click)="isAddingProperty.set(true)">+ Add Property</button>
+          </div>
         </div>
       </div>
+
 
       <!-- Right: Model Details with Tabs -->
       <div class="details-pane">
@@ -72,7 +213,7 @@
           </div>
         </div>
         
-        <div class="details-content">
+        <div class="details-panel">
           <!-- EDIT MODE -->
           @if (isEditing()) {
 
@@ -142,241 +283,52 @@
               </div>
             </div>
           } @else if (selectedModel()) {
-            <!-- VIEW MODE with TABS -->
-            <p-tabs [(value)]="activeTab" (onChange)="onTabChange($event)">
-              <p-tablist>
-                <p-tab value="0">Overview</p-tab>
-                <p-tab value="1">Properties</p-tab>
-                <p-tab value="2">Code</p-tab>
-              </p-tablist>
-
-              <p-tabpanels>
-                <!-- Overview Tab -->
-                <p-tabpanel value="0">
-                  <div class="view-mode">
-                    <p><strong>ID:</strong> {{ selectedModel()!.id }}</p>
-                    <p><strong>Name:</strong> {{ selectedModel()!.name }}</p>
-                    <p><strong>Type:</strong> {{ selectedModel()!.modelTypeName }}</p>
-                    <p><strong>Rank:</strong> {{ selectedModel()!.rank }}</p>
-                    <p><strong>Created:</strong> {{ selectedModel()!.createdDate | date:'medium' }}</p>
-                    <p><strong>Modified:</strong> {{ selectedModel()!.modifiedDate | date:'medium' }}</p>
-                    @if (selectedModel()!.code) {
-                      <p><strong>Code:</strong></p>
-                      <pre>{{ selectedModel()!.code }}</pre>                      
-                    }
-                    <div class="template-actions">
-                      <button class="btn-secondary" (click)="onEditModel()">Edit</button> &nbsp;
-                    @if (isTemplateType(selectedModel()!.modelTypeId) && selectedModel()!.code) {
-                      <button class="btn-primary" (click)="onExecuteTemplate(selectedModel()!, true)">
-                        <i class="pi pi-eye"></i> Preview
-                      </button>                        
-                    }
-                    </div>     
-                  </div>
-                </p-tabpanel>
-
-                <p-tabpanel value="1">
-                  <div class="properties-editor">
-                    @if (modelProperties().length > 0 || isAddingProperty()) {
-                      <div class="properties-table-wrapper">
-                        <table class="properties-table">
-                          <thead>
-                            <tr>
-                              <th style="width: 30%">Key</th>
-                              <th style="width: 50%">Value</th>
-                              <th style="width: 10%">Type</th>
-                              <th style="width: 10%">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            @for (prop of modelProperties(); track prop.id) {
-                              <tr>
-                                <td>
-                                  <input 
-                                    type="text" 
-                                    [(ngModel)]="prop.propertyKey"
-                                    (blur)="onUpdateProperty(prop)"
-                                    class="prop-input"
-                                  />
-                                </td>
-                                <td>
-                                  <!-- REFERENCE TYPE - Dropdown of children -->
-                                  @if (getEditorForProperty(prop) === Mte.LookupTypeEditor) {
-                                    <select
-                                      [(ngModel)]="prop.propertyValue"
-                                      (change)="onUpdateProperty(prop)"
-                                      class="prop-input"
-                                    >
-                                      <option value="">-- Select --</option>
-                                      @for (child of getTypeChildren(prop.propertyValueTypeId!); track child.id) {
-                                        <option [value]="child.id">{{ child.name }}</option>
-                                      }
-                                    </select>
-                                  }
-                                  @else if (getEditorForProperty(prop) === Mte.LookupModelEditor) {
-                                    <select
-                                      [(ngModel)]="prop.propertyValue"
-                                      (change)="onUpdateProperty(prop)"
-                                      class="prop-input"
-                                    >
-                                      <option value="">-- Select --</option>
-                                      @for (modelOption of getTargetModelOptions(selectedModel()!); track modelOption.id) {
-                                        <option [value]="modelOption.id">{{ modelOption.name }}</option>
-                                      }
-                                    </select>
-                                  }
-                                  <!-- Boolean (bit) - Checkbox -->
-                                  @else if (getEditorForProperty( prop) === Mte.BooleanEditor) {
-                                    <p-checkbox
-                                      [(ngModel)]="prop.propertyValue"
-                                      [binary]="true"
-                                      [trueValue]="'1'"
-                                      [falseValue]="'0'"
-                                      (onChange)="onUpdateProperty(prop)"
-                                    />
-                                  }
-                                  <!-- Integer types - Number input -->
-                                  @else if (getEditorForProperty(prop) === Mte.IntegerEditor) {
-                                    <input 
-                                      type="number"
-                                      [(ngModel)]="prop.propertyValue"
-                                      (blur)="onUpdateProperty(prop)"
-                                      class="prop-input"
-                                    />
-                                  }
-                                  <!-- Date/DateTime - DatePicker (PrimeNG v20) -->
-                                  @else if (getEditorForProperty(prop) === Mte.DateEditor || getEditorForProperty(prop) === Mte.DateEditor) {
-                                    <p-datepicker
-                                      [(ngModel)]="prop.propertyValue"
-                                      (onSelect)="onUpdateProperty(prop)"
-                                      [showIcon]="true"
-                                      dateFormat="yy-mm-dd"
-                                    />
-                                  }
-                                  <!-- Default - Text input -->
-                                  @else {
-                                    <input 
-                                      type="text"
-                                      [(ngModel)]="prop.propertyValue"
-                                      (blur)="onUpdateProperty(prop)"
-                                      class="prop-input"
-                                    />
-                                  }
-                                </td>
-                                <td>
-                                  <span class="type-badge">{{ prop.propertyValueTypeName || '-' }}</span>
-                                </td>
-                                <td>
-                                  <button 
-                                    class="btn-icon-danger" 
-                                    (click)="onDeleteProperty(prop)"
-                                    title="Delete property"
-                                  >
-                                    <i class="pi pi-trash"></i>
-                                  </button>
-                                </td>
-                              </tr>
-                            }
-                            
-                            @if (isAddingProperty()) {
-                              <tr class="new-property-row">
-                                <td>
-                                  <input 
-                                    type="text" 
-                                    [(ngModel)]="newProperty.propertyKey"
-                                    placeholder="Property key"
-                                    class="prop-input"
-                                    autofocus
-                                  />
-                                </td>
-                                <td>
-                                  <input 
-                                    type="text" 
-                                    [(ngModel)]="newProperty.propertyValue"
-                                    placeholder="Property value"
-                                    class="prop-input"
-                                  />
-                                </td>
-                                <td>-</td>
-                                <td>
-                                  <button 
-                                    class="btn-icon-success" 
-                                    (click)="onAddProperty()"
-                                    title="Save property"
-                                  >
-                                    <i class="pi pi-check"></i>
-                                  </button>
-                                  <button 
-                                    class="btn-icon-secondary" 
-                                    (click)="isAddingProperty.set(false)"
-                                    title="Cancel"
-                                  >
-                                    <i class="pi pi-times"></i>
-                                  </button>
-                                </td>
-                              </tr>
-                            }
-                          </tbody>
-                        </table>
-                      </div>
-                    } @else {
-                      <div class="empty-properties">
-                        <p>No properties defined for this model.</p>
-                      </div>
-                    }
-                    
-                    <div class="properties-actions">
-                      @if (!isAddingProperty()) {
-                        <button class="btn-primary" (click)="isAddingProperty.set(true)">
-                          <i class="pi pi-plus"></i> Add Property
-                        </button>
-                      }
-                    </div>
-                  </div>
-                </p-tabpanel>
-
-                <!-- Add to Code tab for templates -->
-                <p-tabpanel value="2">
-                  <div class="code-tab">
-                    @if (selectedModel() && isTemplateType(selectedModel()!.modelTypeId)) {
-                      <!-- Template actions -->
-                      <div class="template-actions">
-                        <button class="btn-primary" (click)="onExecuteTemplate(selectedModel()!, true)">
-                          <i class="pi pi-eye"></i> Preview
-                        </button>
-                        <button class="btn-secondary" (click)="onExecuteTemplate(selectedModel()!, false)">
-                          <i class="pi pi-play"></i> Execute
-                        </button>
-                      </div>
-                    }
-                    
-                    <div class="placeholder">
-                      <p>Code editor coming soon...</p>
-                      <p>Will provide Monaco editor for SQL/template editing.</p>
-                    </div>
-                  </div>
-                </p-tabpanel>
-
-                <!-- Preview Dialog -->
-                <p-dialog 
-                  header="Template Preview: {{ previewFileName() }}" 
-                  [(visible)]="showPreviewDialog" 
-                  [modal]="true"
-                  [style]="{width: '80vw', height: '80vh'}"
-                  [draggable]="false"
-                  [resizable]="true">
-                  
-                  <pre style="white-space: pre-wrap; font-family: 'Courier New', monospace;">{{ previewCode() }}</pre>
-                  
-                  <ng-template pTemplate="footer">
-                    <button class="btn-secondary" (click)="showPreviewDialog.set(false)">Close</button>
-                    <button class="btn-primary" (click)="onExecuteTemplate(selectedModel()!, false); showPreviewDialog.set(false)">
-                      Execute & Save
+            <div class="model-overview">
+              <div class="panel-header">
+                <h2>{{ selectedModel()!.name }}</h2>
+                <div class="header-actions">
+                  <button (click)="onEditModel()">Edit</button>
+                  @if (isTemplateType(selectedModel()!.modelTypeId)) {
+                    <button (click)="onExecuteTemplate(selectedModel()!, true)">
+                      <i class="pi pi-eye"></i> Preview
                     </button>
-                  </ng-template>
-                </p-dialog>
-              </p-tabpanels>
-            </p-tabs>
+                    <button (click)="onExecuteTemplate(selectedModel()!, false)">
+                      <i class="pi pi-play"></i> Execute
+                    </button>
+                  }
+                </div>
+              </div>  
+            </div>
+            
+            <div class="info-grid">
+              <p><strong>ID:</strong> {{ selectedModel()!.id }}; 
+                  <strong>Rank:</strong> {{ selectedModel()!.rank }};
+                  <strong>Name:</strong> {{ selectedModel()!.name }}</p>
+              <p><strong>Type:</strong> {{ selectedModel()!.modelTypeName }};
+                  <strong>Created:</strong> {{ selectedModel()!.createdDate | date:'medium' }};
+                  <strong>Modified:</strong> {{ selectedModel()!.modifiedDate | date:'medium' }}</p>
+              <!-- Monaco showing template result -->
+              @if (isTemplateType(selectedModel()!.modelTypeId) && previewCode()) {
+                <div class="template-preview">
+                  <h3>Generated Code: {{ previewFileName() }}</h3>
+                  <app-file-viewer
+                    [fileName]="previewFileName"
+                    [fileContent]="previewCode"
+                    [loading]="previewLoading"
+                    [error]="previewError"
+                    style="height: 500px; display: block;">
+                  </app-file-viewer>
+                </div>
+              } @else if (selectedModel()!.code) {
+                <!-- Show template source if no preview yet -->
+                <div class="template-source">
+                  <h3>Template Source</h3>
+                  <pre>{{ selectedModel()!.code }}</pre>
+                </div>
+              }                    
+            </div> 
+                
+
           } @else {
             <!-- NO SELECTION -->
             <div class="placeholder">

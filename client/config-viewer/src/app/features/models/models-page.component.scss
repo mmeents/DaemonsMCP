@@ -354,3 +354,50 @@
   padding-top: 1rem;
   border-top: 1px solid var(--surface-border);
 }
+
+.split-pane {
+  display: flex;
+  height: calc(100vh - 100px);
+  gap: 10px;
+}
+
+.left-panel {
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  
+  .tree-section {
+    flex: 1;
+    min-height: 300px;
+    overflow: auto;
+  }
+  
+  .properties-section {
+    border-top: 2px solid var(--surface-border);
+    max-height: 400px;
+    
+    .properties-content {
+      overflow-y: auto;
+      max-height: 350px;
+    }
+  }
+}
+
+.details-panel {
+  flex: 1;
+  overflow: auto;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: var(--surface-ground);
+  border-bottom: 1px solid var(--surface-border);
+  
+  h2, h3 {
+    margin: 0;
+  }
+}
