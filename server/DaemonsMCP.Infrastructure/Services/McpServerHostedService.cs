@@ -1,11 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
 using MCPSharp;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DaemonsMCP.Domain.Extensions;
 using DaemonsMCP.Infrastructure.Tools;
 using DaemonsMCP.Domain.Constants;
@@ -38,6 +33,7 @@ namespace DaemonsMCP.Infrastructure.Services {
       MCPServer.Register<ObjectHierarchyTools>();
       MCPServer.Register<ItemTools>();
       MCPServer.Register<ItemTypeTools>();
+      MCPServer.Register<ModelTools>();
 
       // Start MCPSharp server - blocks until cancellation
       await MCPServer.StartAsync(Cx.AppName, Cx.AppVersion);

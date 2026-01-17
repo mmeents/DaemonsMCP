@@ -62,11 +62,6 @@ export class ModelsService extends ApiService {
     return this.delete<{success: boolean}>(`/api/models/properties/${propertyId}`);
   }
 
-  // Get all model types
-  getAllModelTypes(): Observable<ModelTypeDto[]> {
-    return this.get<ModelTypeDto[]>('/api/modeltypes/all');
-  }
-
   // Get editor types
   getEditorTypes(): Observable<ModelTypeDto[]> {
     return this.get<ModelTypeDto[]>('/api/modeltypes/editors');

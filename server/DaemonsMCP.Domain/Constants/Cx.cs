@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,6 +64,17 @@ namespace DaemonsMCP.Domain.Constants {
 
     public const string SaveProjectRepoCmd = "save-project-repo";
 
+    // Models 
+    public const string SearchModelsCmd = "search-models";
+    public const string GetModelCmd = "get-model";
+    public const string AddUpdateModelCmd = "add-update-model";
+    public const string AddUpdateModelPropertyCmd = "add-update-model-property";
+    public const string GetModelTypeCmd = "get-model-type";
+    public const string AddUpdateModelTypeCmd = "add-update-model-type";    
+    public const string DeleteModelCmd = "delete-model";
+    public const string DeleteModelPropertyCmd = "delete-model-property";
+
+
 
     // Tool descriptions
     public const string ListProjectsDesc = "Gets list of available projects. A project is the configured name and the root folder allowed to access.";
@@ -116,8 +128,21 @@ namespace DaemonsMCP.Domain.Constants {
     public const string RestoreAsTodoCmdDesc = "Restore todo status as Not Started. to be used with get-next-todo to abort the todo.";
     public const string MarkTodoCancelCmdDesc = "Marks todo as cancelled. To be used with get-next-todo to mark cancelled status when task is abandoned. That is it sets Nodes Status to Cancelled, and Markes the completed date.";
 
+
+    public const string SearchModelsCmdDesc = "Search models command, searches recursively maxDepth deep. Models are hierarchical trees with configurable properties.";
+    public const string GetModelCmdDesc = "Get model command retrieves a model by its ID.";
+    public const string AddUpdateModelCmdDesc = "Add update model command adds or updates a model.";
+    public const string AddUpdateModelPropertyCmdDesc = "Add update model property command, adds or updates a property of a model.";
+
+    public const string GetModelTypeCmdDesc = "Get model type command retrieves the type of a model.";
+    public const string AddUpdateModelTypeCmdDesc = "Add update model type command adds or updates the type of a model.";
+    
+    public const string DeleteModelCmdDesc = "Delete model command deletes a model.";
+    public const string DeleteModelPropertyCmdDesc = "Delete model property command deletes a property of a model.";
+
+
     // Tool parameter descriptions
-    public const string ProjectParamDesc = $"The configured projectId that were working in.";
+    public const string ProjectParamDesc = "The configured projectId that were working in.";
     public const string FileSystemNodeIdParamDesc = "The int fileSystemNodeId of the File to get.";
     public const string SearchFilterParamDesc = "Search filter to apply, uses string.Contains c# filtering on file or folder names in ef core.";
     public const string SearchIncludeDirectoriesDesc = "bool should results include directories";
@@ -180,6 +205,36 @@ namespace DaemonsMCP.Domain.Constants {
     public const string ListNameParamDesc = "Requires. The name of the todo list, corresponds to Nodes.Name of a Nodes with Type 'Todo'.";
     public const string ItemsParamDesc = "The list of items to add to the todo list as child Nodes of the list.";
     public const string ItemIdParamDesc = $"The int Id of the todo item node to mark done or restore. Additionally you could use this Id with {Cx.GetItemByIdCmd}. ";
+
+    public const string SearchModelProjectIdParamDesc = "The int Id of the project to search within. daemonsmcp is allowing sets of models by project, so it's required.";
+    public const string SearchModelParentIdParamDesc = "The int Id of the parent model to filter by, or null for all.";
+    public const string SearchModelTypeIdParamDesc = "The int Id of the model type to filter by, or null for all.";
+    public const string SearchModelNameFilterParamDesc = "Filter models by name.";
+    public const string SearchModelMaxDepthParamDesc = "The max depth to recurse when listing models. Default is 1 (immediate children only). 2 returns children and grandchildren. 0 returns only parent models without children.";
+    public const string SearchModelIncludePropertiesParamDesc = "Whether to include model properties in the results.";
+
+    public const string GetModelParamDesc = "The int Id of the model to get.";
+    public const string GetModelMaxDepthParamDesc = "The max depth to recurse when getting the model. Default is 1 (immediate children only). 2 returns children and grandchildren. 0 returns only the model without children.";
+    public const string GetModelIncludePropertiesParamDesc = "Whether to include model properties in the result.";    
+
+    public const string AddUpdateModelIdParamDesc = "The int Id of the model to add or update. Use 0 to add a new model.";
+    public const string AddUpdateModelProjectIdParamDesc = "The int Id of the project to add or update the model in.";
+    public const string AddUpdateModelParentIdParamDesc = "The int Id of the parent model to add or update the model under, or null for no parent(only really for root template or api or database models).";
+    public const string AddUpdateModelTypeIdParamDesc = "The int Id of the model type to add or update.";
+    public const string AddUpdateModelNameParamDesc = "The name of the model.";
+    public const string AddUpdateModelRankParamDesc = "The rank (order) of the model among its siblings.";
+    public const string AddUpdateModelCodeParamDesc = "The code of the model, if the model is a template type then its scriban script.";
+
+    
+    public const string AddUpdateModelPropertyIdParamDesc = "The int Id of the model property to add or update. Use 0 to add a new property.";
+    public const string AddUpdateModelPropertyModelIdParamDesc = "The int Id of the model the property belongs to.";
+    public const string AddUpdateModelPropertyKeyParamDesc = "The key of the model property.";
+    public const string AddUpdateModelPropertyValueParamDesc = "The value of the model property. always string.";
+    public const string AddUpdateModelPropertyValueTypeIdParamDesc = "The int Id of the model property type. always int reference to ModelTypeId or ModelId depending on owner model type. note: config editor UI does not get access to this column.";
+
+    public const string DeleteModelIdParamDesc = "The int Id of the model to delete.";
+    public const string DeleteModelPropertyIdParamDesc = "The int Id of the model property to delete.";
+
 
     // Well-known ItemType IDs (must match seed data in ItemTypeConfiguration)
     public const int ItemTypeIdNone = 1;
