@@ -23,6 +23,9 @@ namespace DaemonsMCP.Infrastructure.Persistence.Configurations {
       builder.Property(p => p.PropertyValueTypeId)
         .IsRequired(false);
 
+      builder.Property(p => p.PropertyEditorTypeId)
+        .IsRequired(false);
+
       // Unique constraint on ModelId + PropertyKey
       builder.HasIndex(p => new { p.ModelId, p.PropertyKey })
           .IsUnique();
@@ -36,10 +39,18 @@ namespace DaemonsMCP.Infrastructure.Persistence.Configurations {
           .OnDelete(DeleteBehavior.Restrict)
           .IsRequired(false);
 
+      builder.HasOne(p => p.PropertyEditorType)
+          .WithMany()
+          .HasForeignKey(p => p.PropertyEditorTypeId)
+          .OnDelete(DeleteBehavior.Restrict)
+          .IsRequired(false);
+
+
       // Indexes
       builder.HasIndex(p => p.ModelId);
       builder.HasIndex(p => p.PropertyKey);
       builder.HasIndex(p => p.PropertyValueTypeId);
+      builder.HasIndex(p => p.PropertyEditorTypeId);
     }
   }
 }

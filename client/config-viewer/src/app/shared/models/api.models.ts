@@ -353,6 +353,8 @@ export interface ModelPropertyDto {
   propertyValue?: string;
   propertyValueTypeId?: number;
   propertyValueTypeName?: string;
+  propertyEditorTypeId?: number;
+  propertyEditorTypeName?: string;
 }
 
 export interface ModelTypeDto {
@@ -385,6 +387,7 @@ export interface AddUpdateModelPropertyRequest {
   propertyKey: string;
   propertyValue?: string;
   propertyValueTypeId?: number;
+  propertyEditorTypeId?: number;
 }
 
 export interface SearchModelsParams {

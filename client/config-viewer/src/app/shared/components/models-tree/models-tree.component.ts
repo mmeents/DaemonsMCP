@@ -24,6 +24,7 @@ export class ModelsTreeComponent implements OnInit, OnChanges {
   @Output() modelAdd = new EventEmitter<{ parent: ModelDto | null; modelTypeId?: number }>();
   @Output() modelEdit = new EventEmitter<ModelDto>();
   @Output() modelDelete = new EventEmitter<ModelDto>();
+  @Output() importTable = new EventEmitter<ModelDto>();
 
   @ViewChild('cm') contextMenu!: ContextMenu;
   private modelsService = inject(ModelsService);
@@ -166,6 +167,13 @@ export class ModelsTreeComponent implements OnInit, OnChanges {
     }));
   }
 
+  private onImportTable() {
+    if (this.selectedNodeForContext) {
+      const parentModel = this.selectedNodeForContext.data as ModelDto;
+      this.importTable.emit(parentModel);
+    }
+  }
+
   onNodeContextMenu(event: any) {
     console.log('nNodeContextMenu CurretContext:', this.selectedNodeForContext);
     
@@ -190,6 +198,15 @@ export class ModelsTreeComponent implements OnInit, OnChanges {
           command: () => this.onAddChildWithType(type.id)
         });
       });
+      
+      if (modelTypeId === Mte.TablesModel) {  // Tables folder
+        this.nodeContextMenuItems.push({ separator: true });
+        this.nodeContextMenuItems.push({
+          label: 'Import Table',
+          icon: 'pi pi-upload',
+          command: () => this.onImportTable()
+        });
+      }
       
       // Always allow edit
       if (this.nodeContextMenuItems.length > 0) {

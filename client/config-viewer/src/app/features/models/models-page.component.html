@@ -38,6 +38,7 @@
               (modelAdd)="onNewModel($event)"
               (modelEdit)="onEditModel($event)"
               (modelDelete)="onDeleteModel($event)"
+              (importTable)="onImportTable($event)" 
             >
             </app-models-tree>
             
@@ -53,13 +54,51 @@
                 <p><i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: var(--orange-500); margin-right: 1rem;"></i>
                   Delete "{{ modelToDelete?.name }}"?</p>
                 <p>This will permanently delete the model and all its children.</p>
-              </div>
+              </div>             
               
               <ng-template pTemplate="footer">
                 <button class="btn-secondary" (click)="cancelDelete()">Cancel</button>
                 <button class="btn-primary" (click)="confirmDelete()">Delete</button>
               </ng-template>
             </p-dialog>
+
+            <p-dialog 
+                [(visible)]="showImportTableDialog" 
+                [modal]="true" 
+                [style]="{width: '600px'}"
+                header="Import Table from SQL">
+                
+                <div class="p-fluid">
+                  <label for="sqlInput">Paste CREATE TABLE statement:</label>
+                  <textarea 
+                    id="sqlInput"
+                    rows="15" 
+                    [(ngModel)]="importTableSql"
+                    placeholder="CREATE TABLE MyTable (
+  Id INT PRIMARY KEY IDENTITY(1,1),
+  Name NVARCHAR(100) NOT NULL,
+  ...
+)"
+                    style="font-family: monospace; width: 100%;">
+                  </textarea>
+                </div>
+                
+                <ng-template pTemplate="footer">
+                  <button 
+                    type="button" 
+                    (click)="cancelImportTable()" 
+                    label="Cancel">
+                    Cancel
+                  </button>
+                  <button 
+                    type="button" 
+                    (click)="confirmImportTable()" 
+                    label="Import"
+                    [disabled]="!importTableSql().trim()">
+                    Import
+                  </button>
+                </ng-template>
+              </p-dialog>
           </div>
         </div>
         <!-- Bottom: Properties (collapsible panel, not tab) -->
@@ -112,7 +151,7 @@
                           class="prop-input"
                         >
                           <option value="">-- Select --</option>
-                          @for (modelOption of getTargetModelOptions(selectedModel()!); track modelOption.id) {
+                          @for (modelOption of getTargetModelOptions(prop.propertyValueTypeId!); track modelOption.id) {
                             <option [value]="modelOption.id">{{ modelOption.name }}</option>
                           }
                         </select>
@@ -308,26 +347,40 @@
                   <strong>Created:</strong> {{ selectedModel()!.createdDate | date:'medium' }};
                   <strong>Modified:</strong> {{ selectedModel()!.modifiedDate | date:'medium' }}</p>
               <!-- Monaco showing template result -->
-              @if (isTemplateType(selectedModel()!.modelTypeId) && previewCode()) {
-                <div class="template-preview">
-                  <h3>Generated Code: {{ previewFileName() }}</h3>
-                  <app-file-viewer
-                    [fileName]="previewFileName"
-                    [fileContent]="previewCode"
-                    [loading]="previewLoading"
-                    [error]="previewError"
-                    style="height: 500px; display: block;">
-                  </app-file-viewer>
-                </div>
-              } @else if (selectedModel()!.code) {
-                <!-- Show template source if no preview yet -->
-                <div class="template-source">
-                  <h3>Template Source</h3>
-                  <pre>{{ selectedModel()!.code }}</pre>
-                </div>
-              }                    
-            </div> 
-                
+               @if (selectedModel() && (isTemplateType(selectedModel()!.modelTypeId) || isTableModelType(selectedModel()!.modelTypeId))) {
+              <p-tabs>
+                <p-tablist>
+                  <p-tab [value]="0">Source</p-tab>
+                  <p-tab [value]="1">Preview</p-tab>                  
+                </p-tablist>
+                <p-tabpanels>
+                  <p-tabpanel [value]="0">
+                    <textarea 
+                      [(ngModel)]="selectedModel()!.code"
+                      rows="20"
+                      style="width: 100%; font-family: monospace;">
+                    </textarea>
+                  </p-tabpanel>
+                  
+                  <p-tabpanel [value]="1">
+                    @if (previewCode()) {
+                      <app-file-viewer
+                        [fileName]="previewFileName"
+                        [fileContent]="previewCode"
+                        [loading]="previewLoading"
+                        [error]="previewError"
+                        style="height: 500px; display: block;">
+                      </app-file-viewer>
+                    } @else {
+                      <div class="empty-preview">
+                        <p>No preview available. Click a table or template to generate preview.</p>
+                      </div>
+                    }
+                  </p-tabpanel>
+                </p-tabpanels>
+              </p-tabs>
+            }                                             
+            </div>                 
 
           } @else {
             <!-- NO SELECTION -->

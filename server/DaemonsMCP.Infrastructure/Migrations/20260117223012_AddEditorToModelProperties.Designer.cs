@@ -4,6 +4,7 @@ using DaemonsMCP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DaemonsMCP.Infrastructure.Migrations
 {
     [DbContext(typeof(DaemonsMcpDbContext))]
-    partial class DaemonsMcpDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260117223012_AddEditorToModelProperties")]
+    partial class AddEditorToModelProperties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,7 +91,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
 
                     b.HasIndex("Expires", "UsedUrl");
 
-                    b.ToTable("AccessTokens", (string)null);
+                    b.ToTable("AccessTokens");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.FileSystemNode", b =>
@@ -145,7 +148,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.HasIndex("ProjectId", "RelativePath")
                         .IsUnique();
 
-                    b.ToTable("FileSystemNodes", (string)null);
+                    b.ToTable("FileSystemNodes");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.GitBranch", b =>
@@ -336,7 +339,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Identifiers", (string)null);
+                    b.ToTable("Identifiers");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.IdentifierType", b =>
@@ -357,7 +360,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("IdentifierTypes", (string)null);
+                    b.ToTable("IdentifierTypes");
 
                     b.HasData(
                         new
@@ -447,7 +450,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
 
                     b.HasIndex("Status", "CreatedAt");
 
-                    b.ToTable("IndexQueues", (string)null);
+                    b.ToTable("IndexQueues");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.InvitationToken", b =>
@@ -567,7 +570,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
 
                     b.HasIndex("ParentId", "Rank");
 
-                    b.ToTable("Items", (string)null);
+                    b.ToTable("Items");
 
                     b.HasData(
                         new
@@ -626,7 +629,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
 
                     b.HasIndex("ParentId", "Rank");
 
-                    b.ToTable("ItemTypes", (string)null);
+                    b.ToTable("ItemTypes");
 
                     b.HasData(
                         new
@@ -776,7 +779,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
 
                     b.HasIndex("ProjectId", "ParentId", "Rank");
 
-                    b.ToTable("Models", (string)null);
+                    b.ToTable("Models");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.ModelProperty", b =>
@@ -818,7 +821,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.HasIndex("ModelId", "PropertyKey")
                         .IsUnique();
 
-                    b.ToTable("ModelProperties", (string)null);
+                    b.ToTable("ModelProperties");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.ModelType", b =>
@@ -2170,7 +2173,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
 
                     b.HasIndex("ProjectId", "ParentId");
 
-                    b.ToTable("ObjectHierarchies", (string)null);
+                    b.ToTable("ObjectHierarchies");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.Project", b =>
@@ -2201,7 +2204,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.Setting", b =>
@@ -2237,7 +2240,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
                     b.HasIndex("Key")
                         .IsUnique();
 
-                    b.ToTable("Settings", (string)null);
+                    b.ToTable("Settings");
 
                     b.HasData(
                         new
@@ -2334,7 +2337,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
 
                     b.HasIndex("IsActive");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("DaemonsMCP.Domain.Entities.UserCredential", b =>

@@ -127,6 +127,21 @@ namespace DaemonsMCP.Domain.Enums {
 
   public static class ModelPropExt {
 
+    public static bool IsTemplate(this Mte modelType) {
+      int type = (int)modelType;
+      if (type < 400 || type >= 500) {
+        return false;
+      }      
+      return true;
+    }
+
+    public static bool IsModel(this Mte modelType) {
+      int type = (int)modelType;
+      if (type >= 400 || type <= 200) { // server is hidden and not an option to be a model.
+        return false;
+      }
+      return true;
+    }
     public static List<ModelPropertyDto> GetDefaultPropertiesByModelId(int modelTypeId) {
       if (DefaultProps.ContainsKey((Mte)modelTypeId)) {
         // Return a deep copy of each property
@@ -134,7 +149,8 @@ namespace DaemonsMCP.Domain.Enums {
           .Select(p => new ModelPropertyDto {
             PropertyKey = p.PropertyKey,
             PropertyValue = p.PropertyValue,
-            PropertyValueTypeId = p.PropertyValueTypeId
+            PropertyValueTypeId = p.PropertyValueTypeId,
+            PropertyEditorTypeId = p.PropertyEditorTypeId
           })
           .ToList();
       }
@@ -146,7 +162,7 @@ namespace DaemonsMCP.Domain.Enums {
       {
         Mte.DatabaseModel, 
         new List<ModelPropertyDto>(){ 
-            new ModelPropertyDto { PropertyKey = "ConnectionString", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType }
+            new ModelPropertyDto { PropertyKey = "ConnectionString", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor }
         } 
       }, // 210 DatabaseModel  
       {
@@ -156,18 +172,19 @@ namespace DaemonsMCP.Domain.Enums {
       {
         Mte.TableModel,
         new List<ModelPropertyDto> {
-            new ModelPropertyDto { PropertyKey = "Schema", PropertyValue = "dbo", PropertyValueTypeId=(int)Mte.SqlVarcharType },
-            new ModelPropertyDto { PropertyKey = "DisplayName", PropertyValue = "", PropertyValueTypeId=(int)Mte.SqlVarcharType }
+            new ModelPropertyDto { PropertyKey = "Schema", PropertyValue = "dbo", PropertyValueTypeId=(int)Mte.SqlVarcharType, PropertyEditorTypeId=(int)Mte.StringEditor },
+            new ModelPropertyDto { PropertyKey = "DisplayName", PropertyValue = "", PropertyValueTypeId=(int)Mte.SqlVarcharType, PropertyEditorTypeId=(int)Mte.StringEditor }
           }
       }, // 222 TableModel
       { 
         Mte.TableColumnModel, 
         new List<ModelPropertyDto> {            
-            new ModelPropertyDto { PropertyKey = "ColumnType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.SqlTypes },
-            new ModelPropertyDto { PropertyKey = "IsPrimaryKey", PropertyValue = "0", PropertyValueTypeId=(int)Mte.SqlBitType },
-            new ModelPropertyDto { PropertyKey = "IsIndexed", PropertyValue = "0", PropertyValueTypeId=(int)Mte.SqlBitType },
-            new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-            new ModelPropertyDto { PropertyKey = "MaxLength", PropertyValue = "100", PropertyValueTypeId=(int)Mte.SqlIntType },            
+            new ModelPropertyDto { PropertyKey = "ColumnType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.SqlTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+            new ModelPropertyDto { PropertyKey = "IsPrimaryKey", PropertyValue = "0", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+            new ModelPropertyDto { PropertyKey = "IsIndexed", PropertyValue = "0", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+            new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+            new ModelPropertyDto { PropertyKey = "MaxLength", PropertyValue = "100", PropertyValueTypeId=(int)Mte.SqlIntType, PropertyEditorTypeId=(int)Mte.StringEditor },
+            new ModelPropertyDto { PropertyKey = "ForeignKey", PropertyValue = "", PropertyValueTypeId=(int)Mte.TableColumnModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor }
         }
       }, // 226 TableColumnModel
       {
@@ -177,16 +194,16 @@ namespace DaemonsMCP.Domain.Enums {
       {
           Mte.ViewModel,
           new List<ModelPropertyDto> {
-              new ModelPropertyDto { PropertyKey = "Schema", PropertyValue = "dbo", PropertyValueTypeId=(int)Mte.SqlVarcharType },
-              new ModelPropertyDto { PropertyKey = "DisplayName", PropertyValue = "", PropertyValueTypeId=(int)Mte.SqlVarcharType }
+              new ModelPropertyDto { PropertyKey = "Schema", PropertyValue = "dbo", PropertyValueTypeId=(int)Mte.SqlVarcharType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "DisplayName", PropertyValue = "", PropertyValueTypeId=(int)Mte.SqlVarcharType, PropertyEditorTypeId=(int)Mte.StringEditor }
           }
       }, // 232 ViewModel
       {
           Mte.ViewColumnModel,
           new List<ModelPropertyDto> {
-              new ModelPropertyDto { PropertyKey = "ColumnType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.SqlTypes },
-              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-              new ModelPropertyDto { PropertyKey = "MaxLength", PropertyValue = "100", PropertyValueTypeId=(int)Mte.SqlIntType },
+              new ModelPropertyDto { PropertyKey = "ColumnType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.SqlTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "MaxLength", PropertyValue = "100", PropertyValueTypeId=(int)Mte.SqlIntType, PropertyEditorTypeId=(int)Mte.StringEditor },
           }
       }, // 236 ViewColumnModel
       {
@@ -203,9 +220,9 @@ namespace DaemonsMCP.Domain.Enums {
       {
           Mte.FunctionParameterModel,
           new List<ModelPropertyDto> {
-              new ModelPropertyDto { PropertyKey = "ParameterType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.SqlTypes },
-              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-              new ModelPropertyDto { PropertyKey = "MaxLength", PropertyValue = "100", PropertyValueTypeId=(int)Mte.SqlIntType },
+              new ModelPropertyDto { PropertyKey = "ParameterType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.SqlTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "MaxLength", PropertyValue = "100", PropertyValueTypeId=(int)Mte.SqlIntType, PropertyEditorTypeId=(int)Mte.StringEditor },
           }
       }, // 246 FunctionParameterModel
       {
@@ -215,105 +232,110 @@ namespace DaemonsMCP.Domain.Enums {
       {
           Mte.ProcedureModel,
           new List<ModelPropertyDto> {
-              new ModelPropertyDto { PropertyKey = "Schema", PropertyValue = "dbo", PropertyValueTypeId=(int)Mte.SqlVarcharType },
-              new ModelPropertyDto { PropertyKey = "DisplayName", PropertyValue = "", PropertyValueTypeId=(int)Mte.SqlVarcharType }
+              new ModelPropertyDto { PropertyKey = "Schema", PropertyValue = "dbo", PropertyValueTypeId=(int)Mte.SqlVarcharType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "DisplayName", PropertyValue = "", PropertyValueTypeId=(int)Mte.SqlVarcharType, PropertyEditorTypeId=(int)Mte.StringEditor }
           }
       }, // 252 ProcedureModel
       {
           Mte.ProcedureParameterModel,
           new List<ModelPropertyDto> {
-              new ModelPropertyDto { PropertyKey = "ParameterType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.SqlTypes },
-              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-              new ModelPropertyDto { PropertyKey = "MaxLength", PropertyValue = "100", PropertyValueTypeId=(int)Mte.SqlIntType },
+              new ModelPropertyDto { PropertyKey = "ParameterType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.SqlTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "MaxLength", PropertyValue = "100", PropertyValueTypeId=(int)Mte.SqlIntType, PropertyEditorTypeId=(int)Mte.StringEditor },
           }
       }, // 256 ProcedureParameterModel
 
       { Mte.ApiModel, 
         new List<ModelPropertyDto>() {
-              new ModelPropertyDto { PropertyKey = "Namespace", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },           
+              new ModelPropertyDto { PropertyKey = "Namespace", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },           
           }
       }, // 300 ApiModel
       { Mte.InterfaceModel, 
         new List<ModelPropertyDto>() {              
-              new ModelPropertyDto { PropertyKey = "BaseType", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
+              new ModelPropertyDto { PropertyKey = "BaseType", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
         }
       }, // 301 InterfaceModel
       { Mte.InterfacePropertyModel, 
         new List<ModelPropertyDto>() {
-              new ModelPropertyDto { PropertyKey = "PropertyType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes },
-              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
+              new ModelPropertyDto { PropertyKey = "PropertyType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
           }
       }, // 302 InterfacePropertyModel
       { Mte.InterfaceMethodModel, 
-        new List<ModelPropertyDto>() {              
-              new ModelPropertyDto { PropertyKey = "ReturnType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes },                            
+        new List<ModelPropertyDto>() {
+              new ModelPropertyDto { PropertyKey = "ReturnType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },                            
           }
       }, // 304 InterfaceMethodModel
       { Mte.InterfaceMethodParameterModel, 
         new List<ModelPropertyDto>() {
-              new ModelPropertyDto { PropertyKey = "ParameterType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes },
-              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },              
+              new ModelPropertyDto { PropertyKey = "ParameterType", PropertyValue = "103", PropertyValueTypeId =(int)Mte.CSharpTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
           }
       }, // 306 InterfaceMethodParameterModel
       { Mte.ControllerModel, 
         new List<ModelPropertyDto>()  {
-              new ModelPropertyDto { PropertyKey = "Namespace", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-              new ModelPropertyDto { PropertyKey = "BaseType", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-              new ModelPropertyDto { PropertyKey = "Interface", PropertyValue = "", PropertyValueTypeId=(int)Mte.InterfaceModel },
+              new ModelPropertyDto { PropertyKey = "Namespace", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "BaseType", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "Interface", PropertyValue = "", PropertyValueTypeId=(int)Mte.InterfaceModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
           }
       }, // 310 ControllerModel
       { Mte.ControllerPropertyModel, 
           new List<ModelPropertyDto>(){
-              new ModelPropertyDto { PropertyKey = "PropertyType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes },
-              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
+              new ModelPropertyDto { PropertyKey = "PropertyType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
           }
       }, // 312 ControllerPropertyModel
       { Mte.ControllerMethodModel, 
           new List<ModelPropertyDto>() {
-              new ModelPropertyDto { PropertyKey = "HttpMethod", PropertyValue = "52", PropertyValueTypeId=(int)Mte.HttpMethod },
-              new ModelPropertyDto { PropertyKey = "AccessModifier", PropertyValue = "62", PropertyValueTypeId=(int)Mte.CSharpAccessModifiers },
-              new ModelPropertyDto { PropertyKey = "ReturnType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes },
-              new ModelPropertyDto { PropertyKey = "IsAsync", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
-              new ModelPropertyDto { PropertyKey = "IsVirtual", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
-              new ModelPropertyDto { PropertyKey = "IsStatic", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
-              new ModelPropertyDto { PropertyKey = "IsAbstract", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
-              new ModelPropertyDto { PropertyKey = "IsSealed", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
+              new ModelPropertyDto { PropertyKey = "HttpMethod", PropertyValue = "52", PropertyValueTypeId=(int)Mte.HttpMethod, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "AccessModifier", PropertyValue = "62", PropertyValueTypeId=(int)Mte.CSharpAccessModifiers, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "ReturnType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "ReturnRefName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "IsAsync", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "IsVirtual", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "IsStatic", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "IsAbstract", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "IsSealed", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
           }
       }, // 314 ControllerMethodModel
       { Mte.ControllerMethodParameterModel, 
           new List<ModelPropertyDto>() {
-              new ModelPropertyDto { PropertyKey = "ParameterType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes },
-              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },              
+              new ModelPropertyDto { PropertyKey = "ParameterType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "ParameterRefName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },              
           }
       }, // 316 ControllerMethodParameterModel
       { Mte.ClassModel, 
         new List<ModelPropertyDto>()  {
-              new ModelPropertyDto { PropertyKey = "Namespace", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-              new ModelPropertyDto { PropertyKey = "BaseType", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-              new ModelPropertyDto { PropertyKey = "Interface", PropertyValue = "", PropertyValueTypeId=(int)Mte.InterfaceModel },
+              new ModelPropertyDto { PropertyKey = "Namespace", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "BaseType", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "Interface", PropertyValue = "", PropertyValueTypeId=(int)Mte.InterfaceModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
           }
       }, // 320 ClassModel
       { Mte.ClassPropertyModel, 
           new List<ModelPropertyDto>() {
-              new ModelPropertyDto { PropertyKey = "PropertyType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes },
-              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },              
+              new ModelPropertyDto { PropertyKey = "PropertyType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "PropertyTypeRefName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },              
           }
       }, // 322 ClassPropertyModel
       { Mte.ClassMethodModel, 
           new List<ModelPropertyDto>() {
-              new ModelPropertyDto { PropertyKey = "AccessModifier", PropertyValue = "62", PropertyValueTypeId=(int)Mte.CSharpAccessModifiers },
-              new ModelPropertyDto { PropertyKey = "ReturnType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes },
-              new ModelPropertyDto { PropertyKey = "IsAsync", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
-              new ModelPropertyDto { PropertyKey = "IsVirtual", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
-              new ModelPropertyDto { PropertyKey = "IsStatic", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
-              new ModelPropertyDto { PropertyKey = "IsAbstract", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
-              new ModelPropertyDto { PropertyKey = "IsSealed", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },
+              new ModelPropertyDto { PropertyKey = "AccessModifier", PropertyValue = "62", PropertyValueTypeId=(int)Mte.CSharpAccessModifiers, PropertyEditorTypeId =(int) Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "ReturnType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "ReturnTypeRefName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "IsAsync", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "IsVirtual", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "IsStatic", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "IsAbstract", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+              new ModelPropertyDto { PropertyKey = "IsSealed", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
           }
       }, // 324 ClassMethodModel
       { Mte.ClassMethodParameterModel, 
           new List<ModelPropertyDto>() {
-              new ModelPropertyDto { PropertyKey = "ParameterType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes },
-              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType },              
+              new ModelPropertyDto { PropertyKey = "ParameterType", PropertyValue = "103", PropertyValueTypeId=(int)Mte.CSharpTypes, PropertyEditorTypeId=(int)Mte.LookupTypeEditor },
+              new ModelPropertyDto { PropertyKey = "ParameterTypeRefName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+              new ModelPropertyDto { PropertyKey = "IsNullable", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor },              
           }
       }, // 326 ClassMethodParameterModel
       #endregion
@@ -321,125 +343,125 @@ namespace DaemonsMCP.Domain.Enums {
       {
         Mte.RootTemplate,        
         new List<ModelPropertyDto>(){ 
-           new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-            new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-            new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+           new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+            new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+            new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       }, // 400 RootTemplate
       { 
         Mte.FolderTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
-        } 
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
+        }
       }, // 402 FolderTemplate
       { Mte.DatabaseTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Database", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },          
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }          
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Database", PropertyValue = "", PropertyValueTypeId=(int)Mte.DatabaseModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },          
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       }, // 410 DatabaseTemplate
       {Mte.ApiTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Api", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Api", PropertyValue = "", PropertyValueTypeId=(int)Mte.ApiModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       }, // 412 ApiTemplate
       { Mte.TablesTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Tables", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Tables", PropertyValue = "", PropertyValueTypeId=(int)Mte.TablesModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       }, // 420 TablesTemplate
       { Mte.ViewsTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Views", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId =(int) Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Views", PropertyValue = "", PropertyValueTypeId=(int)Mte.ViewsModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       }, // 422 ViewsTemplate      
       { Mte.FunctionsTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Functions", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId =(int) Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Functions", PropertyValue = "", PropertyValueTypeId=(int)Mte.FunctionsModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       }, // 424 FunctionsTemplate
       { Mte.ProceduresTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Procedures", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId =(int) Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Procedures", PropertyValue = "", PropertyValueTypeId=(int)Mte.ProcedureModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       }, // 426 ProceduresTemplate
       {
         Mte.TableTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Table", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId =(int) Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Table", PropertyValue = "", PropertyValueTypeId=(int)Mte.TableModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       }, // 430 TableTemplate
       {
         Mte.ViewTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "View", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId =(int) Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "View", PropertyValue = "", PropertyValueTypeId=(int)Mte.ViewModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
-      }, // 432 ViewTemplate
+      }, // 432 ViewTemplate, PropertyEditorTypeId =(int) Mte.BooleanEditor
       {
           Mte.FunctionTemplate,
           new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Function", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId =(int) Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Function", PropertyValue = "", PropertyValueTypeId=(int)Mte.FunctionModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId =(int) Mte.BooleanEditor }
           }
       }, // 434 FunctionTemplate
       {
           Mte.ProcedureTemplate,
           new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Procedure", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Procedure", PropertyValue = "", PropertyValueTypeId=(int)Mte.ProcedureModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
           }
       }, // 436 ProcedureTemplate
       { Mte.InterfaceTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Interface", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Interface", PropertyValue = "", PropertyValueTypeId=(int)Mte.InterfaceModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       }, // 440 InterfaceTemplate
       { Mte.ControllerTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Controller", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Controller", PropertyValue = "", PropertyValueTypeId=(int)Mte.ControllerModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       }, // 442 ControllerMethodModel
       { Mte.ClassTemplate,
         new List<ModelPropertyDto>() {
-          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType },
-          new ModelPropertyDto { PropertyKey = "Class", PropertyValue = "", PropertyValueTypeId=(int)Mte.LookupModelEditor },
-          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType },
-          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.SqlBitType }
+          new ModelPropertyDto { PropertyKey = "IsActive", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId =(int) Mte.BooleanEditor },
+          new ModelPropertyDto { PropertyKey = "Class", PropertyValue = "", PropertyValueTypeId=(int)Mte.ClassModel, PropertyEditorTypeId=(int)Mte.LookupModelEditor },
+          new ModelPropertyDto { PropertyKey = "RelativeFileName", PropertyValue = "", PropertyValueTypeId=(int)Mte.CSharpStringType, PropertyEditorTypeId=(int)Mte.StringEditor },
+          new ModelPropertyDto { PropertyKey = "OverwriteExistingFiles", PropertyValue = "1", PropertyValueTypeId=(int)Mte.CSharpBoolType, PropertyEditorTypeId=(int)Mte.BooleanEditor }
         }
       } // 444 ClassTemplate
       #endregion 

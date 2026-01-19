@@ -8,8 +8,10 @@ using DaemonsMCP.Application.ModelTypes.Queries.GetEditorTypes;
 using DaemonsMCP.Application.ModelTypes.Queries.GetProjectTemplates;
 using DaemonsMCP.Application.ModelTypes.Queries.GetSqlDataTypes;
 using DaemonsMCP.Application.ModelTypes.Queries.GetValidChildTypes;
+using DaemonsMCP.Application.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 
 namespace DaemonsMCP.Api.Extensions {
   public static class ModelsEndpointExt {
@@ -152,6 +154,14 @@ namespace DaemonsMCP.Api.Extensions {
           }
         })
       .WithName("DeleteModelProperty");
+
+      app.MapPost("/api/models/import-table", async (
+        [FromBody] ImportTableRequest request,
+        IMediator mediator) => {
+        var command = new ImportTableCommand(request.ParentId, request.SqlStatement);
+        var result = await mediator.Send(command);
+        return Results.Ok(result);
+      });
 
       // ModelTypes endpoints
       app.MapGet("/api/modeltypes/all", async (

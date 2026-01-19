@@ -7,9 +7,7 @@
   }
   
 <p-tree #treeRef
-  [value]="treeNodes"
-  
-  
+  [value]="treeNodes"  
   (onNodeDrop)="onNodeDrop($event)"  
   selectionMode="single"
   [(selection)]="selectedNode"    

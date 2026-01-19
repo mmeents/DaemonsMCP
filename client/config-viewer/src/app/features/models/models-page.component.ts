@@ -36,7 +36,8 @@ import {
     SelectModule,    
     CheckboxModule,
     DatePickerModule,
-    FileViewerComponent
+    FileViewerComponent,
+    TabsModule
   ],
   templateUrl: './models-page.component.html',
   styleUrl: './models-page.component.scss',
@@ -61,7 +62,8 @@ export class ModelsPageComponent implements OnInit {
   protected newProperty = {
     propertyKey: '',
     propertyValue: '',
-    propertyModelTypeId: undefined as number | undefined
+    propertyValueTypeId: undefined as number | undefined,
+    propertyEditorTypeId: undefined as number | undefined
   };
   protected modelTypeChildren = signal<Map<number, ModelTypeDto[]>>(new Map());
 
@@ -77,6 +79,9 @@ export class ModelsPageComponent implements OnInit {
   protected propertiesExpanded = signal(true); // Start expanded by default
   protected previewLoading = signal(false);
   protected previewError = signal<string | null>(null);
+  protected showImportTableDialog = signal(false);
+  protected importTableSql = signal('');
+  protected importTargetParent?: ModelDto;
 
   // Delete dialog
   protected showDeleteDialog = signal(false);
@@ -141,7 +146,7 @@ export class ModelsPageComponent implements OnInit {
 
   // Use helper methods
 protected getEditorForProperty(prop: ModelPropertyDto): number {
-  return this.modelTypeService.getEditorType(prop.propertyValueTypeId);
+  return this.modelTypeService.getEditorType(prop.propertyEditorTypeId ?? prop.propertyValueTypeId);
 }
   
 protected isReferenceType(typeId: number | null | undefined): boolean {
@@ -225,6 +230,8 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
     this.loadModelProperties();
     if (this.isTemplateType(model.modelTypeId)&& !this.isEditing() && model.code != null) {
       this.onExecuteTemplate(model, true)
+    } else if (this.isTableModelType(model.modelTypeId) && !this.isEditing()) {
+      this.onExecuteTemplate(model, true)
     }
     console.log('MODEL SELECTED EVENT RECEIVED:', model);
   }
@@ -285,12 +292,20 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
 
   confirmDelete() {
     if (!this.modelToDelete) return;
-    
+    const parentId = this.modelToDelete.parentId;
     this.modelsService.deleteModel(this.modelToDelete.id).subscribe({
       next: () => {
         console.log('Model deleted successfully');
-        this.selectedModel.set(null);
-        this.stateService.setSelectedModelId(null);
+
+        if (parentId) {
+          const parent = this.findModelById(this.models(), parentId);
+          this.selectedModel.set(parent);
+          this.stateService.setSelectedModelId(parentId);
+        } else {
+          this.selectedModel.set(null);
+          this.stateService.setSelectedModelId(null);
+        }
+
         this.showDeleteDialog.set(false);
         this.loadModels();
       },
@@ -448,14 +463,15 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
       modelId: model.id,
       propertyKey: this.newProperty.propertyKey,
       propertyValue: this.newProperty.propertyValue?.toString() ?? undefined,
-      propertyValueTypeId: this.newProperty.propertyModelTypeId
+      propertyValueTypeId: this.newProperty.propertyValueTypeId,
+      propertyEditorTypeId: this.newProperty.propertyEditorTypeId,
     };
 
     this.modelsService.addUpdateModelProperty(request).subscribe({
       next: (property) => {
         console.log('Property added:', property);
-        this.modelProperties.update(props => [...props, property]);
-        this.newProperty = { propertyKey: '', propertyValue: '', propertyModelTypeId: undefined };
+        this.modelProperties.update(props => [...props, property]);        
+        this.newProperty = { propertyKey: '', propertyValue: '', propertyValueTypeId: undefined, propertyEditorTypeId: undefined };
         this.isAddingProperty.set(false);
       },
       error: (err) => {
@@ -471,7 +487,8 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
       modelId: property.modelId,
       propertyKey: property.propertyKey,
       propertyValue: property.propertyValue?.toString() ?? undefined,
-      propertyValueTypeId: property.propertyValueTypeId
+      propertyValueTypeId: property.propertyValueTypeId,
+      propertyEditorTypeId: property.propertyEditorTypeId
     };
 
     this.modelsService.addUpdateModelProperty(request).subscribe({
@@ -483,6 +500,8 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
         // 🔥 Auto-refresh the preview
         const model = this.selectedModel();
         if (model && this.isTemplateType(model.modelTypeId) && model.code) {
+          this.onExecuteTemplate(model, true);
+        } else if (model && this.isTableModelType(model.modelTypeId)) {
           this.onExecuteTemplate(model, true);
         }
       },
@@ -510,11 +529,9 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
     });  
   }
 
-  protected getTargetModelOptions(template: ModelDto): ModelDto[] {
-    const targetTypeId = this.modelTypeService.getTargetModelType(template.modelTypeId);
+  protected getTargetModelOptions(templateTypeId: number): ModelDto[] {
+    const targetTypeId = this.modelTypeService.getTargetModelType(templateTypeId);
     if (!targetTypeId) return [];
-    
-    // Filter from already-loaded models - no API call needed!
     return this.findModelsByType(this.models(), targetTypeId);
   }
 
@@ -530,8 +547,18 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
       
       // Recursively check children
       if (model.children?.length) {
-        const childMatches = this.findModelsByType(model.children, targetTypeId);
-        results.push(...childMatches);
+        if (targetTypeId == this.modelTypeService.Mte.TableColumnModel && model.modelTypeId == this.modelTypeService.Mte.TableModel) {
+          const childMatches = this.findModelsByType(model.children, targetTypeId);
+          for (const match of childMatches) {
+            const newName = `${model.name}.${match.name}`;
+            const renamedMatch: ModelDto = { ...match, name: newName };
+            results.push(renamedMatch);
+          }
+        } else {
+          const childMatches = this.findModelsByType(model.children, targetTypeId);
+          results.push(...childMatches);
+        }       
+        
       }
     }
     
@@ -540,6 +567,10 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
 
   protected isTemplateType(modelTypeId: number): boolean {
     return this.modelTypeService.isTemplateType(modelTypeId);
+  }
+
+  protected isTableModelType(modelTypeId: number): boolean {
+    return this.modelTypeService.isTableModelType(modelTypeId);
   }
 
   protected showPreviewDialog = signal(false);
@@ -551,8 +582,7 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
         if (result.success) {
           if (preview) {
             this.previewCode.set(result.renderedCode);
-            this.previewFileName.set(result.relativeFileName);
-            this.showPreviewDialog.set(true);
+            this.previewFileName.set(result.relativeFileName);            
           } else {
             alert(`Generated: ${result.relativeFileName}`);
           }
@@ -565,6 +595,36 @@ protected getTypeChildren(parentTypeId: number): ModelTypeDto[] {
         alert('Template execution failed. Check console.');
       }
     });
+  }
+
+  onImportTable(parent: ModelDto) {
+    this.importTargetParent = parent;
+    this.importTableSql.set('');
+    this.showImportTableDialog.set(true);
+  }
+
+  confirmImportTable() {
+    if (!this.importTableSql().trim() || !this.importTargetParent) return;    
+    
+    this.modelsService.importTable({
+      parentId: this.importTargetParent.id,
+      sqlStatement: this.importTableSql()
+    }).subscribe({
+      next: (result) => {
+        console.log('Table imported.');
+        this.showImportTableDialog.set(false);
+        this.loadModels();
+      },
+      error: (err) => {
+        console.error('Import failed:', err);
+        alert('Import failed. Check console for details.');
+      }
+    });
+  }
+
+  cancelImportTable() {
+    this.showImportTableDialog.set(false);
+    this.importTableSql.set('');
   }
 
 }

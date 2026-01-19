@@ -10,7 +10,8 @@ namespace DaemonsMCP.Application.Models.Commands.AddUpdateModel {
     int ModelId,
     string PropertyKey,
     string? PropertyValue = null,
-    int? PropertyValueTypeId = null
+    int? PropertyValueTypeId = null,
+    int? PropertyEditorTypeId = null
   ) : IRequest<ModelPropertyDto>;
 
   public class AddUpdateModelPropertyCommandHandler : IRequestHandler<AddUpdateModelPropertyCommand, ModelPropertyDto> {
@@ -34,7 +35,8 @@ namespace DaemonsMCP.Application.Models.Commands.AddUpdateModel {
           request.ModelId,
           request.PropertyKey,
           request.PropertyValue,
-          request.PropertyValueTypeId);
+          request.PropertyValueTypeId,
+          request.PropertyEditorTypeId);
 
         id = await _repository.AddAsync(property, cancellationToken);
       } else {
@@ -45,8 +47,8 @@ namespace DaemonsMCP.Application.Models.Commands.AddUpdateModel {
           throw new InvalidOperationException($"ModelProperty with id {request.Id} not found");
         }
 
-        property.Update(request.PropertyValue, request.PropertyValueTypeId);
-        await _repository.UpdateAsync(property, cancellationToken);        
+        property.Update(request.PropertyValue, request.PropertyValueTypeId, request.PropertyEditorTypeId);
+        await _repository.UpdateAsync(property, cancellationToken);
       }
 
       property = await _repository.GetByIdAsync(id, cancellationToken);

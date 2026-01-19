@@ -9,8 +9,8 @@ namespace DaemonsMCP.Domain.Repositories {
     Task<List<Model>> GetByParentIdAsync(int? parentId, CancellationToken cancellationToken = default);
     Task<List<Model>> SearchAsync(int projectId, int? parentId = null, int? modelTypeId = null,
                                    string? nameFilter = null, CancellationToken cancellationToken = default);
-    Task<int> AddAsync(Model model, CancellationToken cancellationToken = default);
-    Task UpdateAsync(Model model, CancellationToken cancellationToken = default);
+    Task<Model?> AddAsync(Model model, CancellationToken cancellationToken = default);
+    Task<Model?> UpdateAsync(Model model, CancellationToken cancellationToken = default);
     Task DeleteAsync(int id, CancellationToken cancellationToken = default);
   }
 }

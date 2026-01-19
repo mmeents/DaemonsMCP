@@ -86,4 +86,8 @@ export class ModelsService extends ApiService {
       { targetModelId: command.targetModelId, saveToFile: command.saveToFile }
     );
   }
+
+  importTable(request: { parentId: number; sqlStatement: string }) {
+    return this.http.post<ModelDto[]>(`${this.apiUrl}/api/models/import-table`, request);
+  }
 }
