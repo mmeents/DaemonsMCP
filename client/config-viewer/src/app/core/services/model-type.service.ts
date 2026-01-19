@@ -217,7 +217,8 @@ export class ModelTypeService {
       // Collection templates
       [Mte.DatabaseModel] : Mte.DatabaseModel,  // DatabaseModel → Database
       [Mte.TablesModel]: Mte.TablesModel,  // TablesModel → Tables
-      [Mte.TableModel]: Mte.TableModel,  // TableModel → Table      
+      [Mte.TableModel]: Mte.TableModel,  // TableModel → Table
+      [Mte.TableColumnModel]: Mte.TableColumnModel,  // TableColumnModel → TableColumn
       [Mte.ViewsModel]: Mte.ViewsModel,  // ViewsModel → Views
       [Mte.ViewModel]: Mte.ViewModel,  // ViewModel → View
       [Mte.FunctionsModel]: Mte.FunctionsModel,  // FunctionsModel → Functions
@@ -229,10 +230,10 @@ export class ModelTypeService {
       [Mte.InterfaceModel]: Mte.InterfaceModel,  // InterfaceModel → Interface
       [Mte.InterfacePropertyModel]: Mte.InterfacePropertyModel,  // InterfacePropertyModel → InterfaceProperty
       [Mte.InterfaceMethodModel]: Mte.InterfaceMethodModel,  // InterfaceMethodModel → InterfaceMethod
-      [Mte.ControllerModel]: Mte.ControllerModel,  // ControllerModel → Controller
+      [Mte.ControllerModel]: Mte.InterfaceModel,  // ControllerModel → Controller
       [Mte.ControllerPropertyModel]: Mte.ControllerPropertyModel,  // ControllerPropertyModel → ControllerProperty
       [Mte.ControllerMethodModel]: Mte.ControllerMethodModel,  // ControllerMethodModel → ControllerMethod
-      [Mte.ClassModel]: Mte.ClassModel,  // ClassModel → Class
+      [Mte.ClassModel]: Mte.InterfaceModel,  // ClassModel → Class
       [Mte.ClassPropertyModel]: Mte.ClassPropertyModel,  // ClassPropertyModel → ClassProperty
       [Mte.ClassMethodModel]: Mte.ClassMethodModel,  // ClassMethodModel → ClassMethod
 
@@ -299,5 +300,13 @@ export class ModelTypeService {
    */
   isTemplateType(modelTypeId: number): boolean {
     return modelTypeId >= 400 && modelTypeId < 500;
+  }
+
+  isModelType(modelTypeId: number): boolean {
+    return modelTypeId > 200 && modelTypeId < 400;
+  }
+
+  isTableModelType(modelTypeId: number): boolean {
+    return modelTypeId === Mte.TableModel; 
   }
 }

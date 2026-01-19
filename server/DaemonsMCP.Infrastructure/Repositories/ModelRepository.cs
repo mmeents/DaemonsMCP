@@ -77,25 +77,46 @@ namespace DaemonsMCP.Infrastructure.Repositories {
       return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<int> AddAsync(Model model, CancellationToken cancellationToken = default) {
-      _context.Models.Add(model);
+    public async Task<Model?> AddAsync(Model model, CancellationToken cancellationToken = default) {
+      var added = _context.Models.Add(model);      
       await _context.SaveChangesAsync(cancellationToken);
-      await SyncDefaultsByModelIdAsync(model.Id, cancellationToken);
-      return model.Id;
+      int newId = added.Entity.Id;      
+      await SyncDefaultsByModelIdAsync(newId, cancellationToken);
+      return await GetByIdWithChildrenAsync(newId, 2, cancellationToken);
     }
 
-    public async Task UpdateAsync(Model model, CancellationToken cancellationToken = default) {
+    public async Task<Model?> UpdateAsync(Model model, CancellationToken cancellationToken = default) {
       _context.Models.Update(model);
       await _context.SaveChangesAsync(cancellationToken);
       await SyncDefaultsByModelIdAsync(model.Id, cancellationToken);
+      return await GetByIdWithChildrenAsync(model.Id, 2, cancellationToken);
     }
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken = default) {
-      var model = await _context.Models.FindAsync(new object[] { id }, cancellationToken);
-      if (model != null) {
-        _context.Models.Remove(model);
-        await _context.SaveChangesAsync(cancellationToken);
+      // Load the entire tree
+      var model = await GetByIdWithChildrenAsync(id, maxDepth: 10, cancellationToken);
+      if (model == null) return;
+
+      // Delete recursively
+      await DeleteRecursiveAsync(model, cancellationToken);
+      await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task DeleteRecursiveAsync(Model model, CancellationToken cancellationToken) {
+      // Ensure children are loaded
+      if (!_context.Entry(model).Collection(m => m.Children).IsLoaded) {
+        await _context.Entry(model).Collection(m => m.Children).LoadAsync(cancellationToken);
       }
+
+      // Delete children first
+      if (model.Children?.Any() == true) {
+        foreach (var child in model.Children.ToList()) {
+          await DeleteRecursiveAsync(child, cancellationToken);
+        }
+      }
+
+      // Mark for deletion (don't SaveChanges yet - batch them)
+      _context.Models.Remove(model);
     }
 
     public async Task<List<Model>> GetByParentIdAsync(int? parentId, CancellationToken cancellationToken = default) {
@@ -123,7 +144,8 @@ namespace DaemonsMCP.Infrastructure.Repositories {
             ModelId = modelId,
             PropertyKey = property.PropertyKey,
             PropertyValue = property.PropertyValue,
-            PropertyValueTypeId = property.PropertyValueTypeId
+            PropertyValueTypeId = property.PropertyValueTypeId,
+            PropertyEditorTypeId = property.PropertyEditorTypeId
           };
           _context.ModelProperties.Add(existing);
           updated = true;
@@ -139,10 +161,7 @@ namespace DaemonsMCP.Infrastructure.Repositories {
 
       var returnList = new List<ModelPropertyDto>();
 
-      ModelPropExt.GetDefaultPropertiesByModelId(modelTypeId)
-        .ForEach(prop => {
-          returnList.Add(prop);
-        });
+      ModelPropExt.GetDefaultPropertiesByModelId(modelTypeId).ForEach(prop => { returnList.Add(prop); });
 
       return returnList;
     }

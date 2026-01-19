@@ -112,6 +112,7 @@ public static class DependencyInjection {
     services.AddSingleton<IObjectHierarchyToolsHandler, ObjectHierarchyToolsHandler>();
     services.AddSingleton<IItemToolsHandler, ItemToolsHandler>();
     services.AddSingleton<IItemTypeToolsHandler, ItemTypeToolsHandler>();
+    services.AddSingleton<IModelToolsHandler, ModelToolsHandler>();
 
     services.AddHostedService<McpServerHostedService>();
 

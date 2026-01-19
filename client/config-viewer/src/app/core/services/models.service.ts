@@ -62,11 +62,6 @@ export class ModelsService extends ApiService {
     return this.delete<{success: boolean}>(`/api/models/properties/${propertyId}`);
   }
 
-  // Get all model types
-  getAllModelTypes(): Observable<ModelTypeDto[]> {
-    return this.get<ModelTypeDto[]>('/api/modeltypes/all');
-  }
-
   // Get editor types
   getEditorTypes(): Observable<ModelTypeDto[]> {
     return this.get<ModelTypeDto[]>('/api/modeltypes/editors');
@@ -90,5 +85,9 @@ export class ModelsService extends ApiService {
     return this.post<TemplateExecutionResult>(`/api/templates/${command.templateId}/execute`,
       { targetModelId: command.targetModelId, saveToFile: command.saveToFile }
     );
+  }
+
+  importTable(request: { parentId: number; sqlStatement: string }) {
+    return this.http.post<ModelDto[]>(`${this.apiUrl}/api/models/import-table`, request);
   }
 }

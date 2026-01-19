@@ -180,5 +180,57 @@ namespace DaemonsMCP.Domain.Extensions {
       return isActive;
     }
 
+    public static string GetDefaultModelTemplate(this Mte modelType) {
+      return modelType switch {
+        Mte.TableModel => @"{{ has_index = 0; index_column = ''; size = ''; type=''; null_value = ''; ident_str = ''; }}{{
+func as_sql_type (type_id, size) 
+  case type_id
+    when 101 
+      'BIT'
+    when 102 
+      'SMALLINT'
+    when 103 
+      'INT'
+    when 104 
+      'BIGINT'
+    when 112 
+      if size != ''; 'DECIMAL' + size; else; 'DECIMAL(18,2)'; end
+    when 108 
+      if size != ''; 'NVARCHAR' + size; else; 'NVARCHAR(MAX)'; end
+    when 110 
+      if size != ''; 'VARCHAR' + size; else; 'VARCHAR(MAX)'; end
+    when 106 
+      'uniqueidentifier'
+    when 114 
+      'DATETIME2' + size
+    when 118 
+      'DATE'
+    when 120 
+      'TIME'
+    else 
+      'NVARCHAR(MAX)'
+  end  
+end   
+}}
+Create Table {{table.name}} ({{ for column in table.children }}
+  {{ column.name }}{{ for prop in column.properties; 
+    if prop.property_key == 'ColumnType' }}{{ type = prop.property_value; }}{{ end }}{{
+    if prop.property_key == 'IsNullable' && prop.property_value == '1'}}{{ null_value='NULL'}}{{ else if prop.property_key == 'IsNullable' && prop.property_value == '0'}}{{ null_value='NOT NULL';}}{{ end }}{{ 
+    if prop.property_key == 'IsPrimaryKey' && prop.property_value == '1' }}{{ ident_str = 'IDENTITY(1,1) ';}}{{ has_index = 1; index_column = column.name; }}{{ end }}{{
+    if prop.property_key == 'MaxLength'}}{{ size = prop.property_value; end; }}{{
+}}{{ end }} {{ as_sql_type type size }} {{ ident_str }}{{ null_value}}{{ ident_str = ''; }},{{ end }}{{ if has_index == 1 }}  
+  CONSTRAINT [pk_{{ table.name | string.remove '.'}}_{{ index_column | string.remove '.'}}] PRIMARY KEY CLUSTERED ({{ index_column }}){{ end }}
+)
+
+",
+        Mte.ViewTemplate => "",
+        Mte.FunctionTemplate => "",
+        Mte.ProcedureTemplate => "",
+        Mte.InterfaceTemplate => "",
+        Mte.ControllerTemplate => "",
+        Mte.ClassTemplate => "",
+        _ => ""
+      };
+    }
   }
 }

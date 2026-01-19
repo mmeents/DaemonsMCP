@@ -78,42 +78,70 @@ namespace DaemonsMCP.Application.Templates.Commands.ExecuteTemplate {
     }
 
     private async Task<List<string>> ExecuteTemplateRecursive(Model template,  CancellationToken cancellationToken) {
-      var outputs = new List<string>();
-
-      if (template == null || !template.IsActive()) { // early exit if its not active.
-        return outputs;
-      }
-
-      var targetModelId = GetTargetModelIdFromProperties(template) ?? template.Id;
-
-      var targetModel = await _modelRepository.GetByIdWithChildrenAsync(targetModelId, maxDepth: 3, cancellationToken);
-
-      // Execute child templates first (ordered by rank)
-      if (template.Children?.Any() == true) {
-        foreach (var childTemplate in template.Children.OrderBy(c => c.Rank)) {
-          var childOutputs = await ExecuteTemplateRecursive(childTemplate, cancellationToken);
-          outputs.AddRange(childOutputs);
+      try {
+        var outputs = new List<string>();
+        if (template == null) { 
+            return outputs;
         }
+        bool isTableModel = ((Mte)template.ModelTypeId) == Mte.TableModel;
+        bool isTemplate = ((Mte)template.ModelTypeId).IsTemplate();
+
+        if (isTemplate) {
+          if (!template.IsActive()) {
+            return outputs;
+          }
+        } else if (!isTableModel) {
+          return outputs;
+        }       
+
+        var targetModelId = GetTargetModelIdFromProperties(template) ?? template.Id;
+
+        var targetModel = await _modelRepository.GetByIdWithChildrenAsync(targetModelId, maxDepth: 3, cancellationToken);
+
+        // Execute child templates first (ordered by rank)
+        if (template.Children?.Any() == true) {
+          foreach (var childTemplate in template.Children.OrderBy(c => c.Rank)) {
+            var childOutputs = await ExecuteTemplateRecursive(childTemplate, cancellationToken);
+            outputs.AddRange(childOutputs);
+          }
+        }
+
+        var scriptToExecute = "";
+        if ( template.ModelTypeId == (int)Mte.TableModel) {  // ((Mte)template.ModelTypeId).IsModel() &&
+          scriptToExecute = ((Mte)template.ModelTypeId).GetDefaultModelTemplate();
+        } else if (((Mte)template.ModelTypeId).IsTemplate()) {
+          if (!string.IsNullOrEmpty(template.Code)) {
+            scriptToExecute = template.Code;
+          } else { 
+            scriptToExecute = ((Mte)template.ModelTypeId).GetDefaultModelTemplate();
+          }
+        }
+
+
+        // Execute this template's code (if any)
+        if (!string.IsNullOrEmpty(scriptToExecute)) {
+          string modelType = ((Mte)template.ModelTypeId).TemplateToModel().ToTypeString().ToLower();
+          var scriptObject = new ScriptObject();
+          scriptObject[modelType] = targetModel;
+          //scriptObject["children_output"] = outputs; // Child template outputs
+
+          var context = new TemplateContext();
+          context.PushGlobal(scriptObject);
+
+          var scribanTemplate = Template.Parse(scriptToExecute);
+          var rendered = scribanTemplate.Render(context);
+
+          outputs.Insert(0, rendered); // Parent output goes first
+        }
+
+        return outputs;
+
+      } catch (Exception ex) { 
+        return new List<string> { $"Error executing template {template.Id}: {ex.Message}" };
+
       }
-
-      // Execute this template's code (if any)
-      if (!string.IsNullOrEmpty(template.Code)) {
-        string modelType = ((Mte)template.ModelTypeId).TemplateToModel().ToTypeString().ToLower();
-        var scriptObject = new ScriptObject();
-        scriptObject[modelType] = targetModel;
-        //scriptObject["children_output"] = outputs; // Child template outputs
-
-        var context = new TemplateContext();
-        context.PushGlobal(scriptObject);
-
-        var scribanTemplate = Template.Parse(template.Code);
-        var rendered = scribanTemplate.Render(context);
-
-        outputs.Insert(0, rendered); // Parent output goes first
-      }
-
-      return outputs;
-
     }
+
   }
+
 }

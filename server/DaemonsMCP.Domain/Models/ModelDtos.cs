@@ -22,8 +22,9 @@ namespace DaemonsMCP.Domain.Models {
     public string PropertyKey { get; set; } = string.Empty;
     public string? PropertyValue { get; set; }
     public int? PropertyValueTypeId { get; set; }
-    public int? ReferenceModelId { get; set; }
+    public int? PropertyEditorTypeId { get; set; }    
     public string? PropertyValueTypeName { get; set; }
+    public string? PropertyEditorTypeName { get; set; }
   }
 
   public record ModelTypeDto {
@@ -42,7 +43,23 @@ namespace DaemonsMCP.Domain.Models {
 
   public static class  ModelDtoExt {
 
-    public static ModelDto ToDto(this Model model) =>
+    public static ModelDto ToDto(this ModelDto model) => 
+      new ModelDto {
+        Id = model.Id,
+        ProjectId = model.ProjectId,
+        ParentId = model.ParentId,
+        ModelTypeId = model.ModelTypeId,
+        ModelTypeName = model.ModelTypeName ?? string.Empty,
+        Name = model.Name,
+        Rank = model.Rank,
+        Code = model.Code,
+        CreatedDate = model.CreatedDate,
+        ModifiedDate = model.ModifiedDate,
+        Properties = model.Properties?.Select(p => p.ToDto()).ToList() ?? new(),
+        Children = model.Children?.Select(c => c.ToDto()).ToList() ?? new()
+      };
+
+      public static ModelDto ToDto(this Model model) =>
       new ModelDto {
         Id = model.Id,
         ProjectId = model.ProjectId,
@@ -58,7 +75,7 @@ namespace DaemonsMCP.Domain.Models {
         Children = model.Children?.Select(c => c.ToDto()).ToList() ?? new()
       };
 
-    public static ModelTypeDto ToDto(this ModelType modelType) =>
+      public static ModelTypeDto ToDto(this ModelType modelType) =>
       new ModelTypeDto {
         Id = modelType.Id,
         OwnerTypeId = modelType.OwnerTypeId,
@@ -73,6 +90,18 @@ namespace DaemonsMCP.Domain.Models {
         Children = modelType.Children?.Select(c => c.ToDto()).ToList() ?? new()
       };
 
+    public static ModelPropertyDto ToDto(this ModelPropertyDto modelProperty) =>
+      new ModelPropertyDto {
+        Id = modelProperty.Id,
+        ModelId = modelProperty.ModelId,
+        PropertyKey = modelProperty.PropertyKey,
+        PropertyValue = modelProperty.PropertyValue,
+        PropertyValueTypeId = modelProperty.PropertyValueTypeId,
+        PropertyValueTypeName = modelProperty.PropertyValueTypeName,
+        PropertyEditorTypeId = modelProperty.PropertyEditorTypeId,
+        PropertyEditorTypeName = modelProperty.PropertyEditorTypeName
+      };
+
     public static ModelPropertyDto ToDto(this ModelProperty modelProperty) =>
       new ModelPropertyDto {
         Id = modelProperty.Id,
@@ -80,7 +109,9 @@ namespace DaemonsMCP.Domain.Models {
         PropertyKey = modelProperty.PropertyKey,
         PropertyValue = modelProperty.PropertyValue,
         PropertyValueTypeId = modelProperty.PropertyValueTypeId,
-        PropertyValueTypeName = modelProperty.PropertyValueType?.Name
+        PropertyValueTypeName = modelProperty.PropertyValueType?.Name,
+        PropertyEditorTypeId = modelProperty.PropertyEditorTypeId,
+        PropertyEditorTypeName = modelProperty.PropertyEditorType?.Name
       };
 
   }
