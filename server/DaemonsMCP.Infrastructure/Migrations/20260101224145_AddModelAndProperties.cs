@@ -96,7 +96,7 @@ namespace DaemonsMCP.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_ModelProperties_PropertyModelTypeId",
                 table: "ModelProperties",
-                column: "PropertyValueTypeId");
+                column: "PropertyModelTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Models_CreatedDate",
