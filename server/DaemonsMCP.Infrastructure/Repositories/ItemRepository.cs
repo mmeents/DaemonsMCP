@@ -1,16 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DaemonsMCP.Domain.Constants;
 using DaemonsMCP.Domain.Entities;
+using DaemonsMCP.Domain.Models;
 using DaemonsMCP.Domain.Repositories;
 using DaemonsMCP.Infrastructure.Persistence;
-using DaemonsMCP.Domain.Constants;
+using Microsoft.EntityFrameworkCore;
 
 namespace DaemonsMCP.Infrastructure.Repositories;
 
 public class ItemRepository : IItemRepository {
   private readonly DaemonsMcpDbContext _context;
+  private readonly IItemTypeRepository _itemTypeRepository;
 
-  public ItemRepository(DaemonsMcpDbContext context) {
+  public ItemRepository(DaemonsMcpDbContext context, IItemTypeRepository itemTypeRepository) {
     _context = context;
+    _itemTypeRepository = itemTypeRepository; 
   }
 
   public async Task<Item?> GetByIdAsync(int id, CancellationToken cancellationToken = default) {
@@ -178,5 +181,38 @@ public class ItemRepository : IItemRepository {
 
   public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) {
     return await _context.SaveChangesAsync(cancellationToken);
+  }
+
+
+  public async Task<ItemDto> MapToDto(Item item, int maxDepth, CancellationToken cancellationToken) {
+    var itemType = await _itemTypeRepository.GetByIdAsync(item.ItemTypeId, cancellationToken);
+    var statusType = await _itemTypeRepository.GetByIdAsync(item.StatusTypeId, cancellationToken);
+
+    var dto = new ItemDto {
+      Id = item.Id,
+      ParentId = item.ParentId,
+      ItemTypeId = item.ItemTypeId,
+      ItemTypeName = itemType?.Name ?? string.Empty,
+      StatusTypeId = item.StatusTypeId,
+      StatusTypeName = statusType?.Name ?? string.Empty,
+      Rank = item.Rank,
+      Name = item.Name,
+      Details = item.Details,
+      Created = item.Created,
+      Modified = item.Modified,
+      Completed = item.Completed,
+      ReferenceFileSystemId = item.ReferenceFileSystemId,
+      ReferenceObjectHierarchyId = item.ReferenceObjectHierarchyId,
+      Children = new List<ItemDto>()
+    };
+
+    if (maxDepth > 0 && item.Children.Any()) {
+      foreach (var child in item.Children) {
+        var childDto = await MapToDto(child, maxDepth - 1, cancellationToken);
+        dto.Children.Add(childDto);
+      }
+    }
+
+    return dto;
   }
 }

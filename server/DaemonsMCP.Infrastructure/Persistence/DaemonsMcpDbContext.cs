@@ -1,6 +1,7 @@
 ﻿using DaemonsMCP.Domain.Entities;
 using DaemonsMCP.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 
 namespace DaemonsMCP.Infrastructure.Persistence;
 
@@ -31,8 +32,7 @@ public class DaemonsMcpDbContext(DbContextOptions<DaemonsMcpDbContext> options) 
 
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
-    base.OnModelCreating(modelBuilder);
-
+    base.OnModelCreating(modelBuilder);    
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(DaemonsMcpDbContext).Assembly);    
 
   }

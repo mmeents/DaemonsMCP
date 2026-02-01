@@ -22,9 +22,11 @@ namespace DaemonsMCP.Application.Todos.Commands.MakeTodoList {
   // it only creates the name and skips on matching existing items. so names need to be unique within the todo tree.
   // they can be added to any arbitrary depth with the names only in the Todo tree.
   public class MakeTodoListCommandHandler(
-    IItemRepository itemRepository  
+    IItemRepository itemRepository,
+    IItemTypeRepository itemTypeRepository
   ) : IRequestHandler<MakeTodoListCommand, ItemDto?> {
     private readonly IItemRepository _itemRepository = itemRepository;
+    private readonly IItemTypeRepository _itemTypeRepository = itemTypeRepository;
 
     public async Task<ItemDto?> Handle(MakeTodoListCommand request, CancellationToken cancellationToken) {
       
@@ -68,7 +70,8 @@ namespace DaemonsMCP.Application.Todos.Commands.MakeTodoList {
 
       var returnTodo = await _itemRepository.GetByIdWithChildrenAsync(todoItem.Id, 1, cancellationToken);
 
-      return returnTodo?.ToDto();
-    }
+      return returnTodo == null ? null : await _itemRepository.MapToDto(returnTodo, 2, cancellationToken);
+    }    
   }
+
 }

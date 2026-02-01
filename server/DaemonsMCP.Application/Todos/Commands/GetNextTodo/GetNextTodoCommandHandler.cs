@@ -21,6 +21,7 @@ namespace DaemonsMCP.Application.Todos.Commands.GetNextTodo {
 
   public class GetNextTodoCommandHandler(IItemRepository itemRepository) : IRequestHandler<GetNextTodoCommand, ItemDto?> {
     private readonly IItemRepository _itemRepository = itemRepository;
+    
     public async Task<ItemDto?> Handle(GetNextTodoCommand request, CancellationToken cancellationToken) {
       Item? item = null;
       if (request.ItemId.HasValue) {
@@ -40,7 +41,7 @@ namespace DaemonsMCP.Application.Todos.Commands.GetNextTodo {
         await _itemRepository.UpdateAsync(item, cancellationToken);
         await _itemRepository.SaveChangesAsync(cancellationToken);
       }
-      return item?.ToDto();
+      return item == null ? null : await _itemRepository.MapToDto(item, 2, cancellationToken);
     }
 
     private async Task<Item?> GetNextTodoItemRecursive(int itemId, CancellationToken cancellationToken) {
@@ -60,8 +61,7 @@ namespace DaemonsMCP.Application.Todos.Commands.GetNextTodo {
 
       // If no suitable child found, return null
       return item;
-    }
+    } 
 
-     
   }
 }

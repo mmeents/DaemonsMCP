@@ -1,4 +1,5 @@
 ﻿using DaemonsMCP.Domain.Entities;
+using DaemonsMCP.Domain.Models;
 
 namespace DaemonsMCP.Domain.Repositories;
 
@@ -30,4 +31,6 @@ public interface IItemRepository {
 
   // Unit of Work
   Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+  Task<ItemDto> MapToDto(Item item, int maxDepth, CancellationToken cancellationToken);
 }

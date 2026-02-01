@@ -36,7 +36,7 @@ namespace DaemonsMCP.Application.Todos.Commands.MarkTodo {
       await _itemRepository.UpdateAsync(item, cancellationToken);
       await _itemRepository.SaveChangesAsync(cancellationToken);
 
-      return item.ToDto();
+      return await _itemRepository.MapToDto(item, 2, cancellationToken);
     }
   }
 }
