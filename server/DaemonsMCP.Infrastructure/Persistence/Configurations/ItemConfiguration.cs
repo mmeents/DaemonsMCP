@@ -28,16 +28,18 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item> {
     builder.Property(i => i.Completed)
         .IsRequired(false);
 
-    // Relationship to ItemType (for type)
+    // Relationship to ItemType (for type) - explicit principal key
     builder.HasOne(i => i.ItemType)
         .WithMany()
         .HasForeignKey(i => i.ItemTypeId)
+        .HasPrincipalKey(t => t.Id)
         .OnDelete(DeleteBehavior.Restrict);
 
-    // Relationship to ItemType (for status) - uses same table!
+    // Relationship to ItemType (for status) - explicit principal key  
     builder.HasOne(i => i.StatusType)
         .WithMany()
         .HasForeignKey(i => i.StatusTypeId)
+        .HasPrincipalKey(t => t.Id)
         .OnDelete(DeleteBehavior.Restrict);
 
     // Self-referencing relationship for hierarchy

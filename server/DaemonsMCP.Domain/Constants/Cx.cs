@@ -123,9 +123,9 @@ namespace DaemonsMCP.Domain.Constants {
     public const string RemoveNodeCmdDesc = "Remove a node from the tree. Strategy options: PreventIfHasChildren (default), DeleteCascade, OrphanChildren, ReparentToGrandparent";
 
     public const string SaveProjectRepoCmdDesc = "Save project repo command writes Items and Types tables to disk. Should be needed as any update inherently calls save.";
-
-    public const string MakeTodoListCmdDesc = "Makes a todo list. Will match on Nodes Typed with Todo by listName becomes its Name. If found adds items as sub Nodes. Otherwise it adds todo list to the 'Todo Root'.";
-    public const string GetNextTodoItemCmdDesc = "Gets the next todo item by recursivly walking the tree and finding it.  Marks status as In Progress once found.  If ListItemId is null it will search all lists in Todo Root.";
+    
+    public const string MakeTodoListCmdDesc = "Creates or syncs a todo list. Matches existing todo list Node by listName or creates under 'Todo Root'. Syncs child items by name - adds only new items, skips existing matches. Names must be unique within todo tree. Supports arbitrary nesting depth.";
+    public const string GetNextTodoItemCmdDesc = "Recursively finds deepest not-started todo by rank, marks In Progress. ListItemId null searches all Todo Root lists. Returns null if none found.";
     public const string MarkTodoDoneCmdDesc = "Marks todo as done. To be used with get-next-todo to mark success status when completed. That is it sets Items Status to Complete, and Markes the completed date.";
     public const string RestoreAsTodoCmdDesc = "Restore todo status as Not Started. to be used with get-next-todo to abort the todo and leave it as a todo.";
     public const string MarkTodoCancelCmdDesc = "Marks todo as cancelled. To be used with get-next-todo to mark cancelled status when task is abandoned. That is it sets Items Status to Cancelled, and Markes the completed date.";
