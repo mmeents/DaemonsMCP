@@ -73,6 +73,8 @@ namespace DaemonsMCP.Domain.Constants {
     public const string AddUpdateModelTypeCmd = "add-update-model-type";    
     public const string DeleteModelCmd = "delete-model";
     public const string DeleteModelPropertyCmd = "delete-model-property";
+    public const string ExecuteTemplateCmd = "execute-template";
+    
 
 
 
@@ -123,10 +125,10 @@ namespace DaemonsMCP.Domain.Constants {
     public const string SaveProjectRepoCmdDesc = "Save project repo command writes Items and Types tables to disk. Should be needed as any update inherently calls save.";
 
     public const string MakeTodoListCmdDesc = "Makes a todo list. Will match on Nodes Typed with Todo by listName becomes its Name. If found adds items as sub Nodes. Otherwise it adds todo list to the 'Todo Root'.";
-    public const string GetNextTodoItemCmdDesc = "Gets the next todo item by recursivly walking the tree and finding it.  Marks status as In Progress once found.  If listName is null it will search all lists in Todo Root.";
-    public const string MarkTodoDoneCmdDesc = "Marks todo as done. To be used with get-next-todo to mark success status when completed. That is it sets Nodes Status to Complete, and Markes the completed date.";
-    public const string RestoreAsTodoCmdDesc = "Restore todo status as Not Started. to be used with get-next-todo to abort the todo.";
-    public const string MarkTodoCancelCmdDesc = "Marks todo as cancelled. To be used with get-next-todo to mark cancelled status when task is abandoned. That is it sets Nodes Status to Cancelled, and Markes the completed date.";
+    public const string GetNextTodoItemCmdDesc = "Gets the next todo item by recursivly walking the tree and finding it.  Marks status as In Progress once found.  If ListItemId is null it will search all lists in Todo Root.";
+    public const string MarkTodoDoneCmdDesc = "Marks todo as done. To be used with get-next-todo to mark success status when completed. That is it sets Items Status to Complete, and Markes the completed date.";
+    public const string RestoreAsTodoCmdDesc = "Restore todo status as Not Started. to be used with get-next-todo to abort the todo and leave it as a todo.";
+    public const string MarkTodoCancelCmdDesc = "Marks todo as cancelled. To be used with get-next-todo to mark cancelled status when task is abandoned. That is it sets Items Status to Cancelled, and Markes the completed date.";
 
 
     public const string SearchModelsCmdDesc = "Search models command, searches recursively maxDepth deep. Models are hierarchical trees with configurable properties.";
@@ -139,7 +141,7 @@ namespace DaemonsMCP.Domain.Constants {
     
     public const string DeleteModelCmdDesc = "Delete model command deletes a model.";
     public const string DeleteModelPropertyCmdDesc = "Delete model property command deletes a property of a model.";
-
+    public const string ExecuteTemplateCmdDesc = "Executes a template with the provided parameters.";
 
     // Tool parameter descriptions
     public const string ProjectParamDesc = "The configured projectId that were working in.";
@@ -202,7 +204,8 @@ namespace DaemonsMCP.Domain.Constants {
     public const string RefObjectHierarchyIdParamDesc = "Optional int ObjectHierarchyId to reference this item to any nuber of supported object types. ";
 
 
-    public const string ListNameParamDesc = "Requires. The name of the todo list, corresponds to Nodes.Name of a Nodes with Type 'Todo'.";
+    public const string ListItemIdParamDesc = "Requires. The Id of the todo list, corresponds to Items.Id of a Item with Type 'Todo'.";
+    public const string ListNameParamDesc = "The name of the todo list to operate on. used in the create todo to name the todo item.";
     public const string ItemsParamDesc = "The list of items to add to the todo list as child Nodes of the list.";
     public const string ItemIdParamDesc = $"The int Id of the todo item node to mark done or restore. Additionally you could use this Id with {Cx.GetItemByIdCmd}. ";
 
@@ -234,7 +237,9 @@ namespace DaemonsMCP.Domain.Constants {
 
     public const string DeleteModelIdParamDesc = "The int Id of the model to delete.";
     public const string DeleteModelPropertyIdParamDesc = "The int Id of the model property to delete.";
-
+    public const string ExecuteTemplateTemplateModelIdParamDesc = "The int Id of the template to execute.";
+    public const string ExecuteTemplateTargetModelIdParamDesc = "templates point to the model by default use null, to override the model, the int Id of the target model for the template execution.";
+    public const string ExecuteTemplateSaveToFileParamDesc = "Whether to save the output of the template execution to a file.";
 
     // Well-known ItemType IDs (must match seed data in ItemTypeConfiguration)
     public const int ItemTypeIdNone = 1;
@@ -260,6 +265,9 @@ namespace DaemonsMCP.Domain.Constants {
     public const string TypeNote = "Note";
 
     public const int TypeTodoMaxDepth = 3;
+
+    public const int ReadmeRootItemId = 1;
+    public const int TodoRootItemId = 2;
 
     public const string StatusStart = "Not Started";
     public const string StatusInProgress = "In Progress";

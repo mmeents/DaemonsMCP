@@ -1,5 +1,6 @@
 ﻿using DaemonsMCP.Domain.Constants;
 using DaemonsMCP.Domain.Extensions;
+using DaemonsMCP.Application.Templates.Commands.ExecuteTemplate;
 using MCPSharp;
 using System.ComponentModel;
 
@@ -58,6 +59,20 @@ namespace DaemonsMCP.Infrastructure.Tools {
     public static async Task<string> DeleteModelProperty(
       [Description(Cx.DeleteModelPropertyIdParamDesc)] int id) {
       return await GetTool().DeleteModelPropertyAsync(id);
+    }
+
+    [McpTool(Cx.ExecuteTemplateCmd, Cx.ExecuteTemplateCmdDesc)]
+    public static async Task<string> ExecuteTemplate(
+        [Description(Cx.ExecuteTemplateTemplateModelIdParamDesc)] int templateModelId,
+        [Description(Cx.ExecuteTemplateTargetModelIdParamDesc)] int? targetModelId = null,
+        [Description(Cx.ExecuteTemplateSaveToFileParamDesc)] bool saveToFile = false
+    ) { 
+      var command = new ExecuteTemplateCommand(
+        templateModelId,
+        targetModelId,
+        saveToFile
+      );
+      return await GetTool().ExecuteTemplateAsync(command);
     }
   }
 }

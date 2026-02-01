@@ -6,6 +6,7 @@ public interface IItemRepository {
   // Queries
   Task<Item?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
   Task<Item?> GetByIdWithChildrenAsync(int id, int maxDepth = 1, CancellationToken cancellationToken = default);
+  Task<Item?> GetByTodoNameAsync(string name, CancellationToken cancellationToken = default);
   Task<List<Item>> GetAllAsync(CancellationToken cancellationToken = default);
   Task<List<Item>> GetByParentIdAsync(int? parentId, CancellationToken cancellationToken = default);
   Task<List<Item>> GetRootItemsAsync(CancellationToken cancellationToken = default);

@@ -86,9 +86,11 @@ namespace DaemonsMCP.Api
                .MapModelsEndpoints()
                .MapProjectEndpoints()
                .MapTemplatesEndpoints()
+               .MapTodoEndpoints()
                .MapAccessTokenEndpoints()
                .MapUserEndpoints()
-               .MapUserCredentialsEndpoints();
+               .MapUserCredentialsEndpoints()
+               .MapSystemEndpoints();
 
             app.Run();
         }

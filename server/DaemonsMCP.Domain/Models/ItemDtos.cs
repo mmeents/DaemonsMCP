@@ -1,4 +1,5 @@
-﻿namespace DaemonsMCP.Domain.Models;
+﻿using DaemonsMCP.Domain.Entities;
+namespace DaemonsMCP.Domain.Models;
 
 public record ItemDto {
   public int Id { get; init; }
@@ -34,5 +35,26 @@ public record ReadmeItemDto {
     public DateTime Modified { get; init; }
     public List<ReadmeItemDto> Children { get; init; } = new();
    
+}
+
+public static class ItemDtoExt {
+  public static ItemDto ToDto(this Item item) =>
+    new ItemDto {
+      Id = item.Id,
+      ParentId = item.ParentId,
+      ItemTypeId = item.ItemTypeId,
+      ItemTypeName = item.ItemType?.Name ?? string.Empty,
+      StatusTypeId = item.StatusTypeId,
+      StatusTypeName = item.StatusType?.Name ?? string.Empty,
+      Rank = item.Rank,
+      Name = item.Name,
+      Details = item.Details,
+      Created = item.Created,
+      Modified = item.Modified,
+      Completed = item.Completed,
+      ReferenceFileSystemId = item.ReferenceFileSystemId,
+      ReferenceObjectHierarchyId = item.ReferenceObjectHierarchyId,
+      Children = item.Children?.Select(c => c.ToDto()).ToList() ?? new()
+    };
 }
 

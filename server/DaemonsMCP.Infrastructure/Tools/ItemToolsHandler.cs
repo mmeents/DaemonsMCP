@@ -1,11 +1,15 @@
 ﻿using DaemonsMCP.Application.Projects.Queries.GetAllProjects;
 using DaemonsMCP.Application.Readme.Queries.GetReadme;
+using DaemonsMCP.Application.Todos.Commands.GetNextTodo;
+using DaemonsMCP.Application.Todos.Commands.MarkTodo;
+using DaemonsMCP.Application.Todos.Commands.MakeTodoList;
 using DaemonsMCP.Domain.Constants;
 using DaemonsMCP.Domain.Models;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using System.Security.Cryptography;
 
 namespace DaemonsMCP.Infrastructure.Tools;
 
@@ -73,7 +77,7 @@ public class ItemToolsHandler : IItemToolsHandler {
       var opResult = McpOpResult.CreateSuccess("get-item-by-id", "Item retrieved successfully", result);
       return JsonSerializer.Serialize(opResult);
     } catch (Exception ex) {
-      _logger.LogError(ex, "Error getting item by id {ItemId}", itemId);
+      _logger.LogError(ex, "Error getting item by id {ParentItemId}", itemId);
       var opResult = McpOpResult.CreateFailure("get-item-by-id", $"Failed: {ex.Message}", null);
       return JsonSerializer.Serialize(opResult);
     }
@@ -147,6 +151,85 @@ public class ItemToolsHandler : IItemToolsHandler {
       return JsonSerializer.Serialize(opResult);
     }
   }
+
+  public async Task<string> MakeTodoList(MakeTodoListCommand command) { 
+    try {
+      using var scope = _scopeFactory.CreateScope();
+      var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+      var result = await mediator.Send(command);
+
+      var opResult = McpOpResult.CreateSuccess(Cx.MakeTodoListCmd, "MakeTodoList successful", result);
+      return JsonSerializer.Serialize(opResult);
+    } catch (Exception ex) {
+      _logger.LogError(ex, "Error on maketodolist");
+      var opResult = McpOpResult.CreateFailure(Cx.MakeTodoListCmd, $"Failed: {ex.Message}", null);
+      return JsonSerializer.Serialize(opResult);
+    }
+    
+  }
+
+  public async Task<string> GetNextTodoItem( int? todoItemId ) {
+    try {
+      using var scope = _scopeFactory.CreateScope();
+      var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+      var command = new GetNextTodoCommand(todoItemId);
+      var result = await mediator.Send(command);
+
+      var opResult = McpOpResult.CreateSuccess(Cx.GetNextTodoItemCmd, "GetNextTodoItem successful", result);
+      return JsonSerializer.Serialize(opResult);
+    } catch (Exception ex) {
+      _logger.LogError(ex, "Error on getnexttodoitem");
+      var opResult = McpOpResult.CreateFailure(Cx.GetNextTodoItemCmd, $"Failed: {ex.Message}", null);
+      return JsonSerializer.Serialize(opResult);
+    }
+   
+  }
+
+  public async Task<string> MarkTodoDone(MarkTodoDoneCommand command) {
+    try {
+      using var scope = _scopeFactory.CreateScope();
+      var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();      
+      var result = await mediator.Send(command);
+
+      var opResult = McpOpResult.CreateSuccess(Cx.MarkTodoDoneCmd, "MarkTodoDone successful", result);
+      return JsonSerializer.Serialize(opResult);
+    } catch (Exception ex) {
+      _logger.LogError(ex, "Error on marktodone");
+      var opResult = McpOpResult.CreateFailure(Cx.MarkTodoDoneCmd, $"Failed: {ex.Message}", null);
+      return JsonSerializer.Serialize(opResult);
+    }
+  }
+
+  public async Task<string> MarkTodoCancel(MarkTodoCancelCommand command) {
+    try {
+      using var scope = _scopeFactory.CreateScope();
+      var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+      var result = await mediator.Send(command);
+
+      var opResult = McpOpResult.CreateSuccess(Cx.MarkTodoCancelCmd, "MarkTodoCancel successful", result);
+      return JsonSerializer.Serialize(opResult);
+    } catch (Exception ex) {
+      _logger.LogError(ex, "Error on marktodocancel");
+      var opResult = McpOpResult.CreateFailure(Cx.MarkTodoCancelCmd, $"Failed: {ex.Message}", null);
+      return JsonSerializer.Serialize(opResult);
+    }
+  }
+
+  public async Task<string> RestoreAsTodo(RestoreAsTodoCommand command) {
+    try {
+      using var scope = _scopeFactory.CreateScope();
+      var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+      var result = await mediator.Send(command);
+
+      var opResult = McpOpResult.CreateSuccess(Cx.RestoreAsTodoCmd, "RestoreAsTodo successful", result);
+      return JsonSerializer.Serialize(opResult);
+    } catch (Exception ex) {
+      _logger.LogError(ex, "Error on restoreastodo");
+      var opResult = McpOpResult.CreateFailure(Cx.RestoreAsTodoCmd, $"Failed: {ex.Message}", null);
+      return JsonSerializer.Serialize(opResult);
+    }
+  }
+
 }
 
 public interface IItemToolsHandler {
@@ -180,4 +263,10 @@ public interface IItemToolsHandler {
     string description,
     int rank,
     int? parentId = null);
+
+  Task<string> MakeTodoList(MakeTodoListCommand command);
+  Task<string> GetNextTodoItem( int? todoItemId );
+  Task<string> MarkTodoDone(MarkTodoDoneCommand command);
+  Task<string> MarkTodoCancel(MarkTodoCancelCommand command);
+  Task<string> RestoreAsTodo(RestoreAsTodoCommand command);
 }

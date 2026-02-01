@@ -11,6 +11,7 @@ namespace DaemonsMCP.Infrastructure.Repositories {
     public async Task<Model?> GetByIdAsync(int id, CancellationToken cancellationToken = default) {
       var query = _context.Models.AsQueryable();
       query = query.Include(model => model.Children);
+      query.OrderBy(m => m.Rank).ThenBy(m => m.Name);
       return await query.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
     }
 
@@ -74,6 +75,7 @@ namespace DaemonsMCP.Infrastructure.Repositories {
       if (!string.IsNullOrEmpty(nameFilter)) {
         query = query.Where(m => EF.Functions.Like(m.Name, $"%{nameFilter}%"));
       }
+      query.OrderBy(m => m.Rank).ThenBy(m => m.Name);
       return await query.ToListAsync(cancellationToken);
     }
 

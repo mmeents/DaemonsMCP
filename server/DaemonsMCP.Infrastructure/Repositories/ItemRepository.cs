@@ -2,6 +2,7 @@
 using DaemonsMCP.Domain.Entities;
 using DaemonsMCP.Domain.Repositories;
 using DaemonsMCP.Infrastructure.Persistence;
+using DaemonsMCP.Domain.Constants;
 
 namespace DaemonsMCP.Infrastructure.Repositories;
 
@@ -31,6 +32,16 @@ public class ItemRepository : IItemRepository {
     }
 
     return await query.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+  }
+
+  public async Task<Item?> GetByTodoNameAsync(string name, CancellationToken cancellationToken = default) {
+    return await _context.Items
+        .Include(i => i.ItemType)
+        .Include(i => i.StatusType)
+        .Where(i => i.ItemTypeId == Cx.ItemTypeIdTodo)
+        .Where(i => i.StatusTypeId == Cx.StatusTypeIdInProgress || i.StatusTypeId == Cx.StatusTypeIdNotStarted)
+        .Include(item => item.Children)
+        .FirstOrDefaultAsync(i => i.Name == name, cancellationToken);
   }
 
   public async Task<List<Item>> GetAllAsync(CancellationToken cancellationToken = default) {

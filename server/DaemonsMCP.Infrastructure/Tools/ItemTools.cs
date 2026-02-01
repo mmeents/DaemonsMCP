@@ -7,6 +7,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DaemonsMCP.Application.Todos.Commands.MakeTodoList;
+using DaemonsMCP.Application.Todos.Commands.GetNextTodo;
+using DaemonsMCP.Application.Todos.Commands.MarkTodo;
 
 namespace DaemonsMCP.Infrastructure.Tools {  
 
@@ -55,6 +58,40 @@ namespace DaemonsMCP.Infrastructure.Tools {
           referenceFileSystemId, referenceObjectHierarchyId);
     }
 
-    
+    #region Todo Operations
+
+    [McpTool(Cx.MakeTodoListCmd, Cx.MakeTodoListCmdDesc)]
+    public static async Task<object> MakeTodoList(
+      [Description(Cx.ListNameParamDesc)] string listName,
+      [Description(Cx.ItemsParamDesc)] string[] items
+    ) {
+      var command = new MakeTodoListCommand(listName, items);
+      return await GetTool().MakeTodoList(command).ConfigureAwait(false);
+    }
+
+    [McpTool(Cx.GetNextTodoItemCmd, Cx.GetNextTodoItemCmdDesc)]
+    public static async Task<object> GetNextTodoItem(
+      [Description(Cx.ListItemIdParamDesc)] int? listItemId
+    ) {      
+      return await GetTool().GetNextTodoItem(listItemId).ConfigureAwait(false);
+    }
+
+    [McpTool(Cx.MarkTodoDoneCmd, Cx.MarkTodoDoneCmdDesc)]
+    public static async Task<object> MarkTodoDone(
+      [Description(Cx.ItemIdParamDesc)] int itemId
+    ) => await GetTool().MarkTodoDone(new MarkTodoDoneCommand(itemId)).ConfigureAwait(false);
+
+    [McpTool(Cx.RestoreAsTodoCmd, Cx.RestoreAsTodoCmdDesc)]
+    public static async Task<object> RestoreAsTodo(
+      [Description(Cx.ItemIdParamDesc)] int itemId
+    ) => await GetTool().RestoreAsTodo(new RestoreAsTodoCommand(itemId)).ConfigureAwait(false);
+
+    [McpTool(Cx.MarkTodoCancelCmd, Cx.MarkTodoCancelCmdDesc)]
+    public static async Task<object> MarkTodoCancel(
+      [Description(Cx.ItemIdParamDesc)] int itemId
+    ) => await GetTool().MarkTodoCancel(new MarkTodoCancelCommand(itemId)).ConfigureAwait(false);
+
+    #endregion
+
   }
 }

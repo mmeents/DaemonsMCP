@@ -1,13 +1,15 @@
-﻿using DaemonsMCP.Domain.Models;
+﻿using DaemonsMCP.Application.Models.Commands.AddUpdateModel;
+using DaemonsMCP.Application.Models.Commands.DeleteModel;
+using DaemonsMCP.Application.Models.Queries.GetModelById;
+using DaemonsMCP.Application.Models.Queries.SearchModels;
+using DaemonsMCP.Application.Templates.Commands.ExecuteTemplate;
 using DaemonsMCP.Domain.Constants;
+using DaemonsMCP.Domain.Models;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using DaemonsMCP.Application.Models.Queries.SearchModels;
-using DaemonsMCP.Application.Models.Queries.GetModelById;
-using DaemonsMCP.Application.Models.Commands.AddUpdateModel;
-using DaemonsMCP.Application.Models.Commands.DeleteModel;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 
 
@@ -148,6 +150,20 @@ namespace DaemonsMCP.Infrastructure.Tools {
       }
     }
 
+    public async Task<string> ExecuteTemplateAsync(ExecuteTemplateCommand command) { 
+      try {         
+        using var scope = _serviceScopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var result = await mediator.Send(command);
+        var opResult = McpOpResult.CreateSuccess(Cx.ExecuteTemplateCmd, "Template executed successfully", result);
+        return JsonSerializer.Serialize(opResult);
+      } catch (Exception ex) {
+        _logger.LogError(ex, "Error occurred while executing template");
+        var opResult = McpOpResult.CreateFailure(Cx.ExecuteTemplateCmd, $"Failed: {ex.Message}", null);
+        return JsonSerializer.Serialize(opResult);
+      }
+    }
+
 
   }
 
@@ -185,7 +201,7 @@ namespace DaemonsMCP.Infrastructure.Tools {
     Task<string> DeleteModelAsync(int modelId);
     Task<string> DeleteModelPropertyAsync(int propertyId);
 
-
+    Task<string> ExecuteTemplateAsync(ExecuteTemplateCommand command);
 
   }
 }

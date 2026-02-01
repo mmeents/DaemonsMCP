@@ -9,7 +9,7 @@ using Scriban.Runtime;
 namespace DaemonsMCP.Application.Templates.Commands.ExecuteTemplate {
 
   public record ExecuteTemplateCommand(
-    int TemplateId,
+    int TemplateModelId,
     int? TargetModelId = null,  // Optional override
     bool SaveToFile = false      // Preview vs Execute
   ) : IRequest<TemplateExecutionResult>;
@@ -30,7 +30,7 @@ namespace DaemonsMCP.Application.Templates.Commands.ExecuteTemplate {
     private readonly IModelRepository _modelRepository = modelRepository;
     public async Task<TemplateExecutionResult> Handle(ExecuteTemplateCommand request, CancellationToken cancellationToken) {
       // 1. Load template with properties
-      var template = await _modelRepository.GetByIdWithChildrenAsync(request.TemplateId, maxDepth: 3, cancellationToken);
+      var template = await _modelRepository.GetByIdWithChildrenAsync(request.TemplateModelId, maxDepth: 3, cancellationToken);
 
       // 2. Get target model ID from property or override
       var targetModelId = request.TargetModelId
