@@ -23,6 +23,7 @@ namespace DaemonsMCP.Application.Todos.Commands.MarkTodo {
       if (item == null) {
         return null;
       }
+      item.ClearCompleted();
       item.UpdateStatus(Cx.StatusTypeIdCancelled);
       await _itemRepository.UpdateAsync(item, cancellationToken);
       await _itemRepository.SaveChangesAsync(cancellationToken);

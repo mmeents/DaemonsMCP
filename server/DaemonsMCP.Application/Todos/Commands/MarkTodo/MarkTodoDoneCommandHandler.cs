@@ -31,7 +31,7 @@ namespace DaemonsMCP.Application.Todos.Commands.MarkTodo {
       if (item == null) {
         return null;
       }
-
+      item.MarkCompleted();
       item.UpdateStatus(Cx.StatusTypeIdComplete);
       await _itemRepository.UpdateAsync(item, cancellationToken);
       await _itemRepository.SaveChangesAsync(cancellationToken);
