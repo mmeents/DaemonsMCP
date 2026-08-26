@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MCPSharp" Version="1.0.11" />
+    <PackageReference Include="MCPSharpMM" Version="1.0.14" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="9.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.3.9" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.8.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
@@ -23,6 +24,8 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+    <PackageReference Include="Scriban" Version="7.2.6" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.19" />
   </ItemGroup>
 
   <ItemGroup>

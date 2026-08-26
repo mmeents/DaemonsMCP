@@ -9,13 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MCPSharp" Version="1.0.11" />
+    <PackageReference Include="MCPSharpMM" Version="1.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.3.9" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+    <PackageReference Include="Scriban" Version="7.2.6" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="System.Formats.Asn1" Version="9.0.9" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.19" />
   </ItemGroup>
 
   <ItemGroup>
